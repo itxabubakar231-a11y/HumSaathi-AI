@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Persona {
+  child
+  teen
+  adult
+}
+
+enum Language {
+  en
+  ur
+  ur_rm
+}
+
+enum ActivityType {
+  letter
+  number
+  shape_color_match
+  counting
+  animal_matching
+  emotion_learning
+  routine_sequencing
+}
+
+enum Difficulty {
+  beginner
+  easy
+  medium
+  hard
+  advanced
+}
+
+enum UserRole {
+  learner
+  parent
+  teacher
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  role         UserRole @default(learner)
+  persona      Persona?
+  language     Language @default(en)
+  sensoryPrefs String   @default("{}")
+  parentPin    String   @default("1234")
+  setupComplete Boolean @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assessments       Assessment[]
+  attempts          Attempt[]
+  progress          Progress[]
+  badges            Badge[]
+  aiRecommendations AiRecommendation[]
+  conversationSessions ConversationSession[]
+}
+
+model Assessment {
+  id             String     @id @default(cuid())
+  userId         String
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  persona        Persona
+  language       Language
+  questions      String
+  responses      String
+  score          Float
+  estimatedLevel Difficulty
+  areaLevels     String
+  aiSummary      String?
+  createdAt      DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model Activity {
+  id         String       @id @default(cuid())
+  type       ActivityType
+  topic      String
+  title      String
+  difficulty Difficulty
+  language   Language
+  personas   String
+  content    String
+  isActive   Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+
+  attempts Attempt[]
+
+  @@index([type, difficulty, language])
+}
+
+model Attempt {
+  id                  String     @id @default(cuid())
+  userId              String
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityId          String
+  activity            Activity   @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  answers             String
+  score               Float
+  correctCount        Int
+  totalCount          Int
+  starsAwarded        Int        @default(0)
+  attemptsUsed        Int        @default(1)
+  timeMs              Int?
+  completed           Boolean    @default(false)
+  difficultyAtAttempt Difficulty
+  createdAt           DateTime   @default(now())
+  completedAt         DateTime?
+
+  @@index([userId, activityId])
+  @@index([userId, createdAt])
+}
+
+model Progress {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill     String
+  level     Difficulty
+  accuracy  Float      @default(0)
+  attempts  Int        @default(0)
+  updatedAt DateTime   @updatedAt
+
+  @@unique([userId, skill])
+  @@index([userId])
+}
+
+model Badge {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code       String
+  unlockedAt DateTime @default(now())
+
+  @@unique([userId, code])
+  @@index([userId])
+}
+
+model AiRecommendation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  input     String
+  output    String
+  source    String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model CommunicationScenario {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  aiRole          String   // e.g., "teacher", "friend", "stranger", "shopkeeper"
+  personas        String   // JSON array of strings: ["child", "teen", "adult"]
+  languages       String   // JSON array of strings: ["en", "ur", "ur_rm"]
+  difficulty      Difficulty
+  objectives      String   // JSON array of strings
+  context         String   // Detailed context/role instructions for AI
+  initialPrompt   String   // AI's opening message (or JSON mapping per language)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sessions ConversationSession[]
+}
+
+model ConversationSession {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenarioId   String
+  scenario     CommunicationScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  mode         String    // "text" or "voice"
+  language     Language  @default(en)
+  transcript   String    // JSON string of conversation: [{ role: "assistant"|"user", content: "..." }]
+  turnCount    Int       @default(0)
+  completed    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  evaluation   ConversationEvaluation?
+
+  @@index([userId])
+  @@index([scenarioId])
+}
+
+model ConversationEvaluation {
+  id               String   @id @default(cuid())
+  sessionId        String   @unique
+  session          ConversationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  clarity          Int      // 0 - 100
+  relevance        Int      // 0 - 100
+  appropriateness  Int      // 0 - 100
+  communication    Int      // 0 - 100
+  conversationFlow Int      // 0 - 100
+  overallScore     Int      // 0 - 100
+  strengths        String   // JSON string of strengths
+  improvements     String   // JSON string of improvements
+  betterResponse   String   // Example of a better response
+  feedback         String   // Supportive feedback text
+  createdAt        DateTime @default(now())
+}
