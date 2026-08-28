@@ -7,7 +7,7 @@ import { api } from '../services/api';
 export default function ConversationPage() {
   const { sessionId } = useParams();
   const { user } = useUser();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const navigate = useNavigate();
 
   const [session, setSession] = useState(null);
@@ -48,7 +48,7 @@ export default function ConversationPage() {
           setMode(session.mode || 'text');
           
           // Text to Speech initial greeting if voice mode
-          if (session.mode === 'voice' && session.transcript.length > 0) {
+          if (session.mode === 'voice' && session.transcript?.length > 0) {
             speakText(session.transcript[0].content, session.language);
           }
         }
@@ -95,7 +95,6 @@ export default function ConversationPage() {
     }
 
     return () => {
-      // Cleanup speaking and listening on unmount
       window.speechSynthesis?.cancel();
       if (recognitionRef.current) {
         recognitionRef.current.abort();
@@ -107,13 +106,11 @@ export default function ConversationPage() {
     scrollToBottom();
   }, [messages, sending]);
 
-  // Text-to-speech speaker
   const speakText = (text, lang) => {
     if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel(); // Stop any ongoing speech
+    window.speechSynthesis.cancel();
     
-    const u = speechSupported;
-    if (!u) return;
+    if (!speechSupported) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
     if (lang === 'ur') {
@@ -124,7 +121,6 @@ export default function ConversationPage() {
     window.speechSynthesis.speak(utterance);
   };
 
-  // Start speech recognition
   const startListening = () => {
     if (!speechSupported || !recognitionRef.current) return;
     setSpeechError('');
@@ -135,7 +131,6 @@ export default function ConversationPage() {
     }
   };
 
-  // Stop speech recognition
   const stopListening = () => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -157,7 +152,6 @@ export default function ConversationPage() {
     setSending(true);
     setError('');
 
-    // Optimistically update UI
     const newUserMessage = { role: 'user', content: text, timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, newUserMessage]);
 
@@ -170,13 +164,11 @@ export default function ConversationPage() {
       if (res && res.session) {
         setMessages(res.session.transcript || []);
         
-        // Speak AI's response if voice mode
         if (mode === 'voice' && res.response) {
           speakText(res.response, res.session.language);
         }
 
         if (res.completed) {
-          // Completed conversation session
           setTimeout(() => {
             navigate(`/feedback/${sessionId}`);
           }, 1500);
@@ -184,7 +176,6 @@ export default function ConversationPage() {
       }
     } catch (err) {
       setError(err.message || t('common.error'));
-      // Remove optimistic message if error
       setMessages((prev) => prev.slice(0, -1));
     } finally {
       setSending(false);
@@ -220,18 +211,64 @@ export default function ConversationPage() {
   }
 
   return (
-    <div className="conversation-container">
-      {/* Header */}
-      <div className="conversation-header">
-        <div className="conversation-title-area">
-          <h2>{session?.scenario?.title}</h2>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            Role: <strong>{session?.scenario?.aiRole}</strong> ({session?.language?.toUpperCase()})
+    <div className="web-practice-workspace">
+      {/* Left Sidebar: Scenario Information & Goals */}
+      <aside className="practice-info-sidebar">
+        <div className="practice-info-header">
+          <span className="practice-badge-kicker">
+            🎯 {language === 'ur' ? 'بات چیت کا منظرنامہ' : 'Interactive Practice'}
           </span>
+          <h2 className="practice-scenario-title">{session?.scenario?.title}</h2>
+          <p className="practice-scenario-desc">{session?.scenario?.description}</p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-          {/* Mode Switcher */}
+        <div className="practice-meta-card">
+          <div className="meta-row">
+            <span className="meta-label">🤖 {language === 'ur' ? 'کردار:' : 'AI Role:'}</span>
+            <strong className="meta-val">{session?.scenario?.aiRole}</strong>
+          </div>
+          <div className="meta-row">
+            <span className="meta-label">🌐 {language === 'ur' ? 'زبان:' : 'Language:'}</span>
+            <strong className="meta-val">{session?.language?.toUpperCase()}</strong>
+          </div>
+          <div className="meta-row">
+            <span className="meta-label">⚡ {language === 'ur' ? 'لیول:' : 'Difficulty:'}</span>
+            <strong className="meta-val" style={{ textTransform: 'capitalize' }}>
+              {session?.scenario?.difficulty || 'Intermediate'}
+            </strong>
+          </div>
+        </div>
+
+        <div className="practice-tips-card">
+          <h4>💡 {language === 'ur' ? 'رہنمائی اور نکات:' : 'Communication Pro-Tips:'}</h4>
+          <ul>
+            <li>{language === 'ur' ? 'پراعتماد انداز میں اپنا مدعا بیان کریں۔' : 'Take turns and answer naturally.'}</li>
+            <li>{language === 'ur' ? 'ضرورت پڑنے پر وضاحت طلب کریں۔' : 'Ask questions for clarification when needed.'}</li>
+            <li>{language === 'ur' ? 'شائستہ اختتامی کلمات استعمال کریں۔' : 'End conversations with polite remarks.'}</li>
+          </ul>
+        </div>
+
+        <div className="practice-sidebar-actions">
+          <button className="btn-secondary end-session-btn" onClick={handleFinish}>
+            🏁 {t('conversation.endBtn') || 'Finish & View Feedback'}
+          </button>
+        </div>
+      </aside>
+
+      {/* Right Column: Interactive Chat Conversation Room */}
+      <section className="practice-chat-container">
+        {/* Top Chat Bar with Mode Switcher */}
+        <div className="chat-top-header">
+          <div className="chat-partner-status">
+            <span className="online-indicator-dot" />
+            <div>
+              <span className="partner-name">{session?.scenario?.aiRole} (AI Coach)</span>
+              <span className="partner-sub">
+                {language === 'ur' ? 'محفوظ مشق جاری ہے' : 'Safe simulation active'}
+              </span>
+            </div>
+          </div>
+
           <div className="mode-toggle-group">
             <button
               type="button"
@@ -248,99 +285,113 @@ export default function ConversationPage() {
               🎙️ Voice
             </button>
           </div>
-
-          <button className="text-btn" style={{ color: 'var(--accent-highlight)', fontWeight: '600' }} onClick={handleFinish}>
-            {t('conversation.endBtn')} ➔
-          </button>
         </div>
-      </div>
 
-      {/* Messages Feed */}
-      <div className="chat-messages">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`chat-bubble ${msg.role === 'user' ? 'user' : 'ai'}`}
-          >
-            {msg.content}
-          </div>
-        ))}
-
-        {sending && (
-          <div className="typing-indicator" aria-label="AI is typing">
-            <span className="typing-dot" />
-            <span className="typing-dot" />
-            <span className="typing-dot" />
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {error && <p className="error-text" style={{ fontSize: '0.85rem' }}>{error}</p>}
-
-      {/* Control / Input Bar */}
-      {mode === 'voice' ? (
-        <div className="chat-input-area" style={{ flexDirection: 'column', alignItems: 'center', gap: 'var(--space-xs)' }}>
-          {speechSupported ? (
-            <>
-              {transcriptPreview && (
-                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontStyle: 'italic', textAlign: 'center', width: '100%' }}>
-                  "{transcriptPreview}"
-                </div>
+        {/* Chat Feed */}
+        <div className="chat-messages">
+          {messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`chat-bubble-row ${msg.role === 'user' ? 'user-row' : 'ai-row'}`}
+            >
+              {msg.role !== 'user' && (
+                <div className="bubble-avatar-ai">🤖</div>
               )}
-              {speechError && <p className="error-text" style={{ fontSize: '0.8rem' }}>{speechError}</p>}
-              
-              <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
-                <button
-                  className={`voice-btn ${isListening ? 'is-listening' : ''}`}
-                  style={{ width: 'auto', padding: '0.75rem 1.5rem', borderRadius: 'var(--radius-full)' }}
-                  onClick={isListening ? stopListening : startListening}
-                >
-                  {isListening ? t('conversation.listening') : '🎙️ Tap to Speak'}
-                </button>
-                <button
-                  className="btn-secondary"
-                  onClick={() => setMode('text')}
-                  style={{ padding: '0.6rem 1rem', fontSize: '0.85rem' }}
-                >
-                  Switch to Text
-                </button>
+              <div className={`chat-bubble ${msg.role === 'user' ? 'user' : 'ai'}`}>
+                {msg.content}
               </div>
-            </>
-          ) : (
-            <div style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              <p>{t('conversation.micError')}</p>
-              <button className="btn-secondary" onClick={() => setMode('text')} style={{ marginTop: 'var(--space-xs)' }}>
-                Switch to Text Mode
-              </button>
+              {msg.role === 'user' && (
+                <div className="bubble-avatar-user">{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</div>
+              )}
+            </div>
+          ))}
+
+          {sending && (
+            <div className="chat-bubble-row ai-row">
+              <div className="bubble-avatar-ai">🤖</div>
+              <div className="typing-indicator" aria-label="AI is typing">
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+              </div>
             </div>
           )}
+          <div ref={messagesEndRef} />
         </div>
-      ) : (
-        <form onSubmit={handleSendClick} className="chat-input-area">
-          <input
-            className="chat-input"
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder={t('conversation.placeholder')}
-            disabled={sending}
-          />
-          <button className="chat-send-btn" type="submit" disabled={sending || !inputText.trim()} title="Send">
-            ➔
-          </button>
-          {speechSupported && (
+
+        {error && <p className="error-text" style={{ padding: '0 1.5rem', fontSize: '0.85rem' }}>{error}</p>}
+
+        {/* Floating Input Area */}
+        {mode === 'voice' ? (
+          <div className="chat-input-area voice-input-area">
+            {speechSupported ? (
+              <>
+                {transcriptPreview && (
+                  <div className="voice-preview-text">
+                    "{transcriptPreview}"
+                  </div>
+                )}
+                {speechError && <p className="error-text" style={{ fontSize: '0.8rem' }}>{speechError}</p>}
+                
+                <div className="voice-controls-row">
+                  <button
+                    className={`voice-btn-large ${isListening ? 'is-listening' : ''}`}
+                    onClick={isListening ? stopListening : startListening}
+                  >
+                    {isListening ? (
+                      <>🔴 {t('conversation.listening') || 'Listening... (Tap to Send)'}</>
+                    ) : (
+                      <>🎙️ {language === 'ur' ? 'بولنے کے لیے کلک کریں' : 'Tap to Speak'}</>
+                    )}
+                  </button>
+                  <button
+                    className="btn-secondary btn-sm"
+                    onClick={() => setMode('text')}
+                  >
+                    💬 {language === 'ur' ? 'ٹیکسٹ پر جائیں' : 'Switch to Text'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="mic-unsupported-box">
+                <p>{t('conversation.micError') || 'Microphone not supported in this browser. Please use text mode.'}</p>
+                <button className="btn-secondary" onClick={() => setMode('text')}>
+                  Switch to Text Mode
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <form onSubmit={handleSendClick} className="chat-input-area text-input-area">
+            <input
+              className="chat-input"
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={language === 'ur' ? 'اپنا جواب یہاں لکھیں...' : t('conversation.placeholder')}
+              disabled={sending}
+            />
             <button
-              className="voice-btn"
-              type="button"
-              onClick={() => setMode('voice')}
-              title="Switch to Voice Mode"
+              className="chat-send-btn"
+              type="submit"
+              disabled={sending || !inputText.trim()}
+              title="Send Message"
             >
-              🎙️
+              ➔
             </button>
-          )}
-        </form>
-      )}
+            {speechSupported && (
+              <button
+                className="voice-quick-btn"
+                type="button"
+                onClick={() => setMode('voice')}
+                title="Switch to Voice Mode"
+              >
+                🎙️
+              </button>
+            )}
+          </form>
+        )}
+      </section>
     </div>
   );
 }

@@ -74,7 +74,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
 
   return (
     <div className="child-dashboard">
-      {/* Child Header Banner with Star Counter */}
+      {/* Welcome Area & Star Counter */}
       <header className="child-header">
         <div className="child-header-main">
           <div className="child-avatar-wrap">
@@ -82,12 +82,12 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
           </div>
           <div className="child-welcome">
             <p className="child-greeting-kicker">{t('child.greeting')},</p>
-            <h1 className="child-name">{user?.name}!</h1>
+            <h1 className="child-name">{user?.name || 'Learner'}!</h1>
             <p className="child-subgreeting">{t('child.subgreeting')}</p>
           </div>
         </div>
 
-        {/* Persistent Star Counter */}
+        {/* Big Star Bank */}
         <div className="child-star-bank" aria-label={`${rewards.totalStars || 0} ${t('child.stars')}`}>
           <span className="star-bank-icon" aria-hidden="true">⭐</span>
           <div className="star-bank-info">
@@ -97,7 +97,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </div>
       </header>
 
-      {/* Next Milestone / Learning Goal Track */}
+      {/* Next Milestone / Goal Track */}
       {rewards.nextMilestone && (
         <section className="child-milestone-card" aria-label="Learning Goal">
           <div className="milestone-content">
@@ -130,13 +130,13 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
           <div className="child-hero-content">
             <span className="child-hero-icon" aria-hidden="true">🌟</span>
             <h2>{t('assessment.title')}</h2>
-            <p>{t('assessment.intro')}</p>
+            <p className="child-hero-desc">{t('assessment.intro')}</p>
             <button
               className="btn-child-primary"
               type="button"
               onClick={() => navigate('/assessment')}
             >
-              {t('dashboard.goAssessment')}
+              {t('dashboard.goAssessment')} 🚀
             </button>
           </div>
         </section>
@@ -149,13 +149,12 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
             <span className="child-hero-icon" aria-hidden="true">
               {getTopicIcon(recommendation.topic || recommendation.activityType)}
             </span>
-            <p className="child-hero-badge">
+            <span className="child-hero-badge">
               {getChildLevelLabel(recommendation.difficulty)}
-            </p>
+            </span>
             <h2>
               {t(`child.game.${recommendation.topic === 'colors' || recommendation.topic === 'shapes' ? 'shape_color_match' : (recommendation.topic || recommendation.activityType)}`) || recommendation.topic}
             </h2>
-            <p className="child-hero-desc">{recommendation.reason}</p>
             <button
               className="btn-child-primary"
               type="button"
@@ -217,7 +216,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* My Badges & Milestones Gallery */}
+      {/* My Badges Gallery */}
       {rewards.badges?.length > 0 && (
         <section className="child-section">
           <div className="child-section-header">
@@ -230,7 +229,6 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
               <div
                 key={badge.code}
                 className={`child-badge-card ${badge.isUnlocked ? 'is-unlocked' : 'is-locked'}`}
-                title={badge.isUnlocked ? t(badge.descKey) : t('child.nextMilestone')}
               >
                 <span className="child-badge-icon" aria-hidden="true">{badge.icon}</span>
                 <div className="child-badge-text">
@@ -243,7 +241,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* Child Learning Journey (Visual Badges) */}
+      {/* Child Learning Journey (Skill Journey) */}
       {hasAssessment && dashboard?.progress?.length > 0 && (
         <section className="child-section">
           <h2 className="child-section-title">
@@ -279,47 +277,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* Recent Adventures (Clickable Replay) */}
-      {dashboard?.recentAttempts?.length > 0 && (
-        <section className="child-section">
-          <div className="child-section-header">
-            <h2 className="child-section-title">
-              <span aria-hidden="true">🎯</span> {t('child.recentAdventures')}
-            </h2>
-            <button
-              className="text-btn"
-              type="button"
-              onClick={() => navigate('/progress')}
-            >
-              {t('dashboard.viewAll')}
-            </button>
-          </div>
-          <div className="child-recent-list">
-            {dashboard.recentAttempts.map((item) => (
-              <button
-                key={item.id}
-                className="child-recent-card is-interactive"
-                type="button"
-                onClick={() => startActivityByTopicOrType(item.topic)}
-                title={`${t('child.continuePlay')} ${item.title}`}
-              >
-                <span className="child-recent-icon" aria-hidden="true">
-                  {getTopicIcon(item.topic)}
-                </span>
-                <div className="child-recent-text">
-                  <h3>{item.title}</h3>
-                  <p>
-                    {getChildLevelLabel(item.difficulty)}
-                    {item.starsAwarded ? ` · ${'⭐'.repeat(item.starsAwarded)}` : ''}
-                  </p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Quick Navigation Footer */}
+      {/* Simple Bottom Navigation */}
       <footer className="child-footer-nav">
         <button
           className="child-nav-btn"
