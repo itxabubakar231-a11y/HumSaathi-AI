@@ -56,7 +56,12 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`HumSaathi API running on http://localhost:${PORT}`);
-  console.log(`AI mode: ${isAiAvailable() ? 'enabled' : 'rules fallback (no API key)'}`);
-});
+// Only start the server when running directly (local dev), not when imported by Vercel
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`HumSaathi API running on http://localhost:${PORT}`);
+    console.log(`AI mode: ${isAiAvailable() ? 'enabled' : 'rules fallback (no API key)'}`);
+  });
+}
+
+export default app;
