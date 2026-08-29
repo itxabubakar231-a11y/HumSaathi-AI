@@ -431,7 +431,7 @@ def get_skill_module_details(module_id: str, language: str = 'en') -> Optional[D
         ],
     }
 
-async def evaluate_skill_solution(
+async def evaluate_skill_solution(  # v1.0.6-deploy-sync
     db: Session,
     user_id: str,
     module_id: str,

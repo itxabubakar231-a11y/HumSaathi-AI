@@ -9,7 +9,7 @@ from app.services.skill_module_service import (
     evaluate_skill_solution,
 )
 
-router = APIRouter(prefix="/skills", tags=["Skills"])
+router = APIRouter(prefix="/skills", tags=["Skills"])  # v1.0.6-deploy-sync
 
 class EvaluateSkillRequest(BaseModel):
     userId: str
