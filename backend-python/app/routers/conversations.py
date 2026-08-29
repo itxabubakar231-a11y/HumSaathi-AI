@@ -41,6 +41,8 @@ def format_session(s: ConversationSession):
         "scenario": format_scenario(s.scenario) if s.scenario else None,
     }
 
+from app.data.scenarios import DEFAULT_SCENARIOS
+
 @router.get("/scenarios")
 def list_scenarios(
     persona: Optional[str] = Query(None),
@@ -48,36 +50,67 @@ def list_scenarios(
     difficulty: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
-    query = db.query(CommunicationScenario).filter(CommunicationScenario.isActive == True)
-
-    if difficulty:
-        query = query.filter(CommunicationScenario.difficulty == difficulty)
-
-    all_scenarios = query.all()
     results = []
+    try:
+        query = db.query(CommunicationScenario).filter(CommunicationScenario.isActive == True)
+        if difficulty:
+            query = query.filter(CommunicationScenario.difficulty == difficulty)
+        all_scenarios = query.all()
 
-    for s in all_scenarios:
-        s_personas = parse_json(s.personas, [])
-        s_languages = parse_json(s.languages, [])
+        for s in all_scenarios:
+            s_personas = parse_json(s.personas, [])
+            s_languages = parse_json(s.languages, [])
 
-        if persona and persona not in s_personas:
-            continue
-        if language and language not in s_languages:
-            continue
+            if persona and persona not in s_personas:
+                continue
+            if language and language not in s_languages:
+                continue
 
-        results.append(format_scenario(s))
+            results.append(format_scenario(s))
+    except Exception:
+        results = []
+
+    if not results:
+        for s in DEFAULT_SCENARIOS:
+            if persona and persona not in s["personas"]:
+                continue
+            if language and language not in s["languages"]:
+                continue
+            if difficulty and s["difficulty"] != difficulty:
+                continue
+            results.append({
+                "id": s["id"],
+                "title": s["title"],
+                "description": s["description"],
+                "aiRole": s["aiRole"],
+                "personas": s["personas"],
+                "languages": s["languages"],
+                "difficulty": s["difficulty"],
+                "objectives": s["objectives"],
+                "context": s["context"],
+                "initialPrompt": s["initialPrompt"],
+                "isActive": True,
+            })
 
     return {"scenarios": results}
 
 @router.get("/scenarios/{scenario_id}")
 def get_scenario(scenario_id: str, db: Session = Depends(get_db)):
-    s = db.query(CommunicationScenario).filter(CommunicationScenario.id == scenario_id).first()
-    if not s:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Scenario not found",
-        )
-    return {"scenario": format_scenario(s)}
+    try:
+        s = db.query(CommunicationScenario).filter(CommunicationScenario.id == scenario_id).first()
+        if s:
+            return {"scenario": format_scenario(s)}
+    except Exception:
+        pass
+
+    fallback = next((item for item in DEFAULT_SCENARIOS if item["id"] == scenario_id), None)
+    if fallback:
+        return {"scenario": fallback}
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Scenario not found",
+    )
 
 @router.post("/start")
 def start_conversation(

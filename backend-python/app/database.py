@@ -48,11 +48,13 @@ def init_db_tables():
         logger.warning(f"Non-blocking database initialization notice: {e}")
 
 def seed_foundational_activities():
-    """Ensure standard activity rows exist for foreign key relations."""
+    """Ensure standard activity and scenario rows exist for foreign key relations."""
     try:
         from app.models.activity import Activity
+        from app.models.conversation import CommunicationScenario
         from app.schemas.common import stringify_json
         from app.activities.registry import get_activity_content
+        from app.data.scenarios import DEFAULT_SCENARIOS
 
         topic_defs = {
             'letters': {'type': 'letter', 'topic': 'letters', 'title': 'Letter Learning'},
@@ -67,10 +69,10 @@ def seed_foundational_activities():
 
         db = SessionLocal()
         try:
-            existing_ids = {a.id for a in db.query(Activity.id).all()}
+            existing_act_ids = {a.id for a in db.query(Activity.id).all()}
             new_activities = []
             for key, defn in topic_defs.items():
-                if key not in existing_ids:
+                if key not in existing_act_ids:
                     content = get_activity_content(defn['type'], 'easy', 'en')
                     act = Activity(
                         id=key,
@@ -87,6 +89,29 @@ def seed_foundational_activities():
                     new_activities.append(act)
             if new_activities:
                 db.add_all(new_activities)
+                db.commit()
+
+            existing_scen_ids = {s.id for s in db.query(CommunicationScenario.id).all()}
+            new_scenarios = []
+            for s in DEFAULT_SCENARIOS:
+                if s['id'] not in existing_scen_ids:
+                    scen = CommunicationScenario(
+                        id=s['id'],
+                        title=s['title'],
+                        description=s['description'],
+                        aiRole=s['aiRole'],
+                        personas=stringify_json(s['personas']),
+                        languages=stringify_json(s['languages']),
+                        difficulty=s['difficulty'],
+                        objectives=stringify_json(s['objectives']),
+                        context=s['context'],
+                        initialPrompt=stringify_json(s['initialPrompt']),
+                        isActive=True,
+                        createdAt=datetime.utcnow(),
+                    )
+                    new_scenarios.append(scen)
+            if new_scenarios:
+                db.add_all(new_scenarios)
                 db.commit()
         except Exception:
             db.rollback()

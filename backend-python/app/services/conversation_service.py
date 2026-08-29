@@ -221,6 +221,34 @@ def start_session(db: Session, user_id: str, scenario_id: str, mode: str = "text
     if not user:
         raise ValueError("User not found")
     if not scenario:
+        from app.data.scenarios import DEFAULT_SCENARIOS
+        def_s = next((s for s in DEFAULT_SCENARIOS if s["id"] == scenario_id), None)
+        if not def_s and DEFAULT_SCENARIOS:
+            def_s = DEFAULT_SCENARIOS[0]
+        if def_s:
+            scenario = CommunicationScenario(
+                id=def_s["id"],
+                title=def_s["title"],
+                description=def_s["description"],
+                aiRole=def_s["aiRole"],
+                personas=stringify_json(def_s["personas"]),
+                languages=stringify_json(def_s["languages"]),
+                difficulty=def_s["difficulty"],
+                objectives=stringify_json(def_s["objectives"]),
+                context=def_s["context"],
+                initialPrompt=stringify_json(def_s["initialPrompt"]),
+                isActive=True,
+                createdAt=datetime.utcnow(),
+            )
+            try:
+                db.add(scenario)
+                db.commit()
+                db.refresh(scenario)
+            except Exception:
+                db.rollback()
+                scenario = db.query(CommunicationScenario).filter(CommunicationScenario.id == def_s["id"]).first()
+
+    if not scenario:
         raise ValueError("Scenario not found")
 
     language = user.language or "en"
