@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.schemas.dashboard import ParentPinRequest
+from app.schemas.common import parse_json, stringify_json
 from app.services.progress_service import get_dashboard_stats, get_user_progress
 from app.services.reward_service import get_user_rewards
 from app.services.ai.activity_recommender import recommend_activity
@@ -13,6 +14,14 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 from app.routers.activities import ACTIVITY_TOPIC_DEFS
 
 def get_attempt_title(a) -> str:
+    try:
+        ans = parse_json(a.answers, [])
+        if ans and isinstance(ans, list) and len(ans) > 0 and isinstance(ans[0], dict):
+            mod_id = ans[0].get('moduleId')
+            if mod_id and mod_id in ACTIVITY_TOPIC_DEFS:
+                return ACTIVITY_TOPIC_DEFS[mod_id]['title']
+    except Exception:
+        pass
     if a.activity and a.activity.title:
         return a.activity.title
     if a.activityId and a.activityId in ACTIVITY_TOPIC_DEFS:
@@ -20,6 +29,14 @@ def get_attempt_title(a) -> str:
     return a.activityId.capitalize() if a.activityId else "Learning Activity"
 
 def get_attempt_topic(a) -> str:
+    try:
+        ans = parse_json(a.answers, [])
+        if ans and isinstance(ans, list) and len(ans) > 0 and isinstance(ans[0], dict):
+            mod_id = ans[0].get('moduleId')
+            if mod_id and mod_id in ACTIVITY_TOPIC_DEFS:
+                return ACTIVITY_TOPIC_DEFS[mod_id]['topic']
+    except Exception:
+        pass
     if a.activity and a.activity.topic:
         return a.activity.topic
     if a.activityId and a.activityId in ACTIVITY_TOPIC_DEFS:

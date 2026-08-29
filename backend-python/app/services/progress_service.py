@@ -111,14 +111,25 @@ def is_skill_for_persona(skill: str, target_persona: str) -> bool:
         return s in CHILD_SKILLS or (not s.startswith('teen_') and not s.startswith('adult_') and s not in TEEN_SKILLS and s not in ADULT_SKILLS)
 
 def is_attempt_for_persona(attempt: Attempt, target_persona: str) -> bool:
-    act_id = (attempt.activityId or "").lower()
-    topic = ((attempt.activity.topic if attempt.activity else None) or act_id).lower()
+    mod_id = None
+    try:
+        ans = parse_json(attempt.answers, [])
+        if ans and isinstance(ans, list) and len(ans) > 0 and isinstance(ans[0], dict):
+            mod_id = ans[0].get('moduleId')
+    except Exception:
+        pass
+
+    target_id = (mod_id or attempt.activityId or "").lower()
+    topic = ((attempt.activity.topic if attempt.activity else None) or target_id).lower()
+    if mod_id:
+        topic = mod_id.lower()
+
     if target_persona == 'teen':
-        return act_id.startswith('teen_') or topic in TEEN_SKILLS
+        return target_id.startswith('teen_') or topic in TEEN_SKILLS
     elif target_persona == 'adult':
-        return act_id.startswith('adult_') or topic in ADULT_SKILLS
+        return target_id.startswith('adult_') or topic in ADULT_SKILLS
     else:  # child
-        return not act_id.startswith('teen_') and not act_id.startswith('adult_') and topic not in TEEN_SKILLS and topic not in ADULT_SKILLS
+        return not target_id.startswith('teen_') and not target_id.startswith('adult_') and topic not in TEEN_SKILLS and topic not in ADULT_SKILLS
 
 def get_user_progress(db: Session, user_id: str, persona: Optional[str] = None) -> List[Dict[str, Any]]:
     user = db.query(User).filter(User.id == user_id).first()
