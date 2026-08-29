@@ -8,9 +8,11 @@ import ShapeVisual from '../components/activities/ShapeVisual';
 export default function ActivityPage() {
   const { id } = useParams();
   const { user } = useUser();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const navigate = useNavigate();
   const [activity, setActivity] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState(null);
   const [checkedState, setCheckedState] = useState(null); // 'correct' | 'incorrect' | null
@@ -28,16 +30,61 @@ export default function ActivityPage() {
       return;
     }
     const currentLang = user?.language || language || 'en';
+    setLoading(true);
+    setFetchError(null);
     api.getActivity(id, { language: currentLang })
-      .then((data) => setActivity(data.activity))
-      .catch(() => navigate('/dashboard'));
+      .then((data) => {
+        const act = data?.activity || (data?.id ? data : null);
+        if (act && act.content?.questions?.length > 0) {
+          setActivity(act);
+        } else if (act) {
+          setActivity(act);
+        } else {
+          setFetchError(t('child.activityNotFound') || 'Activity not found');
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load activity:', err);
+        setFetchError(err.message || 'Unable to load activity');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [id, user?.id, user?.language, language, navigate]);
 
-  if (!activity) return <p className="loading-text">{t('common.loading')}</p>;
+  if (loading) {
+    return (
+      <div className="activity-page child-activity-container" style={{ textAlign: 'center', padding: '60px 20px' }}>
+        <div className="assessment-spinner" aria-hidden="true" style={{ margin: '0 auto 20px' }} />
+        <p className="loading-text" style={{ fontSize: '1.2rem', fontWeight: 600 }}>{t('common.loading')}</p>
+      </div>
+    );
+  }
 
-  const questions = activity.content?.questions || [];
-  const question = questions[qIndex];
-  const isLastQuestion = qIndex >= questions.length - 1;
+  const questions = Array.isArray(activity?.content?.questions) ? activity.content.questions : [];
+  const question = questions[qIndex] || null;
+  const isLastQuestion = questions.length > 0 && qIndex >= questions.length - 1;
+
+  if (fetchError || !activity || questions.length === 0) {
+    return (
+      <div className="activity-page child-activity-container error-state" style={{ textAlign: 'center', padding: '40px 20px' }}>
+        <span className="error-icon" aria-hidden="true" style={{ fontSize: '3rem', display: 'block', marginBottom: '12px' }}>⚠️</span>
+        <h2>{t('common.error')}</h2>
+        <p className="error-text" style={{ margin: '12px 0 24px' }}>
+          {fetchError || 'Unable to load questions for this activity.'}
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <button
+            className="btn-primary"
+            type="button"
+            onClick={() => navigate('/dashboard')}
+          >
+            🏠 {t('common.back') || 'Back to Dashboard'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleSelect = (option) => {
     if (checkedState === 'correct') return; // already solved this task
@@ -192,7 +239,7 @@ export default function ActivityPage() {
       )}
 
       {/* Visual or Text Options Grid */}
-      {question?.visual ? (
+      {question?.visual && Array.isArray(question.visual) ? (
         <div className="shape-grid">
           {question.visual.map((item) => {
             const isSelected = selected === item.label;
@@ -215,8 +262,8 @@ export default function ActivityPage() {
           })}
         </div>
       ) : (
-        <div className={`option-grid ${question?.options?.every((opt) => String(opt).length <= 3) ? 'option-grid-letters' : 'option-grid-large'}`}>
-          {question?.options.map((opt) => {
+        <div className={`option-grid ${Array.isArray(question?.options) && question.options.every((opt) => String(opt).length <= 3) ? 'option-grid-letters' : 'option-grid-large'}`}>
+          {Array.isArray(question?.options) && question.options.map((opt) => {
             const isSelected = selected === opt;
             const isSolved = checkedState === 'correct' && isSelected;
             const isWrong = checkedState === 'incorrect' && isSelected;

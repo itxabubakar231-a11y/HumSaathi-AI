@@ -59,6 +59,12 @@ def get_activity_by_id(
     # 1. Fast path for recognized foundational topics (letters, numbers, colors, shapes, counting, animals, emotions, routines)
     if normalized_key in ACTIVITY_TOPIC_DEFS:
         definition = ACTIVITY_TOPIC_DEFS[normalized_key]
+    else:
+        # Check substring match
+        matched_key = next((k for k in ACTIVITY_TOPIC_DEFS if k in normalized_key), None)
+        definition = ACTIVITY_TOPIC_DEFS.get(matched_key) if matched_key else None
+
+    if definition:
         act_type = definition['type']
         act_topic = definition['topic']
         act_title = definition['title']

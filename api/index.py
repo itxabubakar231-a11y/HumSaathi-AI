@@ -7,4 +7,4 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 from app.main import app
 
 # Export for ASGI serverless handlers
-export_app = app  # v1.0.5-persona-isolation
+export_app = app  # v1.0.7-child-activity-fix
