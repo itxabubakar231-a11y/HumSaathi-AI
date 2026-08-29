@@ -100,7 +100,7 @@ class ResponseEnvelopeMiddleware(BaseHTTPMiddleware):
         except Exception as exc:
             logger.error(f"Unhandled server error: {exc}", exc_info=True)
             return JSONResponse(
-                content={"success": False, "error": "Internal server error"},
+                content={"success": False, "error": f"Internal server error: {exc}"},
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
