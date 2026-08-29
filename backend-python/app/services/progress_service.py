@@ -82,8 +82,49 @@ def update_progress_from_attempt(
     db.commit()
     return adaptation
 
-def get_user_progress(db: Session, user_id: str) -> List[Dict[str, Any]]:
+CHILD_SKILLS = {
+    'letters', 'letter', 'numbers', 'number', 'colors', 'shapes', 'shape_color_match',
+    'counting', 'animals', 'animal_matching', 'emotions', 'emotion_learning', 'routines', 'routine_sequencing', 'general'
+}
+
+TEEN_SKILLS = {
+    'teen_reading_vocab', 'reading_vocabulary', 'reading_vocab',
+    'teen_problem_solving', 'problem_solving',
+    'teen_communication', 'teen_social_comm', 'communication', 'social_comm',
+    'teen_decision_making', 'decision_making'
+}
+
+ADULT_SKILLS = {
+    'adult_functional_reading', 'functional_reading',
+    'adult_problem_solving', 'workplace_problem_solving', 'everyday_problem_solving',
+    'adult_everyday_comm', 'adult_workplace_comm', 'everyday_communication', 'workplace_communication',
+    'adult_decision_making', 'independent_decision_making'
+}
+
+def is_skill_for_persona(skill: str, target_persona: str) -> bool:
+    s = (skill or "").lower().strip()
+    if target_persona == 'teen':
+        return s in TEEN_SKILLS or s.startswith('teen_')
+    elif target_persona == 'adult':
+        return s in ADULT_SKILLS or s.startswith('adult_')
+    else:  # child
+        return s in CHILD_SKILLS or (not s.startswith('teen_') and not s.startswith('adult_') and s not in TEEN_SKILLS and s not in ADULT_SKILLS)
+
+def is_attempt_for_persona(attempt: Attempt, target_persona: str) -> bool:
+    act_id = (attempt.activityId or "").lower()
+    topic = ((attempt.activity.topic if attempt.activity else None) or act_id).lower()
+    if target_persona == 'teen':
+        return act_id.startswith('teen_') or topic in TEEN_SKILLS
+    elif target_persona == 'adult':
+        return act_id.startswith('adult_') or topic in ADULT_SKILLS
+    else:  # child
+        return not act_id.startswith('teen_') and not act_id.startswith('adult_') and topic not in TEEN_SKILLS and topic not in ADULT_SKILLS
+
+def get_user_progress(db: Session, user_id: str, persona: Optional[str] = None) -> List[Dict[str, Any]]:
+    user = db.query(User).filter(User.id == user_id).first()
+    active_persona = persona or (user.persona if user else 'child') or 'child'
     records = db.query(Progress).filter(Progress.userId == user_id).order_by(Progress.skill.asc()).all()
+    filtered = [p for p in records if is_skill_for_persona(p.skill, active_persona)]
     return [
         {
             'id': p.id,
@@ -94,27 +135,41 @@ def get_user_progress(db: Session, user_id: str) -> List[Dict[str, Any]]:
             'attempts': p.attempts,
             'updatedAt': p.updatedAt.isoformat() if p.updatedAt else None,
         }
-        for p in records
+        for p in filtered
     ]
 
-def get_dashboard_stats(db: Session, user_id: str) -> Dict[str, Any]:
+def get_dashboard_stats(db: Session, user_id: str, persona: Optional[str] = None) -> Dict[str, Any]:
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return {'user': None}
 
-    progress_records = db.query(Progress).filter(Progress.userId == user_id).all()
-    attempts_records = (
+    active_persona = persona or user.persona or 'child'
+
+    all_progress = db.query(Progress).filter(Progress.userId == user_id).all()
+    all_attempts = (
         db.query(Attempt)
         .filter(Attempt.userId == user_id, Attempt.completed == True)
         .order_by(Attempt.completedAt.desc(), Attempt.createdAt.desc())
         .all()
     )
+
+    # Strictly isolate data by active persona
+    progress_records = [p for p in all_progress if is_skill_for_persona(p.skill, active_persona)]
+    attempts_records = [a for a in all_attempts if is_attempt_for_persona(a, active_persona)]
+
     latest_assessment = (
         db.query(Assessment)
-        .filter(Assessment.userId == user_id)
+        .filter(Assessment.userId == user_id, Assessment.persona == active_persona)
         .order_by(Assessment.createdAt.desc())
         .first()
     )
+    if not latest_assessment:
+        latest_assessment = (
+            db.query(Assessment)
+            .filter(Assessment.userId == user_id)
+            .order_by(Assessment.createdAt.desc())
+            .first()
+        )
 
     completed_count = len(attempts_records)
     avg_accuracy = (
@@ -126,7 +181,7 @@ def get_dashboard_stats(db: Session, user_id: str) -> Dict[str, Any]:
     practiced = [p for p in progress_records if p.attempts > 0]
     practiced_sorted = sorted(practiced, key=lambda p: (p.accuracy, p.attempts), reverse=True)
 
-    # Evidence-based strengths from real performance and attempt history
+    # Evidence-based strengths from real performance and attempt history for this persona
     strengths_records = [p for p in practiced_sorted if p.accuracy >= 0.6]
     needs_practice_records = [p for p in practiced_sorted if p.accuracy < 0.6]
 
@@ -137,11 +192,12 @@ def get_dashboard_stats(db: Session, user_id: str) -> Dict[str, Any]:
     current_level = (
         latest_assessment.estimatedLevel
         if latest_assessment
-        else (progress_records[0].level if progress_records else 'beginner')
+        else (progress_records[0].level if progress_records else ('beginner' if active_persona == 'child' else 'easy'))
     )
 
     return {
         'user': user,
+        'persona': active_persona,
         'progress': progress_records,
         'attempts': attempts_records[:10],
         'completedCount': completed_count,

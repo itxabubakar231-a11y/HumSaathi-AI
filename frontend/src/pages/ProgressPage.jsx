@@ -95,96 +95,77 @@ export default function ProgressPage() {
       </div>
 
       {/* Row 2: Skill Strengths & Growth Areas */}
-      <div className="dashboard-grid-split" style={{ marginBottom: 'var(--space-md)' }}>
-        <section className="dashboard-card strength-highlight-card">
-          <div className="card-header-flex">
-            <span className="badge-highlight-pill green-pill">🌟 {t('progress.strongest')}</span>
-          </div>
-          <h3 className="highlight-skill-title">
-            {dashboard.strongest?.skill ? dashboard.strongest.skill.replace('_', ' ') : 'Communication'}
-          </h3>
-          <p className="highlight-skill-desc">
-            {language === 'ur'
-              ? 'آپ نے اس شعبے میں سب سے زیادہ مستقل مزاجی اور درستگی کا مظاہرہ کیا ہے۔'
-              : 'Highest accuracy demonstrated across scenarios and interactive practice.'}
-          </p>
-          <div className="highlight-score-badge">
-            {dashboard.strongest?.accuracy !== undefined ? `${Math.round(dashboard.strongest.accuracy)}% Mastery` : '85% Mastery'}
-          </div>
-        </section>
+      {dashboard.strongest ? (
+        <div className="dashboard-grid-split" style={{ marginBottom: 'var(--space-md)' }}>
+          <section className="dashboard-card strength-highlight-card">
+            <div className="card-header-flex">
+              <span className="badge-highlight-pill green-pill">🌟 {t('progress.strongest')}</span>
+            </div>
+            <h3 className="highlight-skill-title">
+              {dashboard.strongest.skill.replace('_', ' ').toUpperCase()}
+            </h3>
+            <p className="highlight-skill-desc">
+              {language === 'ur'
+                ? 'آپ نے اس شعبے میں سب سے زیادہ مستقل مزاجی اور درستگی کا مظاہرہ کیا ہے۔'
+                : language === 'ur_rm'
+                ? 'Aap ne is skill mein sab se achi consistency aur accuracy ka muzahira kiya hai.'
+                : 'Highest accuracy demonstrated across interactive practice.'}
+            </p>
+            <div className="highlight-score-badge">
+              {Math.round(dashboard.strongest.accuracy)}% {language === 'ur' ? 'مہارت' : 'Mastery'}
+            </div>
+          </section>
 
-        <section className="dashboard-card practice-highlight-card">
-          <div className="card-header-flex">
-            <span className="badge-highlight-pill amber-pill">🎯 {t('progress.needsPractice')}</span>
-          </div>
-          <h3 className="highlight-skill-title">
-            {dashboard.needsPractice?.skill ? dashboard.needsPractice.skill.replace('_', ' ') : 'Problem Solving'}
-          </h3>
-          <p className="highlight-skill-desc">
-            {language === 'ur'
-              ? 'مزید مشق کے ذریعے اس شعبے میں اپنی مہارت اور رفتار کو بہتر بنائیں۔'
-              : 'Recommended for your next practice session to boost confidence.'}
-          </p>
-          <button className="btn-primary btn-sm" onClick={() => navigate('/scenarios')}>
-            🚀 {language === 'ur' ? 'ابھی مشق شروع کریں' : 'Practice Now'}
-          </button>
-        </section>
-      </div>
+          <section className="dashboard-card practice-highlight-card">
+            <div className="card-header-flex">
+              <span className="badge-highlight-pill amber-pill">🎯 {t('progress.needsPractice')}</span>
+            </div>
+            <h3 className="highlight-skill-title">
+              {dashboard.needsPractice ? dashboard.needsPractice.skill.replace('_', ' ').toUpperCase() : 'Skill Practice'}
+            </h3>
+            <p className="highlight-skill-desc">
+              {language === 'ur'
+                ? 'مزید مشق کے ذریعے اس شعبے میں اپنی مہارت اور رفتار کو بہتر بنائیں۔'
+                : language === 'ur_rm'
+                ? 'Mazeed mashq ke zariye is skill mein confidence barhayein.'
+                : 'Recommended for your next practice session to boost confidence.'}
+            </p>
+            <button className="btn-primary btn-sm" onClick={() => navigate(user?.persona === 'child' ? '/dashboard' : '/scenarios')}>
+              🚀 {language === 'ur' ? 'ابھی مشق شروع کریں' : language === 'ur_rm' ? 'Abhi mashq karein' : 'Practice Now'}
+            </button>
+          </section>
+        </div>
+      ) : null}
 
       {/* Row 3: Detailed Skill Progression Meters */}
       <section className="dashboard-card skill-breakdown-card" style={{ marginBottom: 'var(--space-md)' }}>
         <div className="card-header-line">
-          <h3 className="card-heading-title">📊 {language === 'ur' ? 'مہارتوں کا تفصیلی جائزہ' : 'Detailed Skills Mastery Breakdown'}</h3>
+          <h3 className="card-heading-title">📊 {language === 'ur' ? 'مہارتوں کا تفصیلی جائزہ' : language === 'ur_rm' ? 'Skills Ka Tafseeli Jaiza' : 'Detailed Skills Mastery Breakdown'}</h3>
           <span className="card-meta-note">
-            {language === 'ur' ? 'خودکار AI تجزیہ' : 'AI-Evaluated Performance'}
+            {language === 'ur' ? 'خودکار AI تجزیہ' : language === 'ur_rm' ? 'AI Jaiza' : 'AI-Evaluated Performance'}
           </span>
         </div>
 
         <div className="skills-meter-grid">
-          {dashboard?.progress?.length ? dashboard.progress.map((prog) => (
-            <div key={prog.skill} className="skill-meter-row">
-              <div className="meter-info">
-                <span className="meter-name">{prog.skill.replace('_', ' ')}</span>
-                <span className="meter-val">{Math.round(prog.accuracy)}%</span>
-              </div>
-              <div className="meter-track">
-                <div
-                  className="meter-fill"
-                  style={{ width: `${Math.max(12, Math.min(100, prog.accuracy))}%` }}
-                />
-              </div>
-            </div>
-          )) : (
-            <>
-              <div className="skill-meter-row">
+          {dashboard?.progress?.length ? (
+            dashboard.progress.map((prog) => (
+              <div key={prog.skill} className="skill-meter-row">
                 <div className="meter-info">
-                  <span className="meter-name">💬 {language === 'ur' ? 'مواصلات اور بات چیت' : 'Communication & Dialogue'}</span>
-                  <span className="meter-val">72%</span>
+                  <span className="meter-name">{prog.skill.replace('_', ' ').toUpperCase()}</span>
+                  <span className="meter-val">{Math.round(prog.accuracy)}%</span>
                 </div>
-                <div className="meter-track"><div className="meter-fill" style={{ width: '72%' }} /></div>
-              </div>
-              <div className="skill-meter-row">
-                <div className="meter-info">
-                  <span className="meter-name">🎭 {language === 'ur' ? 'جذبات کی پہچان' : 'Emotions & Expressions'}</span>
-                  <span className="meter-val">68%</span>
+                <div className="meter-track">
+                  <div
+                    className="meter-fill"
+                    style={{ width: `${Math.max(8, Math.min(100, prog.accuracy))}%` }}
+                  />
                 </div>
-                <div className="meter-track"><div className="meter-fill" style={{ width: '68%' }} /></div>
               </div>
-              <div className="skill-meter-row">
-                <div className="meter-info">
-                  <span className="meter-name">🤝 {language === 'ur' ? 'سماجی مہارتیں' : 'Social Interaction Skills'}</span>
-                  <span className="meter-val">56%</span>
-                </div>
-                <div className="meter-track"><div className="meter-fill" style={{ width: '56%' }} /></div>
-              </div>
-              <div className="skill-meter-row">
-                <div className="meter-info">
-                  <span className="meter-name">🧩 {language === 'ur' ? 'روزمرہ مسائل کا حل' : 'Daily Life & Problem Solving'}</span>
-                  <span className="meter-val">70%</span>
-                </div>
-                <div className="meter-track"><div className="meter-fill" style={{ width: '70%' }} /></div>
-              </div>
-            </>
+            ))
+          ) : (
+            <p className="empty-notice" style={{ padding: '1rem 0' }}>
+              {t('progress.none')}
+            </p>
           )}
         </div>
       </section>

@@ -1,7 +1,8 @@
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
-from app.models.user import User, Progress
+from app.models.user import User, Progress, Attempt
+from app.schemas.common import stringify_json
 from app.services.ai.ai_service import call_ai_chat, is_ai_available
 
 SKILL_MODULES_DATA = {
@@ -507,6 +508,23 @@ async def evaluate_skill_solution(
             attempts=1,
         )
         db.add(p)
+
+    # Record Attempt for persona activity history & recent activity
+    attempt = Attempt(
+        userId=user_id,
+        activityId=module_id,
+        answers=stringify_json([{"scenarioId": scenario_id, "optionId": option_id, "score": score, "solution": custom_solution}]),
+        score=score / 100.0,
+        correctCount=1 if score >= 70 else 0,
+        totalCount=1,
+        starsAwarded=3 if score >= 90 else (2 if score >= 70 else 1),
+        attemptsUsed=1,
+        completed=True,
+        difficultyAtAttempt="medium",
+        createdAt=datetime.utcnow(),
+        completedAt=datetime.utcnow(),
+    )
+    db.add(attempt)
 
     db.commit()
 

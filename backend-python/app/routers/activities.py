@@ -25,6 +25,24 @@ ACTIVITY_TOPIC_DEFS: Dict[str, Dict[str, str]] = {
     'emotion_learning': {'type': 'emotion_learning', 'topic': 'emotions', 'title': 'Emotion Learning'},
     'routines': {'type': 'routine_sequencing', 'topic': 'routines', 'title': 'Daily Routine Sequence'},
     'routine_sequencing': {'type': 'routine_sequencing', 'topic': 'routines', 'title': 'Daily Routine Sequence'},
+    # Teen Modules
+    'teen_reading_vocab': {'type': 'reading_vocabulary', 'topic': 'reading_vocabulary', 'title': 'Reading & Vocabulary'},
+    'reading_vocabulary': {'type': 'reading_vocabulary', 'topic': 'reading_vocabulary', 'title': 'Reading & Vocabulary'},
+    'teen_problem_solving': {'type': 'problem_solving', 'topic': 'problem_solving', 'title': 'Problem Solving'},
+    'problem_solving': {'type': 'problem_solving', 'topic': 'problem_solving', 'title': 'Problem Solving'},
+    'teen_communication': {'type': 'communication', 'topic': 'communication', 'title': 'Social Communication'},
+    'communication': {'type': 'communication', 'topic': 'communication', 'title': 'Communication'},
+    'teen_decision_making': {'type': 'decision_making', 'topic': 'decision_making', 'title': 'Decision Making'},
+    # Adult Modules
+    'adult_functional_reading': {'type': 'functional_reading', 'topic': 'functional_reading', 'title': 'Functional Reading'},
+    'functional_reading': {'type': 'functional_reading', 'topic': 'functional_reading', 'title': 'Functional Reading'},
+    'adult_problem_solving': {'type': 'workplace_problem_solving', 'topic': 'workplace_problem_solving', 'title': 'Everyday Problem Solving'},
+    'workplace_problem_solving': {'type': 'workplace_problem_solving', 'topic': 'workplace_problem_solving', 'title': 'Workplace Problem Solving'},
+    'adult_everyday_comm': {'type': 'everyday_communication', 'topic': 'everyday_communication', 'title': 'Everyday Communication'},
+    'everyday_communication': {'type': 'everyday_communication', 'topic': 'everyday_communication', 'title': 'Everyday Communication'},
+    'adult_workplace_comm': {'type': 'workplace_communication', 'topic': 'workplace_communication', 'title': 'Workplace Communication'},
+    'workplace_communication': {'type': 'workplace_communication', 'topic': 'workplace_communication', 'title': 'Workplace Communication'},
+    'adult_decision_making': {'type': 'independent_decision_making', 'topic': 'independent_decision_making', 'title': 'Independent Decision Making'},
 }
 
 @router.get("/{activity_id}")
