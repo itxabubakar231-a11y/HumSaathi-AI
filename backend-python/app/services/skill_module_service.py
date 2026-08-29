@@ -1,10 +1,12 @@
 from typing import Dict, Any, List, Optional
 from datetime import datetime
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from app.models.user import User, Progress, Attempt
 from app.models.activity import Activity
 from app.schemas.common import stringify_json
 from app.services.ai.ai_service import call_ai_chat, is_ai_available
+from app.routers.activities import ACTIVITY_TOPIC_DEFS
 
 SKILL_MODULES_DATA = {
     'teen': [
@@ -511,13 +513,17 @@ async def evaluate_skill_solution(
         db.add(p)
 
     # Ensure Activity record exists in DB for this module so ForeignKey constraint is satisfied
-    act_row = db.query(Activity).filter(Activity.id == module_id).first()
-    if not act_row:
-        act_row = Activity(
+    activity = db.query(Activity).filter(Activity.id == module_id).first()
+    if not activity:
+        activity = db.query(Activity).filter(or_(Activity.topic == module_id, Activity.type == module_id)).first()
+
+    if not activity:
+        act_def = ACTIVITY_TOPIC_DEFS.get(module_id, {'type': module_id, 'topic': module_id, 'title': module_id.replace('_', ' ').title()})
+        activity = Activity(
             id=module_id,
-            type=module_def.get('type', module_id) if module_def else module_id,
-            topic=module_def.get('skillKey', module_id) if module_def else module_id,
-            title=module_def.get('title', {}).get('en', module_id.replace('_', ' ').title()) if module_def else module_id,
+            type=act_def['type'],
+            topic=act_def['topic'],
+            title=act_def['title'],
             difficulty="medium",
             language=language or "en",
             personas=stringify_json([user.persona or "teen"]),
@@ -525,13 +531,20 @@ async def evaluate_skill_solution(
             isActive=True,
             createdAt=datetime.utcnow(),
         )
-        db.add(act_row)
-        db.flush()
+        try:
+            db.add(activity)
+            db.commit()
+            db.refresh(activity)
+        except Exception:
+            db.rollback()
+            activity = db.query(Activity).filter(Activity.id == module_id).first()
+            if not activity:
+                activity = db.query(Activity).first()
 
     # Record Attempt for persona activity history & recent activity
     attempt = Attempt(
         userId=user_id,
-        activityId=act_row.id if act_row else module_id,
+        activityId=activity.id if activity else module_id,
         answers=stringify_json([{"scenarioId": scenario_id, "optionId": option_id, "score": score, "solution": custom_solution}]),
         score=score / 100.0,
         correctCount=1 if score >= 70 else 0,
