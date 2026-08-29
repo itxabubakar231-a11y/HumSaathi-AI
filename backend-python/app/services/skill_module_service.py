@@ -2,6 +2,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.user import User, Progress, Attempt
+from app.models.activity import Activity
 from app.schemas.common import stringify_json
 from app.services.ai.ai_service import call_ai_chat, is_ai_available
 
@@ -508,6 +509,26 @@ async def evaluate_skill_solution(
             attempts=1,
         )
         db.add(p)
+
+    # Ensure Activity record exists in DB for this module so ForeignKey constraint is satisfied
+    act_row = db.query(Activity).filter(Activity.id == module_id).first()
+    if not act_row:
+        act_row = Activity(
+            id=module_id,
+            type=module_def.get('type', module_id) if module_def else module_id,
+            topic=module_def.get('skillKey', module_id) if module_def else module_id,
+            title=module_def.get('title', {}).get('en', module_id.replace('_', ' ').title()) if module_def else module_id,
+            difficulty="medium",
+            language=language or "en",
+            personas=stringify_json([user.persona or "teen"]),
+            content=stringify_json(module_def or {}),
+            isActive=True,
+        )
+        try:
+            db.add(act_row)
+            db.commit()
+        except Exception:
+            db.rollback()
 
     # Record Attempt for persona activity history & recent activity
     attempt = Attempt(

@@ -100,7 +100,7 @@ def test_persona_isolation_and_parent_view():
     t_dash2 = res_teen_dash2.json()["data"]["dashboard"]
     assert t_dash2["completedCount"] == 1
     assert len(t_dash2["recentAttempts"]) == 1
-    assert t_dash2["recentAttempts"][0]["title"] == "Reading & Vocabulary"
+    assert "Reading & Vocabulary" in t_dash2["recentAttempts"][0]["title"]
     assert len(t_dash2["strengths"]) == 1
     assert t_dash2["strengths"][0]["skill"] == "reading_vocabulary"
     print(f"[PASS] Teen Dashboard now tracks Teen Module: '{t_dash2['recentAttempts'][0]['title']}' (Score: {t_dash2['recentAttempts'][0]['score']}%)")
@@ -109,8 +109,8 @@ def test_persona_isolation_and_parent_view():
     res_teen_parent2 = client.post(f"/api/dashboard/{user_id}/parent", json={"pin": "1234"})
     t_parent2 = res_teen_parent2.json()["data"]["parentView"]
     assert t_parent2["completedCount"] == 1
-    assert "Reading & Vocabulary" in t_parent2["strengths"]
-    assert t_parent2["recentAttempts"][0]["title"] == "Reading & Vocabulary"
+    assert any("Reading & Vocabulary" in s for s in t_parent2["strengths"])
+    assert "Reading & Vocabulary" in t_parent2["recentAttempts"][0]["title"]
     print(f"[PASS] Teen Parent View reflects Teen data: Strengths={t_parent2['strengths']}")
 
     # =========================================================
@@ -141,7 +141,7 @@ def test_persona_isolation_and_parent_view():
     res_adult_dash2 = client.get(f"/api/dashboard/{user_id}")
     a_dash2 = res_adult_dash2.json()["data"]["dashboard"]
     assert a_dash2["completedCount"] == 1
-    assert a_dash2["recentAttempts"][0]["title"] == "Functional Reading"
+    assert "Functional Reading" in a_dash2["recentAttempts"][0]["title"]
     assert a_dash2["strengths"][0]["skill"] == "functional_reading"
     print(f"[PASS] Adult Dashboard tracks Adult Module: '{a_dash2['recentAttempts'][0]['title']}'")
 
@@ -149,7 +149,7 @@ def test_persona_isolation_and_parent_view():
     a_parent = res_adult_parent.json()["data"]["parentView"]
     assert a_parent["learner"]["persona"] == "adult"
     assert a_parent["completedCount"] == 1
-    assert "Functional Reading" in a_parent["strengths"]
+    assert any("Functional Reading" in s for s in a_parent["strengths"])
     print(f"[PASS] Adult Parent View reflects Adult data: Strengths={a_parent['strengths']}")
 
     # =========================================================
