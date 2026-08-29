@@ -85,16 +85,17 @@ export default function SetupPage() {
               <h2 id="language-heading">{t('setup.languageTitle')}</h2>
             </div>
           </div>
-          <div className="language-options" role="group" aria-label={t('setup.languageTitle')}>
+          <div className="lang-pills-grid" role="group" aria-label={t('setup.languageTitle')}>
             {LANGUAGES.map((lang) => (
               <button
-                className={`language-option ${language === lang.id ? 'is-selected' : ''}`}
+                className={`lang-pill-btn ${language === lang.id ? 'is-selected' : ''}`}
                 key={lang.id}
                 type="button"
                 onClick={() => setLanguage(lang.id)}
                 aria-pressed={language === lang.id}
               >
-                {t(lang.labelKey)}
+                <span className="lang-flag">{lang.id === 'en' ? '🇬🇧' : '🇵🇰'}</span>
+                <span className="lang-name">{t(lang.labelKey)}</span>
               </button>
             ))}
           </div>
