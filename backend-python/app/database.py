@@ -40,6 +40,7 @@ def init_db_tables():
         return
     _tables_initialized = True
     try:
+        import app.models  # noqa: F401
         Base.metadata.create_all(bind=engine)
     except Exception as e:
         logger.warning(f"Non-blocking database initialization notice: {e}")
