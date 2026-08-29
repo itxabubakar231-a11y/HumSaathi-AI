@@ -146,5 +146,8 @@ def run_comprehensive_smoke():
 
     print("\n=== ALL 10 COMPREHENSIVE PRODUCTION SMOKE AUDITS PASSED ===")
 
+def test_smoke():
+    run_comprehensive_smoke()
+
 if __name__ == "__main__":
     run_comprehensive_smoke()

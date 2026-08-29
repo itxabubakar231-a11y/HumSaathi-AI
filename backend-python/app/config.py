@@ -34,6 +34,8 @@ class Settings(BaseSettings):
             url = url.replace("postgres://", "postgresql://", 1)
         elif url.startswith("file:"):
             url = f"sqlite:///{url[5:]}"
+        if os.getenv("VERCEL") and (url.startswith("sqlite:///.") or url == "sqlite:///./humsaathi.db"):
+            url = "sqlite:////tmp/humsaathi.db"
         return url
 
 settings = Settings()
