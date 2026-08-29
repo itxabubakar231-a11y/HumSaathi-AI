@@ -48,13 +48,15 @@ def upsert_progress_from_assessment(db: Session, user_id: str, area_levels: Dict
 def update_progress_from_attempt(
     db: Session,
     user_id: str,
-    activity: Activity,
+    activity: Optional[Activity],
     attempt_result: Dict[str, Any],
+    fallback_topic: str = "letters",
 ) -> Dict[str, Any]:
-    skill = activity.topic
+    skill = (activity.topic if activity and activity.topic else fallback_topic)
+    difficulty = (activity.difficulty if activity and activity.difficulty else "easy")
     existing = db.query(Progress).filter(Progress.userId == user_id, Progress.skill == skill).first()
 
-    current_level = existing.level if existing else activity.difficulty
+    current_level = existing.level if existing else difficulty
     adaptation = adapt_difficulty(current_level, attempt_result["score"], attempt_result["totalCount"])
 
     prev_attempts = existing.attempts if existing else 0
