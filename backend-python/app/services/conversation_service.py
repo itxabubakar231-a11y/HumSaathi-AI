@@ -223,8 +223,6 @@ def start_session(db: Session, user_id: str, scenario_id: str, mode: str = "text
     if not scenario:
         from app.data.scenarios import DEFAULT_SCENARIOS
         def_s = next((s for s in DEFAULT_SCENARIOS if s["id"] == scenario_id), None)
-        if not def_s and DEFAULT_SCENARIOS:
-            def_s = DEFAULT_SCENARIOS[0]
         if def_s:
             scenario = CommunicationScenario(
                 id=def_s["id"],
