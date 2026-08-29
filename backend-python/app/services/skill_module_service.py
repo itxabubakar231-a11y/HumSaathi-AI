@@ -512,40 +512,16 @@ async def evaluate_skill_solution(
         )
         db.add(p)
 
-    # Ensure Activity record exists in DB for this module so ForeignKey constraint is satisfied
-    activity = db.query(Activity).filter(Activity.id == module_id).first()
-    if not activity:
-        activity = db.query(Activity).filter(or_(Activity.topic == module_id, Activity.type == module_id)).first()
-
-    if not activity:
-        act_def = ACTIVITY_TOPIC_DEFS.get(module_id, {'type': module_id, 'topic': module_id, 'title': module_id.replace('_', ' ').title()})
-        activity = Activity(
-            id=module_id,
-            type=act_def['type'],
-            topic=act_def['topic'],
-            title=act_def['title'],
-            difficulty="medium",
-            language=language or "en",
-            personas=stringify_json([user.persona or "teen"]),
-            content=stringify_json(module_def or {}),
-            isActive=True,
-            createdAt=datetime.utcnow(),
-        )
-        try:
-            db.add(activity)
-            db.commit()
-            db.refresh(activity)
-        except Exception:
-            db.rollback()
-            activity = db.query(Activity).filter(Activity.id == module_id).first()
-            if not activity:
-                activity = db.query(Activity).first()
+    # Use existing Activity in DB to satisfy foreign key without enum constraint conflict
+    base_activity = db.query(Activity).filter(Activity.id == "letters").first()
+    if not base_activity:
+        base_activity = db.query(Activity).first()
 
     # Record Attempt for persona activity history & recent activity
     attempt = Attempt(
         userId=user_id,
-        activityId=activity.id if activity else module_id,
-        answers=stringify_json([{"scenarioId": scenario_id, "optionId": option_id, "score": score, "solution": custom_solution}]),
+        activityId=base_activity.id if base_activity else "letters",
+        answers=stringify_json([{"moduleId": module_id, "scenarioId": scenario_id, "optionId": option_id, "score": score, "solution": custom_solution}]),
         score=score / 100.0,
         correctCount=1 if score >= 70 else 0,
         totalCount=1,
