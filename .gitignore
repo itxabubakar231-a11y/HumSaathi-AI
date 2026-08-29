@@ -7,3 +7,7 @@ dist/
 .DS_Store
 .vscode/
 backend/prisma/dev.db
+*.db
+__pycache__/
+*.py[cod]
+.pytest_cache/
