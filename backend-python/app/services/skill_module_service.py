@@ -523,17 +523,15 @@ async def evaluate_skill_solution(
             personas=stringify_json([user.persona or "teen"]),
             content=stringify_json(module_def or {}),
             isActive=True,
+            createdAt=datetime.utcnow(),
         )
-        try:
-            db.add(act_row)
-            db.commit()
-        except Exception:
-            db.rollback()
+        db.add(act_row)
+        db.flush()
 
     # Record Attempt for persona activity history & recent activity
     attempt = Attempt(
         userId=user_id,
-        activityId=module_id,
+        activityId=act_row.id if act_row else module_id,
         answers=stringify_json([{"scenarioId": scenario_id, "optionId": option_id, "score": score, "solution": custom_solution}]),
         score=score / 100.0,
         correctCount=1 if score >= 70 else 0,
