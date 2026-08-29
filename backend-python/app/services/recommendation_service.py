@@ -28,16 +28,19 @@ def find_matching_activity(
     topic: Optional[str] = None,
     difficulty: str = "easy",
 ) -> Optional[Activity]:
-    activities = (
-        db.query(Activity)
-        .filter(
-            Activity.isActive == True,
-            Activity.type == activity_type,
-            Activity.language == language,
-            Activity.difficulty == difficulty,
-        )
-        .all()
-    )
+    VALID_ENUM_TYPES = {'letter', 'number', 'shape_color_match', 'counting', 'animal_matching', 'emotion_learning', 'routine_sequencing', 'general'}
+    query = db.query(Activity).filter(Activity.isActive == True)
+    if activity_type in VALID_ENUM_TYPES:
+        query = query.filter(Activity.type == activity_type)
+    else:
+        query = query.filter(Activity.topic == activity_type)
+
+    if language:
+        query = query.filter(Activity.language == language)
+    if difficulty:
+        query = query.filter(Activity.difficulty == difficulty)
+
+    activities = query.all()
 
     filtered = []
     for a in activities:

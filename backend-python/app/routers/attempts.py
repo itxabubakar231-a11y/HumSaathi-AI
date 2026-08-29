@@ -27,14 +27,18 @@ async def submit_attempt(
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
+    VALID_ENUM_TYPES = {'letter', 'number', 'shape_color_match', 'counting', 'animal_matching', 'emotion_learning', 'routine_sequencing', 'general'}
     activity_id = payload.activityId or "letters"
     activity = db.query(Activity).filter(Activity.id == activity_id).first()
 
     if not activity:
+        filters = [Activity.topic == activity_id]
+        if activity_id in VALID_ENUM_TYPES:
+            filters.append(Activity.type == activity_id)
         activity = (
             db.query(Activity)
             .filter(
-                or_(Activity.topic == activity_id, Activity.type == activity_id),
+                or_(*filters),
                 Activity.isActive == True,
             )
             .first()
