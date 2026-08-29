@@ -1,0 +1,41 @@
+from typing import Optional, Literal
+from pydantic import BaseModel, Field
+
+DEFAULT_SENSORY = {
+    'textSize': 'medium',
+    'soundEnabled': False,
+    'animationsEnabled': True,
+    'reducedMotion': False,
+    'highContrast': False,
+    'calmMode': True,
+}
+
+class SensoryPrefsSchema(BaseModel):
+    textSize: Optional[Literal['small', 'medium', 'large', 'xlarge']] = 'medium'
+    soundEnabled: Optional[bool] = False
+    animationsEnabled: Optional[bool] = True
+    reducedMotion: Optional[bool] = False
+    highContrast: Optional[bool] = False
+    calmMode: Optional[bool] = True
+
+class UserSetupRequest(BaseModel):
+    userId: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=80)
+    persona: Literal['child', 'teen', 'adult']
+    language: Literal['en', 'ur', 'ur_rm'] = 'en'
+    sensoryPrefs: Optional[SensoryPrefsSchema] = None
+
+class UserLoginRequest(BaseModel):
+    name: Optional[str] = None
+    userId: Optional[str] = None
+
+class PersonaUpdateRequest(BaseModel):
+    persona: str
+
+class SensoryUpdateRequest(BaseModel):
+    textSize: Optional[Literal['small', 'medium', 'large', 'xlarge']] = None
+    soundEnabled: Optional[bool] = None
+    animationsEnabled: Optional[bool] = None
+    reducedMotion: Optional[bool] = None
+    highContrast: Optional[bool] = None
+    calmMode: Optional[bool] = None
