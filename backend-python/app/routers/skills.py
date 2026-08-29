@@ -50,8 +50,8 @@ async def evaluate_solution(
         return result
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        tb = traceback.format_exc()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Evaluation failed: {str(e)}",
+            detail=f"Evaluation failed: {tb}",
         )
