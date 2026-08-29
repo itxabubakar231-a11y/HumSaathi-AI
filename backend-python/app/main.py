@@ -24,12 +24,6 @@ from app.routers import (
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("humsaathi-api")
 
-# Auto-create tables if they do not exist (non-destructive)
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    logger.warning(f"Note on table creation check: {e}")
-
 app = FastAPI(
     title="HumSaathi AI API",
     description="Adaptive Learning & AI Communication API for Neurodiverse Learners",

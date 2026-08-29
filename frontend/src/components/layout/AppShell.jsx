@@ -13,7 +13,7 @@ const navItems = [
 
 export default function AppShell({ children }) {
   const { t, language } = useI18n();
-  const { user, setupUser } = useUser();
+  const { user, updateLanguage } = useUser();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -37,12 +37,7 @@ export default function AppShell({ children }) {
   };
 
   const handleLanguageToggle = async (newLang) => {
-    if (user?.id) {
-      await setupUser({ ...user, language: newLang });
-    } else {
-      localStorage.setItem('humsaathi_language', newLang);
-      window.location.reload();
-    }
+    await updateLanguage(newLang);
   };
 
   return (
@@ -69,14 +64,14 @@ export default function AppShell({ children }) {
                 HumSaathi <span className="brand-ai-badge">AI</span>
               </span>
               <span className="brand-subtext">
-                {language === 'ur' ? 'آٹزم سپورٹ پلیٹ فارم' : 'Autism Support Platform'}
+                {language === 'ur' ? 'آٹزم سپورٹ پلیٹ فارم' : language === 'ur_rm' ? 'Autism Support Platform' : 'Autism Support Platform'}
               </span>
             </div>
           </Link>
         </div>
 
         <div className="topbar-right">
-          {/* Quick Language Toggle (EN | اردو) */}
+          {/* Quick Language Toggle (EN | اردو | Rom) */}
           <div className="topbar-lang-switcher" title="Switch Language">
             <button
               className={`lang-btn ${language === 'en' ? 'is-active' : ''}`}
@@ -89,6 +84,12 @@ export default function AppShell({ children }) {
               onClick={() => handleLanguageToggle('ur')}
             >
               اردو
+            </button>
+            <button
+              className={`lang-btn ${language === 'ur_rm' ? 'is-active' : ''}`}
+              onClick={() => handleLanguageToggle('ur_rm')}
+            >
+              Rom
             </button>
           </div>
 

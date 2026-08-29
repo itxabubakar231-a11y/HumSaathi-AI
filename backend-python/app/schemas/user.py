@@ -39,3 +39,6 @@ class SensoryUpdateRequest(BaseModel):
     reducedMotion: Optional[bool] = None
     highContrast: Optional[bool] = None
     calmMode: Optional[bool] = None
+
+class LanguageUpdateRequest(BaseModel):
+    language: Literal['en', 'ur', 'ur_rm']

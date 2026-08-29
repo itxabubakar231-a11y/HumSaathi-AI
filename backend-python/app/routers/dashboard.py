@@ -33,6 +33,8 @@ def format_dashboard(stats: Dict[str, Any], rewards: Optional[Dict[str, Any]] = 
     latest_assessment = stats.get("latestAssessment")
     strongest = stats.get("strongest")
     weakest = stats.get("weakest")
+    strengths_list = stats.get("strengths", [])
+    needs_practice_list = stats.get("needsPracticeList", [])
 
     return {
         "name": user.name,
@@ -41,14 +43,23 @@ def format_dashboard(stats: Dict[str, Any], rewards: Optional[Dict[str, Any]] = 
         "currentLevel": stats.get("currentLevel", "beginner"),
         "completedCount": stats.get("completedCount", 0),
         "avgAccuracy": round(stats.get("avgAccuracy", 0) * 100),
+        "strengths": [
+            {
+                "skill": p.skill,
+                "accuracy": round(p.accuracy * 100),
+                "attempts": p.attempts,
+                "level": p.level,
+            }
+            for p in strengths_list
+        ],
         "strongest": (
             {"skill": strongest.skill, "accuracy": round(strongest.accuracy * 100)}
-            if strongest
+            if strongest and getattr(strongest, "attempts", 0) > 0
             else None
         ),
         "needsPractice": (
             {"skill": weakest.skill, "accuracy": round(weakest.accuracy * 100)}
-            if weakest
+            if weakest and getattr(weakest, "attempts", 0) > 0
             else None
         ),
         "rewards": rewards or {"totalStars": 0, "earnedCount": 0, "badges": []},
@@ -89,6 +100,8 @@ def format_parent_view(stats: Dict[str, Any]) -> Dict[str, Any]:
     attempts_list = stats.get("attempts", [])
     strongest = stats.get("strongest")
     weakest = stats.get("weakest")
+    strengths_list = stats.get("strengths", [])
+    needs_practice_list = stats.get("needsPracticeList", [])
 
     return {
         "learner": {
@@ -99,8 +112,14 @@ def format_parent_view(stats: Dict[str, Any]) -> Dict[str, Any]:
         "currentLevel": stats.get("currentLevel", "beginner"),
         "completedCount": stats.get("completedCount", 0),
         "avgAccuracy": round(stats.get("avgAccuracy", 0) * 100),
-        "strengths": [strongest.skill] if strongest else [],
-        "needsPractice": [weakest.skill] if weakest else [],
+        "strengths": [
+            ACTIVITY_TOPIC_DEFS.get(p.skill, {}).get("title", p.skill.replace("_", " ").title())
+            for p in strengths_list
+        ] or ([ACTIVITY_TOPIC_DEFS.get(strongest.skill, {}).get("title", strongest.skill.title())] if strongest and getattr(strongest, "attempts", 0) > 0 else []),
+        "needsPractice": [
+            ACTIVITY_TOPIC_DEFS.get(p.skill, {}).get("title", p.skill.replace("_", " ").title())
+            for p in needs_practice_list
+        ] or ([ACTIVITY_TOPIC_DEFS.get(weakest.skill, {}).get("title", weakest.skill.title())] if weakest and getattr(weakest, "attempts", 0) > 0 else []),
         "progress": [
             {
                 "skill": p.skill,

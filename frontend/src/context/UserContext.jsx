@@ -24,6 +24,16 @@ export function UserProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    try {
+      const storedLang = localStorage.getItem('humsaathi_language') || 'en';
+      applyLanguageToDocument(storedLang);
+      const storedSensory = localStorage.getItem('humsaathi_sensory');
+      if (storedSensory) {
+        applySensoryToDocument(JSON.parse(storedSensory));
+      }
+    } catch {
+      // ignore JSON parse error
+    }
     api.health().then((h) => setAiMode(h.mode)).catch(() => setAiMode('offline'));
     const storedId = localStorage.getItem(STORAGE_KEY);
     if (storedId) {
@@ -38,8 +48,12 @@ export function UserProvider({ children }) {
     const result = await api.setupUser(payload);
     const userObj = result?.user || result;
     setUser(userObj);
-    applySensoryToDocument(userObj?.sensoryPrefs || DEFAULT_SENSORY);
-    applyLanguageToDocument(userObj?.language || 'en');
+    const finalSensory = userObj?.sensoryPrefs || DEFAULT_SENSORY;
+    const finalLang = userObj?.language || 'en';
+    applySensoryToDocument(finalSensory);
+    applyLanguageToDocument(finalLang);
+    localStorage.setItem('humsaathi_language', finalLang);
+    localStorage.setItem('humsaathi_sensory', JSON.stringify(finalSensory));
     if (userObj?.id) {
       localStorage.setItem(STORAGE_KEY, userObj.id);
     }
@@ -50,8 +64,12 @@ export function UserProvider({ children }) {
     const result = await api.loginUser(credentials);
     const userObj = result?.user || result;
     setUser(userObj);
-    applySensoryToDocument(userObj?.sensoryPrefs || DEFAULT_SENSORY);
-    applyLanguageToDocument(userObj?.language || 'en');
+    const finalSensory = userObj?.sensoryPrefs || DEFAULT_SENSORY;
+    const finalLang = userObj?.language || 'en';
+    applySensoryToDocument(finalSensory);
+    applyLanguageToDocument(finalLang);
+    localStorage.setItem('humsaathi_language', finalLang);
+    localStorage.setItem('humsaathi_sensory', JSON.stringify(finalSensory));
     if (userObj?.id) {
       localStorage.setItem(STORAGE_KEY, userObj.id);
     }
@@ -59,11 +77,49 @@ export function UserProvider({ children }) {
   };
 
   const selectPersona = async (persona) => {
-    if (!user?.id) return null;
+    if (!user?.id) {
+      setUser((prev) => (prev ? { ...prev, persona } : { persona, language: 'en', sensoryPrefs: DEFAULT_SENSORY }));
+      return { persona };
+    }
     const result = await api.selectPersona(user.id, persona);
-    const updated = result?.user || result;
+    const updated = result?.user || { ...user, persona };
     setUser(updated);
     return updated;
+  };
+
+  const updateSensory = async (patch) => {
+    const nextPrefs = { ...(user?.sensoryPrefs || DEFAULT_SENSORY), ...patch };
+    applySensoryToDocument(nextPrefs);
+    localStorage.setItem('humsaathi_sensory', JSON.stringify(nextPrefs));
+    if (user?.id) {
+      try {
+        const result = await api.updateSensory(user.id, nextPrefs);
+        const updated = result?.user || { ...user, sensoryPrefs: nextPrefs };
+        setUser(updated);
+        return updated;
+      } catch (err) {
+        console.warn('Sensory update error:', err);
+      }
+    }
+    setUser((prev) => (prev ? { ...prev, sensoryPrefs: nextPrefs } : null));
+    return nextPrefs;
+  };
+
+  const updateLanguage = async (newLang) => {
+    applyLanguageToDocument(newLang);
+    localStorage.setItem('humsaathi_language', newLang);
+    if (user?.id) {
+      try {
+        const result = await api.updateLanguage(user.id, newLang);
+        const updated = result?.user || { ...user, language: newLang };
+        setUser(updated);
+        return updated;
+      } catch (err) {
+        console.warn('Language update error:', err);
+      }
+    }
+    setUser((prev) => (prev ? { ...prev, language: newLang } : null));
+    return newLang;
   };
 
   const logout = () => {
@@ -74,7 +130,21 @@ export function UserProvider({ children }) {
   const refreshUser = () => user?.id && loadUser(user.id);
 
   return (
-    <UserContext.Provider value={{ user, loading, aiMode, setupUser, loginUser, selectPersona, logout, refreshUser, setUser }}>
+    <UserContext.Provider
+      value={{
+        user,
+        loading,
+        aiMode,
+        setupUser,
+        loginUser,
+        selectPersona,
+        updateSensory,
+        updateLanguage,
+        logout,
+        refreshUser,
+        setUser,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

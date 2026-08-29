@@ -5,12 +5,28 @@ import { PERSONAS, LANGUAGES, DEFAULT_SENSORY } from '../utils/preferences';
 import SensoryPanel from '../components/ui/SensoryPanel';
 
 export default function SettingsPage() {
-  const { user, setupUser, updateSensory } = useUser();
+  const { user, setupUser, updateSensory, updateLanguage, selectPersona } = useUser();
   const { t } = useI18n();
   const [persona, setPersona] = useState(user?.persona || 'child');
   const [language, setLanguage] = useState(user?.language || 'en');
   const [sensoryPrefs, setSensoryPrefs] = useState(user?.sensoryPrefs || DEFAULT_SENSORY);
   const [saved, setSaved] = useState(false);
+
+  const handlePersonaSelect = async (pId) => {
+    setPersona(pId);
+    if (user) await selectPersona(pId);
+  };
+
+  const handleLanguageSelect = async (langId) => {
+    setLanguage(langId);
+    await updateLanguage(langId);
+  };
+
+  const handleSensoryChange = async (patch) => {
+    const next = { ...sensoryPrefs, ...patch };
+    setSensoryPrefs(next);
+    await updateSensory(next);
+  };
 
   const saveSettings = async () => {
     if (!user) return;
@@ -22,12 +38,6 @@ export default function SettingsPage() {
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
-  };
-
-  const handleSensoryChange = async (patch) => {
-    const next = { ...sensoryPrefs, ...patch };
-    setSensoryPrefs(next);
-    if (user) await updateSensory(next);
   };
 
   return (
@@ -48,7 +58,7 @@ export default function SettingsPage() {
               className={`persona-card ${persona === p.id ? 'is-selected' : ''}`}
               key={p.id}
               type="button"
-              onClick={() => setPersona(p.id)}
+              onClick={() => handlePersonaSelect(p.id)}
               aria-pressed={persona === p.id}
             >
               <span className="persona-label">{t(p.labelKey)}</span>
@@ -70,7 +80,7 @@ export default function SettingsPage() {
               className={`lang-pill-btn ${language === lang.id ? 'is-selected' : ''}`}
               key={lang.id}
               type="button"
-              onClick={() => setLanguage(lang.id)}
+              onClick={() => handleLanguageSelect(lang.id)}
               aria-pressed={language === lang.id}
             >
               <span className="lang-flag">{lang.id === 'en' ? '🇬🇧' : '🇵🇰'}</span>

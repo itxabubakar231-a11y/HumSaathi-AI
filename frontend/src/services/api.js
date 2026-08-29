@@ -20,10 +20,14 @@ export const api = {
   getUser: (userId) => request(`/api/users/${userId}`),
   selectPersona: (userId, persona) => request(`/api/users/${userId}/persona`, { method: 'PATCH', body: JSON.stringify({ persona }) }),
   updateSensory: (userId, prefs) => request(`/api/users/${userId}/sensory`, { method: 'PATCH', body: JSON.stringify(prefs) }),
+  updateLanguage: (userId, language) => request(`/api/users/${userId}/language`, { method: 'PATCH', body: JSON.stringify({ language }) }),
   getAssessmentQuestions: (userId) => request(`/api/assessment/${userId}/questions`),
   submitAssessment: (userId, responses) => request(`/api/assessment/${userId}/submit`, { method: 'POST', body: JSON.stringify({ responses }) }),
   getLatestAssessment: (userId) => request(`/api/assessment/${userId}/latest`),
-  getActivity: (id) => request(`/api/activities/${id}`),
+  getActivity: (id, params) => {
+    const qs = params ? new URLSearchParams(params).toString() : '';
+    return request(`/api/activities/${id}${qs ? `?${qs}` : ''}`);
+  },
   getActivities: (params) => {
     const qs = params ? new URLSearchParams(params).toString() : '';
     return request(`/api/activities${qs ? `?${qs}` : ''}`);

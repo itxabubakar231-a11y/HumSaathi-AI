@@ -123,9 +123,16 @@ def get_dashboard_stats(db: Session, user_id: str) -> Dict[str, Any]:
         else 0.0
     )
 
+    practiced = [p for p in progress_records if p.attempts > 0]
+    practiced_sorted = sorted(practiced, key=lambda p: (p.accuracy, p.attempts), reverse=True)
+
+    # Evidence-based strengths from real performance and attempt history
+    strengths_records = [p for p in practiced_sorted if p.accuracy >= 0.6]
+    needs_practice_records = [p for p in practiced_sorted if p.accuracy < 0.6]
+
     sorted_by_accuracy = sorted(progress_records, key=lambda p: p.accuracy, reverse=True)
-    strongest = sorted_by_accuracy[0] if sorted_by_accuracy else None
-    weakest = sorted(progress_records, key=lambda p: p.accuracy)[0] if progress_records else None
+    strongest = practiced_sorted[0] if practiced_sorted else (sorted_by_accuracy[0] if sorted_by_accuracy else None)
+    weakest = sorted(practiced, key=lambda p: p.accuracy)[0] if practiced else (progress_records[0] if progress_records else None)
 
     current_level = (
         latest_assessment.estimatedLevel
@@ -141,6 +148,8 @@ def get_dashboard_stats(db: Session, user_id: str) -> Dict[str, Any]:
         'avgAccuracy': avg_accuracy,
         'strongest': strongest,
         'weakest': weakest,
+        'strengths': strengths_records,
+        'needsPracticeList': needs_practice_records,
         'currentLevel': current_level,
         'latestAssessment': latest_assessment,
     }

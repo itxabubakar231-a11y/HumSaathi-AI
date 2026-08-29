@@ -4608,6 +4608,69 @@ body {
   color: #92400E;
 }
 
+/* Child Strengths Grid Cards */
+.child-strengths-section {
+  animation: fadeSlideUp 0.35s ease-out;
+}
+
+.child-strengths-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.child-strength-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem 1.25rem;
+  background: #FFFFFF;
+  border: 1.5px solid #A7F3D0;
+  border-radius: 18px;
+  box-shadow: 0 3px 12px rgba(16, 185, 129, 0.06);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.child-strength-card:hover {
+  transform: translateY(-2px);
+  border-color: #10B981;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.15);
+}
+
+.strength-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.strength-card-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.strength-badge-pill {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #065F46;
+  background: #D1FAE5;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+.strength-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.strength-card-meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin: 0;
+}
+
 /* Reduced Motion Standard Compliance */
 @media (prefers-reduced-motion: reduce) {
   *,

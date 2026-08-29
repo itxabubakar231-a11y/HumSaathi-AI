@@ -27,10 +27,11 @@ export default function ActivityPage() {
       navigate('/setup');
       return;
     }
-    api.getActivity(id)
+    const currentLang = user?.language || language || 'en';
+    api.getActivity(id, { language: currentLang })
       .then((data) => setActivity(data.activity))
       .catch(() => navigate('/dashboard'));
-  }, [id, user, navigate]);
+  }, [id, user?.id, user?.language, language, navigate]);
 
   if (!activity) return <p className="loading-text">{t('common.loading')}</p>;
 

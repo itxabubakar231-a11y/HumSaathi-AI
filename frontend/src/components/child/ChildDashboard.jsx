@@ -392,6 +392,43 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
+      {/* 🌟 MY STRENGTHS & SUPERPOWERS */}
+      {dashboard?.strengths?.length > 0 && (
+        <section className="child-section child-strengths-section">
+          <div className="child-section-header">
+            <div>
+              <span className="child-section-kicker">
+                {language === 'ur' ? 'میری طاقت' : language === 'ur_rm' ? 'MERI MAZBOOT SKILLS' : 'SUPERPOWERS'}
+              </span>
+              <h2 className="child-section-title">
+                <span aria-hidden="true">🌟</span> {t('parent.strengths') || (language === 'ur' ? 'میری بہترین مہارتیں' : 'My Strengths')}
+              </h2>
+            </div>
+          </div>
+
+          <div className="child-strengths-grid">
+            {dashboard.strengths.map((str, idx) => (
+              <div key={idx} className="child-strength-card">
+                <div className="strength-card-top">
+                  <span className="strength-card-icon" aria-hidden="true">
+                    {getTopicIcon(str.skill)}
+                  </span>
+                  <span className="strength-badge-pill">
+                    {str.accuracy}% {language === 'ur' ? 'درستگی' : 'Mastery'}
+                  </span>
+                </div>
+                <h4 className="strength-card-title">
+                  {t(`child.game.${str.skill}`) || t(`child.game.${str.skill.replace(/s$/, '')}`) || str.skill.replace('_', ' ').toUpperCase()}
+                </h4>
+                <p className="strength-card-meta">
+                  🎯 {str.attempts} {language === 'ur' ? 'کامیاب مشقیں' : language === 'ur_rm' ? 'mukammal mashqein' : 'completed practices'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ⏱️ RECENT ACTIVITY / RECENT ADVENTURES */}
       {dashboard?.recentAttempts?.length > 0 && (
         <section className="child-section child-recent-section">

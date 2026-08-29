@@ -13,6 +13,7 @@ from app.schemas.user import (
     UserLoginRequest,
     PersonaUpdateRequest,
     SensoryUpdateRequest,
+    LanguageUpdateRequest,
 )
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -173,6 +174,26 @@ def update_sensory_preferences(
     current_prefs.update(updates)
 
     user.sensoryPrefs = stringify_json(current_prefs)
+    user.updatedAt = datetime.utcnow()
+    db.commit()
+    db.refresh(user)
+
+    return {"user": format_user(user)}
+
+@router.patch("/{user_id}/language")
+def update_user_language(
+    user_id: str,
+    payload: LanguageUpdateRequest,
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    user.language = payload.language
     user.updatedAt = datetime.utcnow()
     db.commit()
     db.refresh(user)
