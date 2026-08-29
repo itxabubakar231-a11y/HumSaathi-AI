@@ -6,7 +6,22 @@ import { getActivityContent } from '../activities/registry.js';
 const router = Router();
 
 router.get('/:id', async (req, res) => {
-  const activity = await prisma.activity.findUnique({ where: { id: req.params.id } });
+  const { id } = req.params;
+  let activity = await prisma.activity.findUnique({ where: { id } }).catch(() => null);
+  
+  if (!activity) {
+    // Also support finding by topic or type
+    activity = await prisma.activity.findFirst({
+      where: {
+        OR: [
+          { topic: id },
+          { type: id },
+        ],
+        isActive: true,
+      },
+    });
+  }
+
   if (!activity) return res.status(404).json({ error: 'Activity not found' });
 
   let content = parseJson(activity.content, null);

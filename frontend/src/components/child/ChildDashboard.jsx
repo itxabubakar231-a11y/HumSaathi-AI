@@ -2,32 +2,38 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../context/I18nContext';
 
 export default function ChildDashboard({ user, dashboard, recommendation, activities = [] }) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const navigate = useNavigate();
 
   const hasAssessment = dashboard?.assessmentSummary !== null;
   const rewards = dashboard?.rewards || { totalStars: 0, earnedCount: 0, badges: [] };
+  const completedCount = dashboard?.completedCount || 0;
 
   const startRecommended = () => {
     if (recommendation?.activityId) {
       navigate(`/activity/${recommendation.activityId}`, { state: { recommendation } });
+    } else {
+      startActivityByTopicOrType('letters');
     }
   };
 
   const startActivityByTopicOrType = (topicOrType) => {
+    // 1. Try finding in activities array
     const match = activities.find(
       (a) => a.topic === topicOrType || a.type === topicOrType
     );
-    if (match) {
+    if (match?.id) {
       navigate(`/activity/${match.id}`);
-    } else if (recommendation?.activityId) {
-      navigate(`/activity/${recommendation.activityId}`);
+      return;
     }
+
+    // 2. Direct topic fallback — backend supports topic slugs directly
+    navigate(`/activity/${topicOrType}`);
   };
 
   const getChildLevelLabel = (level) => {
     const key = `child.level.${level || 'beginner'}`;
-    return t(key);
+    return t(key) || level || 'Explorer';
   };
 
   const getTopicIcon = (topic) => {
@@ -60,16 +66,65 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
 
   // Grouped games for child-friendly navigation
   const foundationGames = [
-    { type: 'letter', topic: 'letters', icon: '🔤', titleKey: 'child.game.letter' },
-    { type: 'number', topic: 'numbers', icon: '🔢', titleKey: 'child.game.number' },
-    { type: 'shape_color_match', topic: 'colors', icon: '🎨', titleKey: 'child.game.shape_color_match' },
-    { type: 'counting', topic: 'counting', icon: '🍎', titleKey: 'child.game.counting' },
+    { type: 'letter', topic: 'letters', icon: '🔤', titleKey: 'child.game.letter', desc: 'Alphabet letters & sounds' },
+    { type: 'number', topic: 'numbers', icon: '🔢', titleKey: 'child.game.number', desc: 'Number recognition & order' },
+    { type: 'shape_color_match', topic: 'colors', icon: '🎨', titleKey: 'child.game.shape_color_match', desc: 'Colors, shapes & matching' },
+    { type: 'counting', topic: 'counting', icon: '🍎', titleKey: 'child.game.counting', desc: 'Count friendly objects' },
   ];
 
   const worldGames = [
-    { type: 'animal_matching', topic: 'animals', icon: '🐾', titleKey: 'child.game.animal_matching' },
-    { type: 'emotion_learning', topic: 'emotions', icon: '💛', titleKey: 'child.game.emotion_learning' },
-    { type: 'routine_sequencing', topic: 'routines', icon: '⏰', titleKey: 'child.game.routine_sequencing' },
+    { type: 'animal_matching', topic: 'animals', icon: '🐾', titleKey: 'child.game.animal_matching', desc: 'Friendly animals & habitats' },
+    { type: 'emotion_learning', topic: 'emotions', icon: '💛', titleKey: 'child.game.emotion_learning', desc: 'Recognize feelings & expressions' },
+    { type: 'routine_sequencing', topic: 'routines', icon: '⏰', titleKey: 'child.game.routine_sequencing', desc: 'Morning to evening daily steps' },
+  ];
+
+  // Learning journey structured steps
+  const journeySteps = [
+    {
+      stepNumber: '01',
+      title: 'Initial Learning Check',
+      subtitle: hasAssessment ? `Level: ${getChildLevelLabel(dashboard.assessmentSummary?.level)} (${dashboard.assessmentSummary?.score}%)` : 'Find your starting pace',
+      icon: '🎯',
+      state: hasAssessment ? 'completed' : 'recommended',
+      actionLabel: hasAssessment ? 'Revisit' : 'Start Assessment 🚀',
+      onClick: () => navigate('/assessment'),
+    },
+    {
+      stepNumber: '02',
+      title: 'Foundations',
+      subtitle: 'Letters, Numbers, Colors & Counting',
+      icon: '🧩',
+      state: hasAssessment ? (completedCount >= 2 ? 'completed' : 'current') : 'locked',
+      actionLabel: hasAssessment ? (completedCount >= 2 ? 'Practice More ➔' : 'Start Learning ▶') : 'Complete Assessment',
+      onClick: () => (hasAssessment ? startActivityByTopicOrType('letters') : navigate('/assessment')),
+    },
+    {
+      stepNumber: '03',
+      title: 'Communication Coach',
+      subtitle: 'Real-world practice with AI Friend & Teacher',
+      icon: '💬',
+      state: hasAssessment ? 'available' : 'locked',
+      actionLabel: hasAssessment ? 'Open Scenarios ➔' : 'Complete Assessment',
+      onClick: () => navigate('/scenarios'),
+    },
+    {
+      stepNumber: '04',
+      title: 'World & Life Skills',
+      subtitle: 'Animals, Emotions & Daily Routines',
+      icon: '🌍',
+      state: hasAssessment ? (completedCount >= 4 ? 'completed' : 'available') : 'locked',
+      actionLabel: hasAssessment ? 'Explore Games ➔' : 'Complete Assessment',
+      onClick: () => (hasAssessment ? startActivityByTopicOrType('animals') : navigate('/assessment')),
+    },
+    {
+      stepNumber: '05',
+      title: 'Daily Recommendation',
+      subtitle: recommendation?.topic ? `Personalized task: ${recommendation.topic}` : 'Daily adaptive activities',
+      icon: '⭐',
+      state: hasAssessment && recommendation ? 'recommended' : (hasAssessment ? 'available' : 'locked'),
+      actionLabel: hasAssessment ? 'Play Now 🚀' : 'Complete Assessment',
+      onClick: () => (hasAssessment ? startRecommended() : navigate('/assessment')),
+    },
   ];
 
   return (
@@ -166,23 +221,138 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* Choose an Adventure - Foundations */}
+      {/* 🚀 PRACTICE SCENARIOS / AI COACH FEATURE (PROMINENT) */}
+      <section className="child-section child-ai-coach-banner">
+        <div className="ai-coach-card-content">
+          <div className="ai-coach-text">
+            <span className="ai-coach-badge">🤖 AI Practice Companion</span>
+            <h2>{language === 'ur' ? 'اے آئی دوست کے ساتھ بات چیت کریں' : 'Talk with your AI Coach & Friends!'}</h2>
+            <p>
+              {language === 'ur' 
+                ? 'استاد سے مدد مانگیں، نئے دوست بنائیں یا روزمرہ کی گفتگو بول کر یا لکھ کر مشق کریں۔'
+                : 'Practice talking to a helpful teacher, making friends, or asking for directions using voice or text.'}
+            </p>
+          </div>
+          <div className="ai-coach-actions">
+            <button
+              className="btn-primary btn-coach-start"
+              type="button"
+              onClick={() => navigate('/scenarios')}
+            >
+              🗣️ {language === 'ur' ? 'بات چیت شروع کریں' : 'Start Practice Scenarios'} ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 🗺️ MY LEARNING JOURNEY (STRUCTURED PROGRESSION TIMELINE) */}
+      <section className="child-section child-journey-section">
+        <div className="child-section-header">
+          <div>
+            <span className="child-section-kicker">STEP BY STEP PROGRESSION</span>
+            <h2 className="child-section-title">
+              <span aria-hidden="true">🗺️</span> {t('child.myJourney')}
+            </h2>
+          </div>
+        </div>
+
+        <div className="child-journey-timeline">
+          {journeySteps.map((step, idx) => {
+            const isCompleted = step.state === 'completed';
+            const isCurrent = step.state === 'current';
+            const isRecommended = step.state === 'recommended';
+            const isLocked = step.state === 'locked';
+
+            return (
+              <div
+                key={step.stepNumber}
+                className={`journey-timeline-node is-${step.state}`}
+              >
+                {/* Step Connector Line */}
+                {idx < journeySteps.length - 1 && (
+                  <div className={`journey-line-segment ${isCompleted ? 'is-done' : ''}`} aria-hidden="true" />
+                )}
+
+                {/* Node Status Badge */}
+                <div className="journey-node-badge">
+                  {isCompleted && <span className="node-icon-completed">✓</span>}
+                  {isCurrent && <span className="node-icon-current">▶</span>}
+                  {isRecommended && <span className="node-icon-recommended">⭐</span>}
+                  {isLocked && <span className="node-icon-locked">🔒</span>}
+                  {!isCompleted && !isCurrent && !isRecommended && !isLocked && (
+                    <span className="node-icon-available">{step.stepNumber}</span>
+                  )}
+                </div>
+
+                {/* Node Card Content */}
+                <div
+                  className="journey-node-card"
+                  onClick={!isLocked ? step.onClick : undefined}
+                  role={!isLocked ? 'button' : undefined}
+                  tabIndex={!isLocked ? 0 : undefined}
+                  onKeyDown={!isLocked ? (e) => e.key === 'Enter' && step.onClick() : undefined}
+                >
+                  <div className="journey-node-main">
+                    <span className="journey-node-icon" aria-hidden="true">{step.icon}</span>
+                    <div className="journey-node-info">
+                      <div className="journey-node-meta">
+                        <span className="journey-step-tag">STEP {step.stepNumber}</span>
+                        <span className={`journey-state-pill pill-${step.state}`}>
+                          {isCompleted && '✓ Completed'}
+                          {isCurrent && '▶ Current Task'}
+                          {isRecommended && '⭐ Suggested Next'}
+                          {isLocked && '🔒 Complete Previous'}
+                          {step.state === 'available' && 'Available'}
+                        </span>
+                      </div>
+                      <h3 className="journey-node-title">{step.title}</h3>
+                      <p className="journey-node-subtitle">{step.subtitle}</p>
+                    </div>
+                  </div>
+
+                  <div className="journey-node-action">
+                    <button
+                      type="button"
+                      className={`btn-journey-action btn-state-${step.state}`}
+                      disabled={isLocked}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        step.onClick();
+                      }}
+                    >
+                      {step.actionLabel}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 🧩 CHOOSE AN ADVENTURE - FOUNDATIONS */}
       {hasAssessment && (
         <section className="child-section">
-          <h2 className="child-section-title">
-            <span aria-hidden="true">🧩</span> {t('child.category.foundations')}
-          </h2>
+          <div className="child-section-header">
+            <div>
+              <span className="child-section-kicker">CORE SKILLS</span>
+              <h2 className="child-section-title">
+                <span aria-hidden="true">🧩</span> {t('child.category.foundations')}
+              </h2>
+            </div>
+          </div>
           <div className="child-game-grid">
             {foundationGames.map((game) => (
               <button
                 key={game.type}
-                className="child-game-card"
+                className="child-game-card is-interactive-card"
                 type="button"
                 onClick={() => startActivityByTopicOrType(game.topic)}
               >
                 <span className="child-game-icon" aria-hidden="true">{game.icon}</span>
                 <div className="child-game-text">
                   <h3>{t(game.titleKey)}</h3>
+                  <p className="child-game-desc">{game.desc}</p>
                 </div>
                 <span className="child-game-action-btn">{t('child.play')} ➔</span>
               </button>
@@ -191,23 +361,29 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* Choose an Adventure - World & Life Skills */}
+      {/* 🌍 CHOOSE AN ADVENTURE - WORLD & LIFE SKILLS */}
       {hasAssessment && (
         <section className="child-section">
-          <h2 className="child-section-title">
-            <span aria-hidden="true">🌍</span> {t('child.category.world')}
-          </h2>
+          <div className="child-section-header">
+            <div>
+              <span className="child-section-kicker">EVERYDAY UNDERSTANDING</span>
+              <h2 className="child-section-title">
+                <span aria-hidden="true">🌍</span> {t('child.category.world')}
+              </h2>
+            </div>
+          </div>
           <div className="child-game-grid">
             {worldGames.map((game) => (
               <button
                 key={game.type}
-                className="child-game-card"
+                className="child-game-card is-interactive-card"
                 type="button"
                 onClick={() => startActivityByTopicOrType(game.topic)}
               >
                 <span className="child-game-icon" aria-hidden="true">{game.icon}</span>
                 <div className="child-game-text">
                   <h3>{t(game.titleKey)}</h3>
+                  <p className="child-game-desc">{game.desc}</p>
                 </div>
                 <span className="child-game-action-btn">{t('child.play')} ➔</span>
               </button>
@@ -216,13 +392,16 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* My Badges Gallery */}
+      {/* 🏆 MY BADGES GALLERY */}
       {rewards.badges?.length > 0 && (
         <section className="child-section">
           <div className="child-section-header">
-            <h2 className="child-section-title">
-              <span aria-hidden="true">🏆</span> {t('child.myBadges')}
-            </h2>
+            <div>
+              <span className="child-section-kicker">ACHIEVEMENTS</span>
+              <h2 className="child-section-title">
+                <span aria-hidden="true">🏆</span> {t('child.myBadges')}
+              </h2>
+            </div>
           </div>
           <div className="child-badges-grid">
             {rewards.badges.map((badge) => (
@@ -233,7 +412,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
                 <span className="child-badge-icon" aria-hidden="true">{badge.icon}</span>
                 <div className="child-badge-text">
                   <h4>{t(badge.titleKey)}</h4>
-                  <p>{badge.isUnlocked ? t(badge.descKey) : '🔒'}</p>
+                  <p>{badge.isUnlocked ? t(badge.descKey) : '🔒 Complete activities to unlock'}</p>
                 </div>
               </div>
             ))}
@@ -241,44 +420,15 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* Child Learning Journey (Skill Journey) */}
-      {hasAssessment && dashboard?.progress?.length > 0 && (
-        <section className="child-section">
-          <h2 className="child-section-title">
-            <span aria-hidden="true">🗺️</span> {t('child.myJourney')}
-          </h2>
-          <div className="child-skill-grid">
-            {dashboard.progress.map((prog) => (
-              <button
-                key={prog.skill}
-                className="child-skill-card is-interactive"
-                type="button"
-                onClick={() => startActivityByTopicOrType(prog.skill)}
-                title={`${t('child.play')} ${t(`child.game.${prog.skill === 'colors' || prog.skill === 'shapes' ? 'shape_color_match' : prog.skill}`) || prog.skill}`}
-              >
-                <span className="child-skill-icon" aria-hidden="true">
-                  {getTopicIcon(prog.skill)}
-                </span>
-                <div className="child-skill-info">
-                  <h3>{t(`child.game.${prog.skill === 'colors' || prog.skill === 'shapes' ? 'shape_color_match' : prog.skill}`) || prog.skill}</h3>
-                  <span className="child-skill-badge">
-                    {getChildLevelLabel(prog.level)}
-                  </span>
-                </div>
-                <div className="child-progress-track" aria-hidden="true">
-                  <div
-                    className="child-progress-fill"
-                    style={{ width: `${Math.max(15, prog.accuracy)}%` }}
-                  />
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* Simple Bottom Navigation */}
       <footer className="child-footer-nav">
+        <button
+          className="child-nav-btn"
+          type="button"
+          onClick={() => navigate('/scenarios')}
+        >
+          <span>💬</span> Practice Scenarios
+        </button>
         <button
           className="child-nav-btn"
           type="button"

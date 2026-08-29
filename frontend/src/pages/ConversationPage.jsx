@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
@@ -17,6 +17,7 @@ export default function ConversationPage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [mode, setMode] = useState('text'); // text or voice
+  const [speakingIdx, setSpeakingIdx] = useState(null);
 
   // Voice mode state
   const [isListening, setIsListening] = useState(false);
@@ -32,24 +33,59 @@ export default function ConversationPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const speakText = useCallback((text, lang, idx = null) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+
+    if (!text) return;
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (lang === 'ur') {
+      utterance.lang = 'ur-PK';
+    } else {
+      utterance.lang = 'en-US';
+    }
+
+    utterance.onstart = () => {
+      if (idx !== null) setSpeakingIdx(idx);
+    };
+
+    utterance.onend = () => {
+      setSpeakingIdx(null);
+    };
+
+    utterance.onerror = () => {
+      setSpeakingIdx(null);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const stopSpeaking = () => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setSpeakingIdx(null);
+    }
+  };
+
   useEffect(() => {
     if (!user?.id) {
-      navigate('/setup');
+      navigate('/login');
       return;
     }
     // Fetch session directly by ID
     api.getSession(sessionId)
-      .then(({ session }) => {
-        if (!session) {
+      .then(({ session: sess }) => {
+        if (!sess) {
           setError('Session not found');
         } else {
-          setSession(session);
-          setMessages(session.transcript || []);
-          setMode(session.mode || 'text');
-          
+          setSession(sess);
+          setMessages(sess.transcript || []);
+          setMode(sess.mode || 'text');
+
           // Text to Speech initial greeting if voice mode
-          if (session.mode === 'voice' && session.transcript?.length > 0) {
-            speakText(session.transcript[0].content, session.language);
+          if (sess.mode === 'voice' && sess.transcript?.length > 0) {
+            speakText(sess.transcript[0].content, sess.language, 0);
           }
         }
       })
@@ -67,7 +103,7 @@ export default function ConversationPage() {
       const rec = new SpeechRecognition();
       rec.continuous = false;
       rec.interimResults = true;
-      rec.lang = user.language === 'ur' ? 'ur-PK' : 'en-US';
+      rec.lang = user?.language === 'ur' ? 'ur-PK' : 'en-US';
 
       rec.onstart = () => {
         setIsListening(true);
@@ -100,26 +136,11 @@ export default function ConversationPage() {
         recognitionRef.current.abort();
       }
     };
-  }, [sessionId, user, navigate, t]);
+  }, [sessionId, user, navigate, t, speakText]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages, sending]);
-
-  const speakText = (text, lang) => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    
-    if (!speechSupported) return;
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    if (lang === 'ur') {
-      utterance.lang = 'ur-PK';
-    } else {
-      utterance.lang = 'en-US';
-    }
-    window.speechSynthesis.speak(utterance);
-  };
 
   const startListening = () => {
     if (!speechSupported || !recognitionRef.current) return;
@@ -127,7 +148,7 @@ export default function ConversationPage() {
     try {
       recognitionRef.current.start();
     } catch (e) {
-      console.warn('Failed to start speech recognition:', e);
+      console.warn('Speech recognition start note:', e);
     }
   };
 
@@ -158,14 +179,15 @@ export default function ConversationPage() {
     try {
       const res = await api.sendMessage(sessionId, {
         userId: user.id,
-        message: text
+        message: text,
       });
 
       if (res && res.session) {
-        setMessages(res.session.transcript || []);
-        
-        if (mode === 'voice' && res.response) {
-          speakText(res.response, res.session.language);
+        const updatedTranscript = res.session.transcript || [];
+        setMessages(updatedTranscript);
+
+        if (res.response) {
+          speakText(res.response, res.session.language, updatedTranscript.length - 1);
         }
 
         if (res.completed) {
@@ -179,17 +201,17 @@ export default function ConversationPage() {
       setMessages((prev) => prev.slice(0, -1));
     } finally {
       setSending(false);
+      setTranscriptPreview('');
     }
   };
 
   const handleFinish = async () => {
-    setLoading(true);
+    setSending(true);
     try {
       await api.endConversation(sessionId);
       navigate(`/feedback/${sessionId}`);
     } catch (err) {
-      setError(err.message || t('common.error'));
-      setLoading(false);
+      navigate(`/feedback/${sessionId}`);
     }
   };
 
@@ -206,6 +228,9 @@ export default function ConversationPage() {
     return (
       <div className="error-card">
         <p className="error-text">{error}</p>
+        <button className="btn-primary" onClick={() => navigate('/scenarios')}>
+          Back to Scenarios
+        </button>
       </div>
     );
   }
@@ -229,7 +254,7 @@ export default function ConversationPage() {
           </div>
           <div className="meta-row">
             <span className="meta-label">🌐 {language === 'ur' ? 'زبان:' : 'Language:'}</span>
-            <strong className="meta-val">{session?.language?.toUpperCase()}</strong>
+            <strong className="meta-val">{(session?.language || user?.language || 'en').toUpperCase()}</strong>
           </div>
           <div className="meta-row">
             <span className="meta-label">⚡ {language === 'ur' ? 'لیول:' : 'Difficulty:'}</span>
@@ -273,16 +298,19 @@ export default function ConversationPage() {
             <button
               type="button"
               className={`mode-toggle-btn ${mode === 'text' ? 'is-active' : ''}`}
-              onClick={() => setMode('text')}
+              onClick={() => {
+                setMode('text');
+                stopSpeaking();
+              }}
             >
-              💬 Text
+              💬 Text Mode
             </button>
             <button
               type="button"
               className={`mode-toggle-btn ${mode === 'voice' ? 'is-active' : ''}`}
               onClick={() => setMode('voice')}
             >
-              🎙️ Voice
+              🎙️ Voice Mode
             </button>
           </div>
         </div>
@@ -297,8 +325,27 @@ export default function ConversationPage() {
               {msg.role !== 'user' && (
                 <div className="bubble-avatar-ai">🤖</div>
               )}
-              <div className={`chat-bubble ${msg.role === 'user' ? 'user' : 'ai'}`}>
-                {msg.content}
+              <div className="bubble-content-wrap">
+                <div className={`chat-bubble ${msg.role === 'user' ? 'user' : 'ai'}`}>
+                  {msg.content}
+                </div>
+                {msg.role !== 'user' && (
+                  <button
+                    type="button"
+                    className={`btn-replay-audio ${speakingIdx === idx ? 'is-speaking' : ''}`}
+                    onClick={() => {
+                      if (speakingIdx === idx) {
+                        stopSpeaking();
+                      } else {
+                        speakText(msg.content, session?.language || user?.language || 'en', idx);
+                      }
+                    }}
+                    title="Play voice audio"
+                    aria-label="Listen to message audio"
+                  >
+                    {speakingIdx === idx ? '⏹️ Stop' : '🔊 Listen'}
+                  </button>
+                )}
               </div>
               {msg.role === 'user' && (
                 <div className="bubble-avatar-user">{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</div>
@@ -332,10 +379,11 @@ export default function ConversationPage() {
                   </div>
                 )}
                 {speechError && <p className="error-text" style={{ fontSize: '0.8rem' }}>{speechError}</p>}
-                
+
                 <div className="voice-controls-row">
                   <button
                     className={`voice-btn-large ${isListening ? 'is-listening' : ''}`}
+                    type="button"
                     onClick={isListening ? stopListening : startListening}
                   >
                     {isListening ? (
@@ -346,6 +394,7 @@ export default function ConversationPage() {
                   </button>
                   <button
                     className="btn-secondary btn-sm"
+                    type="button"
                     onClick={() => setMode('text')}
                   >
                     💬 {language === 'ur' ? 'ٹیکسٹ پر جائیں' : 'Switch to Text'}
@@ -355,7 +404,7 @@ export default function ConversationPage() {
             ) : (
               <div className="mic-unsupported-box">
                 <p>{t('conversation.micError') || 'Microphone not supported in this browser. Please use text mode.'}</p>
-                <button className="btn-secondary" onClick={() => setMode('text')}>
+                <button className="btn-secondary" type="button" onClick={() => setMode('text')}>
                   Switch to Text Mode
                 </button>
               </div>
