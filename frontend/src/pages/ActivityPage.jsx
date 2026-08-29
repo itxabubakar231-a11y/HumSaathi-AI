@@ -92,6 +92,7 @@ export default function ActivityPage() {
   };
 
   const finishActivity = async (finalAnswers) => {
+    if (submitting) return;
     setSubmitting(true);
     try {
       const timeMs = Date.now() - startTime;
@@ -109,7 +110,6 @@ export default function ActivityPage() {
       });
     } catch {
       setErrorMessage(t('common.error'));
-    } finally {
       setSubmitting(false);
     }
   };
@@ -207,27 +207,30 @@ export default function ActivityPage() {
                 disabled={checkedState === 'correct'}
               >
                 <ShapeVisual shape={item.shape} color={item.color} />
-                <span>{item.label}</span>
+                <span className="shape-label-text">{item.label}</span>
+                {isSolved && <span className="option-check-badge" aria-hidden="true">✓</span>}
               </button>
             );
           })}
         </div>
       ) : (
-        <div className="option-grid option-grid-large">
+        <div className={`option-grid ${question?.options?.every((opt) => String(opt).length <= 3) ? 'option-grid-letters' : 'option-grid-large'}`}>
           {question?.options.map((opt) => {
             const isSelected = selected === opt;
             const isSolved = checkedState === 'correct' && isSelected;
             const isWrong = checkedState === 'incorrect' && isSelected;
+            const isShort = String(opt).length <= 3;
             return (
               <button
                 key={opt}
                 type="button"
-                className={`option-btn ${isSelected ? 'is-selected' : ''} ${isSolved ? 'is-correct' : ''} ${isWrong ? 'is-retry' : ''}`}
+                className={`option-btn ${isShort ? 'is-short-letter' : ''} ${isSelected ? 'is-selected' : ''} ${isSolved ? 'is-correct' : ''} ${isWrong ? 'is-retry' : ''}`}
                 onClick={() => handleSelect(opt)}
                 aria-pressed={isSelected}
                 disabled={checkedState === 'correct'}
               >
-                {opt}
+                <span className="option-text-val">{opt}</span>
+                {isSolved && <span className="option-check-badge" aria-hidden="true">✓</span>}
               </button>
             );
           })}

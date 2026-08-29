@@ -50,17 +50,18 @@ def score_activity(content: Dict[str, Any], answers: List[Dict[str, Any]]) -> Di
         q = next((item for item in questions if item.get("id") == qid), None)
         expected = q.get("correctAnswer") if q else None
         
-        # If user explicitly passed correct=True/False, or compare with correctAnswer
-        if expected is not None:
+        if ans.get("correct") is not None:
+            is_correct = bool(ans.get("correct"))
+        elif expected is not None:
             is_correct = str(expected).strip().lower() == str(ans.get("answer", "")).strip().lower()
         else:
-            is_correct = bool(ans.get("correct", False))
+            is_correct = False
             
         if is_correct:
             correct_count += 1
         graded.append({**ans, "correct": is_correct})
         
-    total_count = len(questions) if questions else len(answers)
+    total_count = len(answers) if answers else (len(questions) if questions else 1)
     score = correct_count / total_count if total_count > 0 else 0.0
     return {
         "score": score,

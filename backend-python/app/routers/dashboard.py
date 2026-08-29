@@ -10,6 +10,22 @@ from app.services.ai.activity_recommender import recommend_activity
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
+from app.routers.activities import ACTIVITY_TOPIC_DEFS
+
+def get_attempt_title(a) -> str:
+    if a.activity and a.activity.title:
+        return a.activity.title
+    if a.activityId and a.activityId in ACTIVITY_TOPIC_DEFS:
+        return ACTIVITY_TOPIC_DEFS[a.activityId]['title']
+    return a.activityId.capitalize() if a.activityId else "Learning Activity"
+
+def get_attempt_topic(a) -> str:
+    if a.activity and a.activity.topic:
+        return a.activity.topic
+    if a.activityId and a.activityId in ACTIVITY_TOPIC_DEFS:
+        return ACTIVITY_TOPIC_DEFS[a.activityId]['topic']
+    return a.activityId or "letters"
+
 def format_dashboard(stats: Dict[str, Any], rewards: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     user = stats["user"]
     progress_list = stats.get("progress", [])
@@ -50,9 +66,9 @@ def format_dashboard(stats: Dict[str, Any], rewards: Optional[Dict[str, Any]] = 
                 "id": a.id,
                 "score": round(a.score * 100),
                 "starsAwarded": a.starsAwarded,
-                "title": a.activity.title if a.activity else "",
-                "topic": a.activity.topic if a.activity else "",
-                "difficulty": a.difficultyAtAttempt,
+                "title": get_attempt_title(a),
+                "topic": get_attempt_topic(a),
+                "difficulty": a.difficultyAtAttempt or "easy",
                 "completedAt": a.completedAt.isoformat() if a.completedAt else (a.createdAt.isoformat() if a.createdAt else None),
             }
             for a in attempts_list
@@ -95,7 +111,8 @@ def format_parent_view(stats: Dict[str, Any]) -> Dict[str, Any]:
         ],
         "recentAttempts": [
             {
-                "title": a.activity.title if a.activity else "",
+                "title": get_attempt_title(a),
+                "topic": get_attempt_topic(a),
                 "score": round(a.score * 100),
                 "completedAt": a.completedAt.isoformat() if a.completedAt else (a.createdAt.isoformat() if a.createdAt else None),
             }

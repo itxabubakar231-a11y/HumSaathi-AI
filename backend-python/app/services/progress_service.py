@@ -136,7 +136,7 @@ def get_dashboard_stats(db: Session, user_id: str) -> Dict[str, Any]:
     return {
         'user': user,
         'progress': progress_records,
-        'attempts': attempts_records[:5],
+        'attempts': attempts_records[:10],
         'completedCount': completed_count,
         'avgAccuracy': avg_accuracy,
         'strongest': strongest,

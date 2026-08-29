@@ -45,55 +45,7 @@ def get_activity_by_id(
         act_topic = definition['topic']
         act_title = definition['title']
 
-        # Optionally check if an explicit DB override exists (non-blocking)
-        activity = None
-        try:
-            activity = (
-                db.query(Activity)
-                .filter(
-                    or_(Activity.id == activity_id, Activity.topic == normalized_key, Activity.type == normalized_key),
-                    Activity.isActive == True,
-                )
-                .first()
-            )
-        except Exception:
-            activity = None
-
-        if activity:
-            content = parse_json(activity.content, {})
-            questions = content.get("questions") if isinstance(content, dict) else None
-            if not questions or len(questions) == 0:
-                content = get_activity_content(activity.type, activity.difficulty, activity.language)
-                questions = content.get("questions", [])
-
-            safe_content = {
-                "questions": [
-                    {
-                        "id": q.get("id"),
-                        "prompt": q.get("prompt"),
-                        "options": q.get("options", []),
-                        "visual": q.get("visual"),
-                        "visualPrompt": q.get("visualPrompt"),
-                        "hint": q.get("hint"),
-                        "correctAnswer": q.get("correctAnswer"),
-                    }
-                    for q in questions
-                ]
-            }
-
-            return {
-                "activity": {
-                    "id": activity.id,
-                    "type": activity.type,
-                    "topic": activity.topic,
-                    "title": activity.title,
-                    "difficulty": activity.difficulty,
-                    "language": activity.language,
-                    "content": safe_content,
-                }
-            }
-
-        # Instant zero-latency dynamic content generation from built-in registry
+        # Always generate fresh, varied, non-repeating question sets
         generated_content = get_activity_content(act_type, diff, lang)
         safe_content = {
             "questions": [

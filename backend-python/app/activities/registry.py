@@ -3,11 +3,11 @@ from typing import Dict, Any, List
 
 def build_letter_content(difficulty: str, language: str) -> Dict[str, Any]:
     pool = (
-        ['A', 'B', 'C', 'D']
+        ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
         if difficulty == 'beginner'
-        else ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+        else ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
         if difficulty == 'easy'
-        else ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+        else ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     )
 
     shuffled_pool = random.sample(pool, len(pool))
@@ -17,7 +17,8 @@ def build_letter_content(difficulty: str, language: str) -> Dict[str, Any]:
     for idx, target in enumerate(targets):
         remaining = [l for l in pool if l != target]
         distractors = random.sample(remaining, min(2, len(remaining)))
-        options = random.sample([target] + distractors, len([target] + distractors))
+        options = [target] + distractors
+        random.shuffle(options)
 
         prompts = {
             'en': f'Find the letter {target}',
@@ -42,34 +43,69 @@ def build_letter_content(difficulty: str, language: str) -> Dict[str, Any]:
     return {'questions': questions}
 
 def build_number_content(difficulty: str, language: str) -> Dict[str, Any]:
-    max_val = 5 if difficulty == 'beginner' else 10 if difficulty == 'easy' else 20
+    max_val = 8 if difficulty == 'beginner' else 15 if difficulty == 'easy' else 25
     used_numbers = set()
     questions = []
 
+    q_types = ['after', 'before', 'find', 'after']
+    random.shuffle(q_types)
+
     for i in range(4):
-        n = random.randint(1, max(1, max_val - 1))
+        q_type = q_types[i % len(q_types)]
+        n = random.randint(2, max(2, max_val - 1))
         attempts = 0
-        while n in used_numbers and attempts < 10:
-            n = random.randint(1, max(1, max_val - 1))
+        while n in used_numbers and attempts < 15:
+            n = random.randint(2, max(2, max_val - 1))
             attempts += 1
         used_numbers.add(n)
 
-        correct = str(n + 1)
-        raw_options = [str(max(1, n - 1)), correct, str(n + 2)]
-        options = list(dict.fromkeys(raw_options))
+        if q_type == 'after':
+            correct = str(n + 1)
+            d1 = str(max(1, n - 1))
+            d2 = str(n + 2)
+            prompts = {
+                'en': f'Which number comes after {n}?',
+                'ur': f'{n} کے بعد کون سا نمبر آتا ہے؟',
+                'ur_rm': f'{n} ke baad kaun sa number aata hai?',
+            }
+            hints = {
+                'en': f'Count forward from {n}: {n}, then comes {correct}',
+                'ur': f'{n} سے آگے گنیں: {n} کے فوراً بعد کیا آتا ہے؟',
+                'ur_rm': f'{n} se aage ginein: {n} ke foran baad kya aata hai?',
+            }
+        elif q_type == 'before':
+            correct = str(n - 1)
+            d1 = str(n + 1)
+            d2 = str(max(1, n - 2) if n > 2 else n + 2)
+            prompts = {
+                'en': f'Which number comes before {n}?',
+                'ur': f'{n} سے پہلے کون سا نمبر آتا ہے؟',
+                'ur_rm': f'{n} se pehle kaun sa number aata hai?',
+            }
+            hints = {
+                'en': f'Think what number comes right before {n}: {correct}',
+                'ur': f'{n} سے پہلے کا نمبر سوچیں: {correct}',
+                'ur_rm': f'{n} se pehle ka number sochein: {correct}',
+            }
+        else:
+            correct = str(n)
+            d1 = str(max(1, n - 1))
+            d2 = str(n + 1)
+            prompts = {
+                'en': f'Find the number {n}',
+                'ur': f'نمبر {n} تلاش کریں',
+                'ur_rm': f'Number {n} talash karein',
+            }
+            hints = {
+                'en': f'Look carefully for the number {n}',
+                'ur': f'نمبر {n} کی شکل کو دیکھیں',
+                'ur_rm': f'Number {n} ki shakal ko dekhein',
+            }
+
+        options = list(dict.fromkeys([d1, correct, d2]))
+        if len(options) < 3:
+            options.append(str(n + 3))
         random.shuffle(options)
-
-        prompts = {
-            'en': f'Which number comes after {n}?',
-            'ur': f'{n} کے بعد کون سا نمبر آتا ہے؟',
-            'ur_rm': f'{n} ke baad kaun sa number aata hai?',
-        }
-
-        hints = {
-            'en': f'Count forward from {n}: {n}, then comes...',
-            'ur': f'{n} سے آگے گنیں: {n} کے فوراً بعد کیا آتا ہے؟',
-            'ur_rm': f'{n} se aage ginein: {n} ke foran baad kya aata hai?',
-        }
 
         questions.append({
             'id': f'q{i + 1}',
@@ -89,6 +125,15 @@ def build_shape_color_content(difficulty: str, language: str) -> Dict[str, Any]:
         {'shape': 'circle', 'color': 'green', 'label': {'en': 'Green circle', 'ur': 'سبز دائرہ', 'ur_rm': 'Sabz daaira'}},
         {'shape': 'square', 'color': 'blue', 'label': {'en': 'Blue square', 'ur': 'نیلا مربع', 'ur_rm': 'Neela murabba'}},
         {'shape': 'triangle', 'color': 'red', 'label': {'en': 'Red triangle', 'ur': 'سرخ مثلث', 'ur_rm': 'Surkh musallas'}},
+        {'shape': 'circle', 'color': 'yellow', 'label': {'en': 'Yellow circle', 'ur': 'پیلا دائرہ', 'ur_rm': 'Peela daaira'}},
+        {'shape': 'square', 'color': 'yellow', 'label': {'en': 'Yellow square', 'ur': 'پیلا مربع', 'ur_rm': 'Peela murabba'}},
+        {'shape': 'triangle', 'color': 'yellow', 'label': {'en': 'Yellow triangle', 'ur': 'پیلا مثلث', 'ur_rm': 'Peela musallas'}},
+        {'shape': 'circle', 'color': 'purple', 'label': {'en': 'Purple circle', 'ur': 'جامنی دائرہ', 'ur_rm': 'Jamni daaira'}},
+        {'shape': 'square', 'color': 'purple', 'label': {'en': 'Purple square', 'ur': 'جامنی مربع', 'ur_rm': 'Jamni murabba'}},
+        {'shape': 'triangle', 'color': 'purple', 'label': {'en': 'Purple triangle', 'ur': 'جامنی مثلث', 'ur_rm': 'Jamni musallas'}},
+        {'shape': 'circle', 'color': 'orange', 'label': {'en': 'Orange circle', 'ur': 'نارنجی دائرہ', 'ur_rm': 'Naranji daaira'}},
+        {'shape': 'square', 'color': 'orange', 'label': {'en': 'Orange square', 'ur': 'نارنجی مربع', 'ur_rm': 'Naranji murabba'}},
+        {'shape': 'triangle', 'color': 'orange', 'label': {'en': 'Orange triangle', 'ur': 'نارنجی مثلث', 'ur_rm': 'Naranji musallas'}},
     ]
 
     shuffled = random.sample(items, len(items))
@@ -96,7 +141,8 @@ def build_shape_color_content(difficulty: str, language: str) -> Dict[str, Any]:
 
     questions = []
     for idx, target in enumerate(targets):
-        distractors = [i for i in items if i['shape'] != target['shape'] or i['color'] != target['color']][:2]
+        remaining = [i for i in items if i['shape'] != target['shape'] or i['color'] != target['color']]
+        distractors = random.sample(remaining, min(2, len(remaining)))
         options_items = random.sample([target] + distractors, len([target] + distractors))
 
         prompts = {
@@ -194,6 +240,12 @@ def build_animal_matching_content(difficulty: str, language: str) -> Dict[str, A
         {'en': 'Lion', 'ur': 'شیر', 'ur_rm': 'Sher', 'icon': '🦁'},
         {'en': 'Elephant', 'ur': 'ہاتھی', 'ur_rm': 'Haathi', 'icon': '🐘'},
         {'en': 'Rabbit', 'ur': 'خرگوش', 'ur_rm': 'Khargosh', 'icon': '🐰'},
+        {'en': 'Monkey', 'ur': 'بندر', 'ur_rm': 'Bandar', 'icon': '🐵'},
+        {'en': 'Duck', 'ur': 'بطخ', 'ur_rm': 'Batakh', 'icon': '🦆'},
+        {'en': 'Sheep', 'ur': 'بھیڑ', 'ur_rm': 'Bher', 'icon': '🐑'},
+        {'en': 'Butterfly', 'ur': 'تتلی', 'ur_rm': 'Titli', 'icon': '🦋'},
+        {'en': 'Panda', 'ur': 'پانڈا', 'ur_rm': 'Panda', 'icon': '🐼'},
+        {'en': 'Bear', 'ur': 'ریچھ', 'ur_rm': 'Reechh', 'icon': '🐻'},
     ]
 
     shuffled = random.sample(animals, len(animals))

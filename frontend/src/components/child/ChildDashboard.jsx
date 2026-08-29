@@ -392,6 +392,56 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
+      {/* ⏱️ RECENT ACTIVITY / RECENT ADVENTURES */}
+      {dashboard?.recentAttempts?.length > 0 && (
+        <section className="child-section child-recent-section">
+          <div className="child-section-header">
+            <div>
+              <span className="child-section-kicker">{language === 'ur' ? 'حالیہ سرگرمیاں' : 'PRACTICE HISTORY'}</span>
+              <h2 className="child-section-title">
+                <span aria-hidden="true">⏱️</span> {t('progress.recent') || 'Recent Activity'}
+              </h2>
+            </div>
+            <button className="text-btn" type="button" onClick={() => navigate('/progress')}>
+              {language === 'ur' ? 'مکمل رپورٹ' : 'Full Progress'} ➔
+            </button>
+          </div>
+
+          <div className="child-recent-grid">
+            {dashboard.recentAttempts.map((attempt) => (
+              <div key={attempt.id} className="child-recent-card">
+                <div className="recent-card-left">
+                  <span className="recent-card-icon" aria-hidden="true">
+                    {getTopicIcon(attempt.topic || attempt.title)}
+                  </span>
+                  <div className="recent-card-details">
+                    <h4 className="recent-card-title">{attempt.title || 'Learning Activity'}</h4>
+                    <div className="recent-card-meta">
+                      <span className="recent-diff-badge">{getChildLevelLabel(attempt.difficulty)}</span>
+                      <span className="recent-score-badge">🎯 {attempt.score}%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="recent-card-right">
+                  <div className="recent-stars-awarded" aria-label={`${attempt.starsAwarded || 1} stars`}>
+                    {Array.from({ length: Math.max(1, Math.min(3, attempt.starsAwarded || 1)) }).map((_, sIdx) => (
+                      <span key={sIdx} className="recent-star-icon" aria-hidden="true">⭐</span>
+                    ))}
+                  </div>
+                  <button
+                    className="btn-replay-activity"
+                    type="button"
+                    onClick={() => startActivityByTopicOrType(attempt.topic || 'letters')}
+                  >
+                    🔄 {language === 'ur' ? 'دوبارہ کھیلیں' : 'Play Again'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 🏆 MY BADGES GALLERY */}
       {rewards.badges?.length > 0 && (
         <section className="child-section">

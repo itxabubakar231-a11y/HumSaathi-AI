@@ -1,8 +1,11 @@
 export default function ShapeVisual({ shape, color }) {
   const colorMap = {
-    blue: '#6b9bd1',
-    red: '#d17a6b',
-    green: '#739e92',
+    blue: '#3b82f6',
+    red: '#ef4444',
+    green: '#10b981',
+    yellow: '#f59e0b',
+    purple: '#8b5cf6',
+    orange: '#f97316',
   };
 
   const fill = colorMap[color] || '#8c84a3';
