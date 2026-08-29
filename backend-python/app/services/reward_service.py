@@ -88,7 +88,12 @@ def evaluate_badges(db: Session, user_id: str) -> Dict[str, Any]:
 
     total_completed = len(attempts)
     total_stars = sum(a.starsAwarded or 0 for a in attempts)
-    topics_completed = {a.activity.topic for a in attempts if a.activity and a.activity.topic}
+    topics_completed = set()
+    for a in attempts:
+        if a.activity and a.activity.topic:
+            topics_completed.add(a.activity.topic)
+        elif a.activityId:
+            topics_completed.add(a.activityId)
 
     eligible_codes = []
     if total_completed >= 1:
@@ -117,24 +122,23 @@ def evaluate_badges(db: Session, user_id: str) -> Dict[str, Any]:
     newly_unlocked = []
     for code in eligible_codes:
         if code not in existing_codes:
-            try:
-                badge = Badge(userId=user_id, code=code, unlockedAt=datetime.utcnow())
-                db.add(badge)
-                db.commit()
-                db.refresh(badge)
-
-                def_item = next((b for b in BADGE_DEFINITIONS if b['code'] == code), None)
-                if def_item:
-                    newly_unlocked.append({
-                        'id': badge.id,
-                        'code': def_item['code'],
-                        'icon': def_item['icon'],
-                        'titleKey': def_item['titleKey'],
-                        'descKey': def_item['descKey'],
-                        'unlockedAt': badge.unlockedAt.isoformat() if badge.unlockedAt else None,
-                    })
-            except Exception:
-                db.rollback()
+            badge = Badge(userId=user_id, code=code, unlockedAt=datetime.utcnow())
+            db.add(badge)
+            existing_codes.add(code)
+            def_item = next((b for b in BADGE_DEFINITIONS if b['code'] == code), None)
+            if def_item:
+                newly_unlocked.append({
+                    'id': badge.id,
+                    'code': def_item['code'],
+                    'icon': def_item['icon'],
+                    'titleKey': def_item['titleKey'],
+                    'descKey': def_item['descKey'],
+                    'unlockedAt': badge.unlockedAt.isoformat() if badge.unlockedAt else None,
+                })
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
 
     return {
         'totalStars': total_stars,

@@ -9,6 +9,7 @@ from app.models.activity import Activity
 from app.schemas.common import parse_json, stringify_json
 from app.schemas.activity import AttemptSubmitRequest
 from app.activities.registry import get_activity_content
+from app.routers.activities import ACTIVITY_TOPIC_DEFS
 from app.services.scoring_service import score_activity
 from app.services.reward_service import calculate_stars, evaluate_badges
 from app.services.progress_service import update_progress_from_attempt
@@ -41,25 +42,33 @@ async def submit_attempt(
 
     # Fallback to dynamically creating/locating activity if not in DB
     if not activity:
-        content_dict = get_activity_content(activity_id, "easy", user.language or "en")
+        act_def = ACTIVITY_TOPIC_DEFS.get(activity_id, {'type': activity_id, 'topic': activity_id, 'title': f"{activity_id.capitalize()} Learning"})
+        content_dict = get_activity_content(act_def['type'], "easy", user.language or "en")
         activity = Activity(
             id=activity_id,
-            type=activity_id,
-            topic=activity_id,
-            title=f"{activity_id.capitalize()} Learning",
+            type=act_def['type'],
+            topic=act_def['topic'],
+            title=act_def['title'],
             difficulty="easy",
             language=user.language or "en",
             personas=stringify_json(["child", "teen", "adult"]),
             content=stringify_json(content_dict),
             isActive=True,
         )
-        db.add(activity)
-        db.commit()
-        db.refresh(activity)
+        try:
+            db.add(activity)
+            db.commit()
+            db.refresh(activity)
+        except Exception:
+            db.rollback()
+            activity = db.query(Activity).filter(Activity.id == activity_id).first()
 
-    stored_content = parse_json(activity.content, {})
+    stored_content = parse_json(activity.content, {}) if activity else {}
     if not stored_content or not stored_content.get("questions"):
-        stored_content = get_activity_content(activity.type, activity.difficulty, activity.language)
+        act_type = activity.type if activity else activity_id
+        act_diff = activity.difficulty if activity else "easy"
+        act_lang = activity.language if activity else (user.language or "en")
+        stored_content = get_activity_content(act_type, act_diff, act_lang)
 
     answers_list = [a.model_dump() for a in payload.answers]
     result = score_activity(stored_content, answers_list)
@@ -68,7 +77,7 @@ async def submit_attempt(
 
     attempt = Attempt(
         userId=user.id,
-        activityId=activity.id,
+        activityId=activity.id if activity else activity_id,
         answers=stringify_json(result["graded"]),
         score=result["score"],
         correctCount=result["correctCount"],
@@ -77,7 +86,7 @@ async def submit_attempt(
         attemptsUsed=total_attempts_used,
         timeMs=payload.timeMs,
         completed=True,
-        difficultyAtAttempt=activity.difficulty,
+        difficultyAtAttempt=activity.difficulty if activity else "easy",
         createdAt=datetime.utcnow(),
         completedAt=datetime.utcnow(),
     )
@@ -94,7 +103,7 @@ async def submit_attempt(
         score=result["score"],
         correct_count=result["correctCount"],
         total_count=result["totalCount"],
-        topic=activity.topic,
+        topic=activity.topic if activity else activity_id,
         should_retry=adaptation["shouldRetry"],
     )
 
