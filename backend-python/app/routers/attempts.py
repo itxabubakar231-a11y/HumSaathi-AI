@@ -1,3 +1,4 @@
+from typing import Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -15,6 +16,8 @@ from app.services.reward_service import calculate_stars, evaluate_badges
 from app.services.progress_service import update_progress_from_attempt
 from app.services.ai.feedback_generator import generate_feedback
 
+from app.dependencies.auth import get_optional_current_user
+
 router = APIRouter(prefix="/attempts", tags=["Attempts"])
 
 @router.post("/{user_id}/submit")
@@ -22,7 +25,13 @@ async def submit_attempt(
     user_id: str,
     payload: AttemptSubmitRequest,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
+    if current_user and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot submit attempts on behalf of another user.",
+        )
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

@@ -1,12 +1,21 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.services.progress_service import get_dashboard_stats
 
+from app.models.user import User
+from app.dependencies.auth import get_optional_current_user
+
 router = APIRouter(prefix="/progress", tags=["Progress"])
 
 @router.get("/{user_id}")
-def get_user_progress_summary(user_id: str, db: Session = Depends(get_db)):
+def get_user_progress_summary(user_id: str, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_optional_current_user)):
+    if current_user and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot access another user's progress summary.",
+        )
     stats = get_dashboard_stats(db, user_id)
     if not stats.get("user"):
         raise HTTPException(

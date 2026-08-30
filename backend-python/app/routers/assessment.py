@@ -1,3 +1,4 @@
+from typing import Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -14,11 +15,17 @@ from app.services.progress_service import (
     upsert_progress_from_assessment,
 )
 from app.services.ai.assessment_interpreter import interpret_assessment
+from app.dependencies.auth import get_optional_current_user
 
 router = APIRouter(prefix="/assessment", tags=["Assessment"])
 
 @router.get("/{user_id}/questions")
-def get_user_assessment_questions(user_id: str, db: Session = Depends(get_db)):
+def get_user_assessment_questions(user_id: str, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_optional_current_user)):
+    if current_user and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot access another user's assessment questions.",
+        )
     user = db.query(User).filter(User.id == user_id).first()
     if not user or not user.persona:
         raise HTTPException(
@@ -47,7 +54,13 @@ async def submit_assessment(
     user_id: str,
     payload: AssessmentSubmitRequest,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
+    if current_user and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot submit assessments for another user.",
+        )
     user = db.query(User).filter(User.id == user_id).first()
     if not user or not user.persona:
         raise HTTPException(
@@ -113,7 +126,12 @@ async def submit_assessment(
     }
 
 @router.get("/{user_id}/latest")
-def get_latest_assessment(user_id: str, db: Session = Depends(get_db)):
+def get_latest_assessment(user_id: str, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_optional_current_user)):
+    if current_user and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot view another user's assessment.",
+        )
     assessment = (
         db.query(Assessment)
         .filter(Assessment.userId == user_id)

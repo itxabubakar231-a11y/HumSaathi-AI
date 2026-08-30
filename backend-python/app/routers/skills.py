@@ -37,15 +37,20 @@ def get_skill_module(
         )
     return {"module": details}
 
+from app.models.user import User
+from app.dependencies.auth import get_optional_current_user
+
 @router.post("/evaluate")
 async def evaluate_solution(
     body: EvaluateSkillRequest,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
+    target_user_id = current_user.id if current_user else body.userId
     try:
         result = await evaluate_skill_solution(
             db=db,
-            user_id=body.userId,
+            user_id=target_user_id,
             module_id=body.moduleId,
             scenario_id=body.scenarioId,
             option_id=body.optionId,

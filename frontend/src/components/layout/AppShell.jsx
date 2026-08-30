@@ -13,7 +13,7 @@ const navItems = [
 
 export default function AppShell({ children }) {
   const { t, language } = useI18n();
-  const { user, updateLanguage } = useUser();
+  const { user, updateLanguage, logout } = useUser();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -117,6 +117,34 @@ export default function AppShell({ children }) {
               <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>
               <span className="user-name">{user.name}</span>
             </div>
+          )}
+
+          {/* Logout Action */}
+          {user && (
+            <button
+              className="auth-logout-btn"
+              onClick={() => {
+                logout();
+                navigate('/login');
+              }}
+              title="Log Out"
+              style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                color: '#ef4444',
+                padding: '0.4rem 0.8rem',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+              }}
+            >
+              <span>🚪</span>
+              <span>{language === 'ur' ? 'لاگ آؤٹ' : 'Logout'}</span>
+            </button>
           )}
         </div>
       </header>

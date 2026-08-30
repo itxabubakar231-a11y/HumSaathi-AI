@@ -12,6 +12,8 @@ class User(Base):
 
     id = Column(String, primary_key=True, default=generate_cuid)
     name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=True)
+    passwordHash = Column(String, nullable=True)
     role = Column(String, default="learner", nullable=False)
     persona = Column(String, nullable=True)
     language = Column(String, default="en", nullable=False)

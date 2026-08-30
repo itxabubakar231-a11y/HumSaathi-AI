@@ -43,9 +43,28 @@ def init_db_tables():
     try:
         import app.models  # noqa: F401
         Base.metadata.create_all(bind=engine)
+        ensure_auth_columns()
         seed_foundational_activities()
     except Exception as e:
         logger.warning(f"Non-blocking database initialization notice: {e}")
+
+def ensure_auth_columns():
+    """Ensure email and passwordHash columns exist on User table without data loss."""
+    try:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            try:
+                conn.execute(text("ALTER TABLE User ADD COLUMN email VARCHAR;"))
+                conn.commit()
+            except Exception:
+                pass
+            try:
+                conn.execute(text("ALTER TABLE User ADD COLUMN passwordHash VARCHAR;"))
+                conn.commit()
+            except Exception:
+                pass
+    except Exception as e:
+        logger.debug(f"Notice during column verification: {e}")
 
 def seed_foundational_activities():
     """Ensure standard activity and scenario rows exist for foreign key relations."""

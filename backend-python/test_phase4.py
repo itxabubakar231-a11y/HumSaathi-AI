@@ -75,12 +75,12 @@ def _run_tests():
     assert auto_user["persona"] == "child"
     print(f"[PASS] POST /api/users/login (Auto-created profile for: {new_name})")
 
-    # 7. List profiles
+    # 7. List profiles (Privacy Protected - Public listing disabled)
     res_profiles = client.get("/api/users/profiles")
     assert res_profiles.status_code == 200
     profiles = res_profiles.json()["data"]["users"]
-    assert len(profiles) >= 2
-    print(f"[PASS] GET /api/users/profiles (Found {len(profiles)} profiles)")
+    assert len(profiles) == 0
+    print("[PASS] GET /api/users/profiles (Public directory disabled for privacy)")
 
     # 8. Persona Switcher (Child, Teen, Adult)
     for p in ["child", "teen", "adult"]:

@@ -138,13 +138,18 @@ def get_scenario(
         detail="Scenario not found",
     )
 
+from app.models.user import User
+from app.dependencies.auth import get_optional_current_user
+
 @router.post("/start")
 def start_conversation(
     payload: StartConversationRequest,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
+    target_user_id = current_user.id if current_user else payload.userId
     try:
-        res = start_session(db, payload.userId, payload.scenarioId, payload.mode or "text")
+        res = start_session(db, target_user_id, payload.scenarioId, payload.mode or "text")
         return res
     except ValueError as e:
         raise HTTPException(
@@ -157,9 +162,17 @@ async def send_conversation_message(
     session_id: str,
     payload: SendMessageRequest,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
+    sess = db.query(ConversationSession).filter(ConversationSession.id == session_id).first()
+    if not sess:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
+    if current_user and sess.userId != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied. You cannot send messages in another user's session.")
+
+    target_user_id = current_user.id if current_user else payload.userId
     try:
-        res = await send_message(db, session_id, payload.userId, payload.message)
+        res = await send_message(db, session_id, target_user_id, payload.message)
         return res
     except ValueError as e:
         raise HTTPException(
@@ -171,10 +184,17 @@ async def send_conversation_message(
 def end_conversation(
     session_id: str,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
+    sess = db.query(ConversationSession).filter(ConversationSession.id == session_id).first()
+    if not sess:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
+    if current_user and sess.userId != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied. You cannot end another user's session.")
+
     try:
-        sess = end_session(db, session_id)
-        return {"session": sess}
+        res = end_session(db, session_id)
+        return {"session": res}
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -182,17 +202,27 @@ def end_conversation(
         )
 
 @router.get("/session/{session_id}")
-def get_session(session_id: str, db: Session = Depends(get_db)):
+def get_session(session_id: str, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_optional_current_user)):
     sess = db.query(ConversationSession).filter(ConversationSession.id == session_id).first()
     if not sess:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Session not found",
         )
+    if current_user and sess.userId != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot view another user's conversation session.",
+        )
     return {"session": format_session(sess)}
 
 @router.get("/sessions/{user_id}")
-def list_user_sessions(user_id: str, db: Session = Depends(get_db)):
+def list_user_sessions(user_id: str, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_optional_current_user)):
+    if current_user and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot view another user's conversation sessions.",
+        )
     sessions = (
         db.query(ConversationSession)
         .filter(ConversationSession.userId == user_id)
@@ -200,3 +230,4 @@ def list_user_sessions(user_id: str, db: Session = Depends(get_db)):
         .all()
     )
     return {"sessions": [format_session(s) for s in sessions]}
+

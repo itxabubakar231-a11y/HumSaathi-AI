@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import { DEFAULT_SENSORY, applySensoryToDocument, applyLanguageToDocument } from '../utils/preferences';
 
 const UserContext = createContext(null);
+const TOKEN_KEY = 'humsaathi_auth_token';
 const STORAGE_KEY = 'humsaathi_user_id';
 
 export function UserProvider({ children }) {
@@ -10,14 +11,50 @@ export function UserProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [aiMode, setAiMode] = useState('unknown');
 
-  const loadUser = useCallback(async (userId) => {
+  const syncUserPreferences = (userObj) => {
+    if (!userObj) return;
+    const finalSensory = userObj.sensoryPrefs || DEFAULT_SENSORY;
+    const finalLang = userObj.language || 'en';
+    applySensoryToDocument(finalSensory);
+    applyLanguageToDocument(finalLang);
+    localStorage.setItem('humsaathi_language', finalLang);
+    localStorage.setItem('humsaathi_sensory', JSON.stringify(finalSensory));
+    if (userObj.id) {
+      localStorage.setItem(STORAGE_KEY, userObj.id);
+    }
+  };
+
+  const loadCurrentUser = useCallback(async () => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) {
+      const legacyId = localStorage.getItem(STORAGE_KEY);
+      if (legacyId) {
+        try {
+          const { user: loaded } = await api.getUser(legacyId);
+          if (loaded) {
+            setUser(loaded);
+            syncUserPreferences(loaded);
+          }
+        } catch {
+          localStorage.removeItem(STORAGE_KEY);
+          setUser(null);
+        }
+      }
+      return;
+    }
+
     try {
-      const { user: loaded } = await api.getUser(userId);
-      setUser(loaded);
-      applySensoryToDocument(loaded.sensoryPrefs || DEFAULT_SENSORY);
-      applyLanguageToDocument(loaded.language || 'en');
-      localStorage.setItem(STORAGE_KEY, loaded.id);
-    } catch {
+      const data = await api.getMe();
+      const loaded = data?.user || data;
+      if (loaded && loaded.id) {
+        setUser(loaded);
+        syncUserPreferences(loaded);
+      } else {
+        throw new Error('Invalid user session');
+      }
+    } catch (err) {
+      console.warn('Session verification failed, clearing credentials:', err);
+      localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(STORAGE_KEY);
       setUser(null);
     }
@@ -32,47 +69,51 @@ export function UserProvider({ children }) {
         applySensoryToDocument(JSON.parse(storedSensory));
       }
     } catch {
-      // ignore JSON parse error
+      // ignore
     }
-    api.health().then((h) => setAiMode(h.mode)).catch(() => setAiMode('offline'));
-    const storedId = localStorage.getItem(STORAGE_KEY);
-    if (storedId) {
-      loadUser(storedId).finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
-  }, [loadUser]);
 
-  const setupUser = async (data) => {
-    const payload = { ...data, userId: user?.id };
-    const result = await api.setupUser(payload);
+    api.health().then((h) => setAiMode(h.mode)).catch(() => setAiMode('offline'));
+
+    loadCurrentUser().finally(() => setLoading(false));
+  }, [loadCurrentUser]);
+
+  const signupUser = async (registrationData) => {
+    const result = await api.signupUser(registrationData);
     const userObj = result?.user || result;
-    setUser(userObj);
-    const finalSensory = userObj?.sensoryPrefs || DEFAULT_SENSORY;
-    const finalLang = userObj?.language || 'en';
-    applySensoryToDocument(finalSensory);
-    applyLanguageToDocument(finalLang);
-    localStorage.setItem('humsaathi_language', finalLang);
-    localStorage.setItem('humsaathi_sensory', JSON.stringify(finalSensory));
-    if (userObj?.id) {
-      localStorage.setItem(STORAGE_KEY, userObj.id);
+    const token = result?.token;
+
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
     }
+    setUser(userObj);
+    syncUserPreferences(userObj);
     return userObj;
   };
 
   const loginUser = async (credentials) => {
     const result = await api.loginUser(credentials);
     const userObj = result?.user || result;
-    setUser(userObj);
-    const finalSensory = userObj?.sensoryPrefs || DEFAULT_SENSORY;
-    const finalLang = userObj?.language || 'en';
-    applySensoryToDocument(finalSensory);
-    applyLanguageToDocument(finalLang);
-    localStorage.setItem('humsaathi_language', finalLang);
-    localStorage.setItem('humsaathi_sensory', JSON.stringify(finalSensory));
-    if (userObj?.id) {
-      localStorage.setItem(STORAGE_KEY, userObj.id);
+    const token = result?.token;
+
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
     }
+    setUser(userObj);
+    syncUserPreferences(userObj);
+    return userObj;
+  };
+
+  const setupUser = async (data) => {
+    const payload = { ...data, userId: user?.id };
+    const result = await api.setupUser(payload);
+    const userObj = result?.user || result;
+    const token = result?.token;
+
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+    }
+    setUser(userObj);
+    syncUserPreferences(userObj);
     return userObj;
   };
 
@@ -123,11 +164,13 @@ export function UserProvider({ children }) {
   };
 
   const logout = () => {
+    api.logoutUser().catch(() => {});
+    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(STORAGE_KEY);
     setUser(null);
   };
 
-  const refreshUser = () => user?.id && loadUser(user.id);
+  const refreshUser = () => loadCurrentUser();
 
   return (
     <UserContext.Provider
@@ -135,14 +178,14 @@ export function UserProvider({ children }) {
         user,
         loading,
         aiMode,
-        setupUser,
+        signupUser,
         loginUser,
+        setupUser,
         selectPersona,
         updateSensory,
         updateLanguage,
         logout,
         refreshUser,
-        setUser,
       }}
     >
       {children}
@@ -151,7 +194,9 @@ export function UserProvider({ children }) {
 }
 
 export function useUser() {
-  const ctx = useContext(UserContext);
-  if (!ctx) throw new Error('useUser must be used within UserProvider');
-  return ctx;
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error('useUser must be used within a UserProvider');
+  }
+  return context;
 }

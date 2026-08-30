@@ -1,5 +1,5 @@
 from typing import Optional, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 DEFAULT_SENSORY = {
     'textSize': 'medium',
@@ -18,14 +18,28 @@ class SensoryPrefsSchema(BaseModel):
     highContrast: Optional[bool] = False
     calmMode: Optional[bool] = True
 
+class UserSignupRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    email: str = Field(..., min_length=3, max_length=150)
+    password: str = Field(..., min_length=6, max_length=128)
+    persona: Optional[Literal['child', 'teen', 'adult']] = 'child'
+    language: Optional[Literal['en', 'ur', 'ur_rm']] = 'en'
+    sensoryPrefs: Optional[SensoryPrefsSchema] = None
+
+class UserAuthLoginRequest(BaseModel):
+    email: str = Field(..., min_length=3, max_length=150)
+    password: str = Field(..., min_length=1, max_length=128)
+
 class UserSetupRequest(BaseModel):
     userId: Optional[str] = None
     name: str = Field(..., min_length=1, max_length=80)
-    persona: Literal['child', 'teen', 'adult']
-    language: Literal['en', 'ur', 'ur_rm'] = 'en'
+    persona: Optional[Literal['child', 'teen', 'adult']] = 'child'
+    language: Optional[Literal['en', 'ur', 'ur_rm']] = 'en'
     sensoryPrefs: Optional[SensoryPrefsSchema] = None
 
 class UserLoginRequest(BaseModel):
+    email: Optional[str] = None
+    password: Optional[str] = None
     name: Optional[str] = None
     userId: Optional[str] = None
 

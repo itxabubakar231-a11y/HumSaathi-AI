@@ -1,22 +1,33 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+
 async function request(path, options = {}) {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('humsaathi_auth_token') : null;
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+
   const response = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders,
+      ...options.headers,
+    },
     ...options,
   });
 
   const body = await response.json().catch(() => ({}));
   if (!response.ok || body.success === false) {
-    throw new Error(body.error || `Request failed: ${response.status}`);
+    const errorMsg = body.error || body.detail || (body.message ? body.message : `Request failed: ${response.status}`);
+    throw new Error(errorMsg);
   }
   return body.data !== undefined ? body.data : body;
 }
 
 export const api = {
   health: () => request('/api/health'),
-  setupUser: (body) => request('/api/users/setup', { method: 'POST', body: JSON.stringify(body) }),
+  signupUser: (body) => request('/api/users/signup', { method: 'POST', body: JSON.stringify(body) }),
   loginUser: (body) => request('/api/users/login', { method: 'POST', body: JSON.stringify(body) }),
-  getProfiles: () => request('/api/users/profiles'),
+  getMe: () => request('/api/users/me'),
+  logoutUser: () => request('/api/users/logout', { method: 'POST', body: '{}' }),
+  setupUser: (body) => request('/api/users/setup', { method: 'POST', body: JSON.stringify(body) }),
   getUser: (userId) => request(`/api/users/${userId}`),
   selectPersona: (userId, persona) => request(`/api/users/${userId}/persona`, { method: 'PATCH', body: JSON.stringify({ persona }) }),
   updateSensory: (userId, prefs) => request(`/api/users/${userId}/sensory`, { method: 'PATCH', body: JSON.stringify(prefs) }),

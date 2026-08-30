@@ -156,8 +156,15 @@ def format_parent_view(stats: Dict[str, Any]) -> Dict[str, Any]:
         ],
     }
 
+from app.dependencies.auth import get_optional_current_user
+
 @router.get("/{user_id}")
-def get_user_dashboard(user_id: str, db: Session = Depends(get_db)):
+def get_user_dashboard(user_id: str, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_optional_current_user)):
+    if current_user and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot access another user's dashboard.",
+        )
     stats = get_dashboard_stats(db, user_id)
     if not stats.get("user"):
         raise HTTPException(
@@ -168,13 +175,23 @@ def get_user_dashboard(user_id: str, db: Session = Depends(get_db)):
     return {"dashboard": format_dashboard(stats, rewards)}
 
 @router.get("/{user_id}/progress")
-def get_dashboard_progress(user_id: str, db: Session = Depends(get_db)):
+def get_dashboard_progress(user_id: str, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_optional_current_user)):
+    if current_user and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot access another user's progress.",
+        )
     progress_list = get_user_progress(db, user_id)
     rewards = get_user_rewards(db, user_id)
     return {"progress": progress_list, "rewards": rewards}
 
 @router.post("/{user_id}/recommend")
-async def get_activity_recommendation(user_id: str, db: Session = Depends(get_db)):
+async def get_activity_recommendation(user_id: str, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_optional_current_user)):
+    if current_user and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot generate recommendations for another user.",
+        )
     try:
         rec = await recommend_activity(db, user_id)
         return {"recommendation": rec}
@@ -186,7 +203,13 @@ def get_parent_view(
     user_id: str,
     payload: ParentPinRequest,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
+    if current_user and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot view another user's parent dashboard.",
+        )
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
