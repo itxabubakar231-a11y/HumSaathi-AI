@@ -52,7 +52,7 @@ def ensure_auth_columns():
     """Ensure email, passwordHash, isActive, and lastActiveAt columns exist on User table, and role is VARCHAR without enum conflicts."""
     try:
         from sqlalchemy import text
-        # 1. Try adding 'ADMIN' directly to the UserRole enum in autocommit mode
+        # 1. Try adding enum values directly in autocommit mode
         try:
             with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
                 for enum_name in ['"UserRole"', 'userrole', '"userrole"']:
@@ -60,19 +60,32 @@ def ensure_auth_columns():
                         conn.execute(text(f"ALTER TYPE {enum_name} ADD VALUE IF NOT EXISTS 'ADMIN';"))
                     except Exception:
                         pass
+                for enum_name in ['"Difficulty"', 'difficulty', '"difficulty"']:
+                    try:
+                        conn.execute(text(f"ALTER TYPE {enum_name} ADD VALUE IF NOT EXISTS 'challenging';"))
+                    except Exception:
+                        pass
         except Exception:
             pass
 
-        # 2. Also ensure column can be text/varchar
-        role_migration_stmts = [
+        # 2. Also ensure columns can be text/varchar without enum constraints
+        migration_stmts = [
             'ALTER TABLE "User" ALTER COLUMN "role" DROP DEFAULT;',
             'ALTER TABLE "User" ALTER COLUMN "role" TYPE VARCHAR(50) USING "role"::VARCHAR(50);',
             'ALTER TABLE "User" ALTER COLUMN "role" SET DEFAULT \'learner\';',
             'ALTER TABLE "user" ALTER COLUMN "role" DROP DEFAULT;',
             'ALTER TABLE "user" ALTER COLUMN "role" TYPE VARCHAR(50) USING "role"::VARCHAR(50);',
             'ALTER TABLE "user" ALTER COLUMN "role" SET DEFAULT \'learner\';',
+            'ALTER TABLE "CommunicationScenario" ALTER COLUMN "difficulty" DROP DEFAULT;',
+            'ALTER TABLE "CommunicationScenario" ALTER COLUMN "difficulty" TYPE VARCHAR(50) USING "difficulty"::VARCHAR(50);',
+            'ALTER TABLE "communicationscenario" ALTER COLUMN "difficulty" DROP DEFAULT;',
+            'ALTER TABLE "communicationscenario" ALTER COLUMN "difficulty" TYPE VARCHAR(50) USING "difficulty"::VARCHAR(50);',
+            'ALTER TABLE "Activity" ALTER COLUMN "difficulty" DROP DEFAULT;',
+            'ALTER TABLE "Activity" ALTER COLUMN "difficulty" TYPE VARCHAR(50) USING "difficulty"::VARCHAR(50);',
+            'ALTER TABLE "activity" ALTER COLUMN "difficulty" DROP DEFAULT;',
+            'ALTER TABLE "activity" ALTER COLUMN "difficulty" TYPE VARCHAR(50) USING "difficulty"::VARCHAR(50);',
         ]
-        for s in role_migration_stmts:
+        for s in migration_stmts:
             try:
                 with engine.begin() as conn:
                     conn.execute(text(s))
