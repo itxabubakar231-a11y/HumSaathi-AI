@@ -1560,10 +1560,10 @@ async def evaluate_skill_solution(
     new_attempts = prev_attempts + 1
     new_accuracy = ((prev_accuracy * prev_attempts) + (score / 100)) / new_attempts
 
-    # Adapt level
+    # Adapt level (ensuring valid Postgres Difficulty enum: beginner, easy, medium, hard, advanced)
     level = 'easy'
     if new_accuracy >= 0.85:
-        level = 'challenging'
+        level = 'advanced'
     elif new_accuracy >= 0.65:
         level = 'medium'
 
@@ -1587,6 +1587,11 @@ async def evaluate_skill_solution(
     if not base_activity:
         base_activity = db.query(Activity).first()
 
+    raw_diff = scenario.get('difficulty', 'easy') if scenario else 'easy'
+    enum_diff = 'advanced' if raw_diff == 'challenging' else raw_diff
+    if enum_diff not in ['beginner', 'easy', 'medium', 'hard', 'advanced']:
+        enum_diff = 'easy'
+
     # Record Attempt for persona activity history & recent activity
     attempt = Attempt(
         userId=user_id,
@@ -1598,7 +1603,7 @@ async def evaluate_skill_solution(
         starsAwarded=3 if score >= 90 else (2 if score >= 70 else 1),
         attemptsUsed=1,
         completed=True,
-        difficultyAtAttempt=scenario.get('difficulty', 'easy') if scenario else 'easy',
+        difficultyAtAttempt=enum_diff,
         createdAt=datetime.utcnow(),
         completedAt=datetime.utcnow(),
     )

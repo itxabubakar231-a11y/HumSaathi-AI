@@ -114,7 +114,7 @@ def test_skill_solution_evaluation_and_adaptive_progression(db_session):
     assert prog is not None
     assert prog.attempts == 1
     assert prog.accuracy >= 0.9
-    assert prog.level == "challenging"
+    assert prog.level == "advanced"
 
 def test_persona_isolation_for_teen_and_adult(db_session):
     # Verify skill definitions isolation

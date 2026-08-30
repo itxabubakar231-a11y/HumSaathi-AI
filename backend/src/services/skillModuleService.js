@@ -1569,7 +1569,7 @@ async function updateProgressForSkill(userId, skill, score) {
   const newAccuracy = ((prevAccuracy * prevAttempts) + (score / 100)) / newAttempts;
 
   let level = 'easy';
-  if (newAccuracy >= 0.85) level = 'challenging';
+  if (newAccuracy >= 0.85) level = 'advanced';
   else if (newAccuracy >= 0.65) level = 'medium';
 
   await prisma.progress.upsert({
