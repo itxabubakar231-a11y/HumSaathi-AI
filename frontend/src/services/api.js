@@ -73,6 +73,8 @@ export const api = {
   // ==========================================
   // Admin API Endpoints
   // ==========================================
+  adminCheckExists: () => request('/api/admin/has-admin'),
+  adminSetupInitial: (body) => request('/api/admin/setup-initial-admin', { method: 'POST', body: JSON.stringify(body) }),
   adminGetDashboard: () => request('/api/admin/dashboard'),
   adminGetUsers: (params) => {
     const cleanParams = Object.fromEntries(Object.entries(params || {}).filter(([_, v]) => v !== undefined && v !== null && v !== ''));

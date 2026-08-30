@@ -10,6 +10,13 @@ import argparse
 import getpass
 from datetime import datetime
 
+# Ensure utf-8 encoding for console output on Windows
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 from app.database import SessionLocal, init_db_tables
 from app.models.user import User, Permission, UserPermission
 from app.services.auth_service import hash_password

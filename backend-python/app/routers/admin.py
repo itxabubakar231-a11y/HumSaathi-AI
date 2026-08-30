@@ -25,6 +25,15 @@ from app.services.admin_service import (
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
+from datetime import datetime
+from app.services.auth_service import hash_password, create_access_token
+from app.models.user import Permission, UserPermission
+
+class InitialAdminSetupRequest(BaseModel):
+    name: Optional[str] = "Administrator"
+    email: str
+    password: str
+
 class UserStatusUpdateRequest(BaseModel):
     isActive: bool
 
@@ -43,6 +52,87 @@ class ScenarioUpdateRequest(BaseModel):
 class PermissionActionRequest(BaseModel):
     userId: str
     permissionId: str
+
+@router.get("/has-admin")
+def check_admin_exists(db: Session = Depends(get_db)):
+    """Check if any admin account has been configured."""
+    admin_count = db.query(User).filter(User.role == "ADMIN").count()
+    return {"hasAdmin": admin_count > 0}
+
+@router.post("/setup-initial-admin")
+def setup_initial_admin(payload: InitialAdminSetupRequest, db: Session = Depends(get_db)):
+    """One-time server-side initial admin provisioning if no admin account exists yet."""
+    existing_admin = db.query(User).filter(User.role == "ADMIN").first()
+    if existing_admin:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="An administrator account already exists. Initial setup is locked.",
+        )
+
+    email = payload.email.strip().lower()
+    if not email or "@" not in email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide a valid email address.",
+        )
+
+    if len(payload.password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Admin password must be at least 6 characters long.",
+        )
+
+    user = db.query(User).filter(User.email == email).first()
+    pw_hash = hash_password(payload.password)
+
+    if user:
+        user.role = "ADMIN"
+        user.passwordHash = pw_hash
+        user.isActive = True
+        user.updatedAt = datetime.utcnow()
+    else:
+        user = User(
+            name=(payload.name or "Administrator").strip(),
+            email=email,
+            passwordHash=pw_hash,
+            role="ADMIN",
+            persona="adult",
+            language="en",
+            isActive=True,
+            setupComplete=True,
+            createdAt=datetime.utcnow(),
+            updatedAt=datetime.utcnow(),
+        )
+        db.add(user)
+        db.flush()
+
+    # Grant all permissions
+    perms = db.query(Permission).all()
+    for p in perms:
+        existing_p = (
+            db.query(UserPermission)
+            .filter(UserPermission.userId == user.id, UserPermission.permissionId == p.id)
+            .first()
+        )
+        if not existing_p:
+            db.add(UserPermission(userId=user.id, permissionId=p.id, grantedBy="ONE_TIME_SETUP"))
+
+    db.commit()
+    db.refresh(user)
+
+    token = create_access_token(user.id)
+    return {
+        "success": True,
+        "message": "Administrator account initialized successfully.",
+        "token": token,
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "role": user.role,
+            "persona": user.persona,
+        },
+    }
 
 @router.get("/dashboard")
 def get_dashboard(
