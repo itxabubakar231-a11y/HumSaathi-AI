@@ -4,6 +4,15 @@ import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 
+function getLocalizedText(val, lang, fallback = '') {
+  if (!val) return fallback;
+  if (typeof val === 'string') return val;
+  if (typeof val === 'object') {
+    return val[lang] || val.en || val.ur || val.ur_rm || fallback;
+  }
+  return String(val);
+}
+
 export default function ScenarioPage() {
   const { user } = useUser();
   const { t, language } = useI18n();
@@ -13,18 +22,25 @@ export default function ScenarioPage() {
   const [error, setError] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('all');
 
-  useEffect(() => {
-    if (!user?.id) {
-      navigate('/setup');
-      return;
-    }
+  const fetchScenarios = () => {
+    setLoading(true);
+    setError('');
     const currentPersona = user?.persona || 'teen';
     const currentLang = user?.language || language || 'en';
 
     api.getScenarios({ persona: currentPersona, language: currentLang })
       .then((data) => {
-        const list = data?.scenarios || (Array.isArray(data) ? data : []);
-        setScenarios(list);
+        const rawList = data?.scenarios || (Array.isArray(data) ? data : []);
+        const normalized = rawList.filter(Boolean).map((scen) => ({
+          ...scen,
+          id: scen.id || `scen_${Math.random().toString(36).substring(2, 9)}`,
+          title: getLocalizedText(scen.title, currentLang, t('scenarios.title')),
+          description: getLocalizedText(scen.description, currentLang, t('scenarios.intro')),
+          aiRole: getLocalizedText(scen.aiRole, currentLang, scen.aiRole || 'Coach'),
+          difficulty: scen.difficulty ? String(scen.difficulty).toLowerCase() : 'easy',
+          options: Array.isArray(scen.options) ? scen.options : [],
+        }));
+        setScenarios(normalized);
       })
       .catch((err) => {
         setError(err.message || t('common.error'));
@@ -32,14 +48,22 @@ export default function ScenarioPage() {
       .finally(() => {
         setLoading(false);
       });
-  }, [user, language, navigate, t]);
+  };
+
+  useEffect(() => {
+    if (!user?.id) {
+      navigate('/setup');
+      return;
+    }
+    fetchScenarios();
+  }, [user, language, navigate]);
 
   const handleStart = async (scenarioId, mode) => {
     try {
       const res = await api.startConversation({
         userId: user?.id,
         scenarioId,
-        mode
+        mode,
       });
       const sessionId = res?.session?.id || res?.id || res?.sessionId;
       if (sessionId) {
@@ -52,22 +76,20 @@ export default function ScenarioPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner" />
-        <p>{t('common.loading')}</p>
-      </div>
-    );
-  }
+  const getRoleLabel = (roleStr) => {
+    if (!roleStr) return 'AI Coach';
+    const key = `role.${String(roleStr).toLowerCase().replace(/\s+/g, '_')}`;
+    const translated = t(key);
+    if (translated && translated !== key) return translated;
+    return getLocalizedText(roleStr, language, roleStr);
+  };
 
-  if (error) {
-    return (
-      <div className="error-card">
-        <p className="error-text">{error}</p>
-      </div>
-    );
-  }
+  const getDifficultyLabel = (diff) => {
+    const key = `scenarios.${String(diff).toLowerCase()}`;
+    const translated = t(key);
+    if (translated && translated !== key) return translated;
+    return diff;
+  };
 
   const filteredScenarios = (scenarios || []).filter((scen) => {
     if (!scen) return false;
@@ -75,8 +97,36 @@ export default function ScenarioPage() {
     return scen.difficulty === filterDifficulty;
   });
 
+  const isRtl = language === 'ur';
+
+  if (loading && scenarios.length === 0) {
+    return (
+      <div className="loading-screen" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="loading-spinner" />
+        <p>{t('common.loading')}</p>
+      </div>
+    );
+  }
+
+  if (error && scenarios.length === 0) {
+    return (
+      <div className="error-card" dir={isRtl ? 'rtl' : 'ltr'} style={{ maxWidth: '600px', margin: 'var(--space-xl) auto', padding: 'var(--space-lg)' }}>
+        <p className="error-text">{error}</p>
+        <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
+          <button className="btn-primary" onClick={fetchScenarios}>
+            🔄 {t('common.playAgain') || t('common.continue') || 'Retry'}
+          </button>
+          <button className="btn-secondary" onClick={() => navigate('/dashboard')}>
+            ← {t('nav.dashboard')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="scenarios-page" style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--space-md) var(--space-sm)' }}>
+    <div className="scenarios-page" dir={isRtl ? 'rtl' : 'ltr'} style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--space-md) var(--space-sm)' }}>
+      {/* Top Header */}
       <div style={{ marginBottom: 'var(--space-md)' }}>
         <p className="eyebrow">{t('nav.scenarios')}</p>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', fontWeight: '600' }}>
@@ -110,6 +160,7 @@ export default function ScenarioPage() {
         ))}
       </div>
 
+      {/* Scenarios Grid or Localized Empty State Card */}
       {filteredScenarios.length === 0 ? (
         <div
           className="dashboard-card"
@@ -117,16 +168,26 @@ export default function ScenarioPage() {
             padding: 'var(--space-xl) var(--space-md)',
             textAlign: 'center',
             borderRadius: 'var(--radius-lg)',
-            marginTop: 'var(--space-md)'
+            marginTop: 'var(--space-md)',
+            background: 'var(--bg-secondary)',
+            border: '1.5px dashed var(--border-color)',
           }}
         >
           <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: 'var(--space-xs)' }}>💬</span>
-          <h3 style={{ fontSize: '1.25rem', marginBottom: 'var(--space-xs)' }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: 'var(--space-xs)', color: 'var(--text-primary)' }}>
             {t('scenarios.noAvailable')}
           </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: 'var(--space-md)' }}>
             {t('scenarios.noAvailableSub')}
           </p>
+          <button
+            type="button"
+            className="btn-primary"
+            style={{ padding: '0.5rem 1.25rem', fontSize: '0.9rem' }}
+            onClick={() => setFilterDifficulty('all')}
+          >
+            {t('scenarios.viewAll')} ➔
+          </button>
         </div>
       ) : (
         <div
@@ -135,7 +196,7 @@ export default function ScenarioPage() {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
             gap: 'var(--space-md)',
-            marginTop: 'var(--space-sm)'
+            marginTop: 'var(--space-sm)',
           }}
         >
           {filteredScenarios.map((scen) => (
@@ -148,7 +209,9 @@ export default function ScenarioPage() {
                 justifyContent: 'space-between',
                 height: '100%',
                 padding: 'var(--space-md)',
-                borderRadius: 'var(--radius-lg)'
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border-color)',
+                background: 'var(--bg-secondary)',
               }}
             >
               <div>
@@ -165,10 +228,15 @@ export default function ScenarioPage() {
                       padding: '0.2rem 0.6rem',
                       borderRadius: 'var(--radius-full)',
                       background: 'var(--bg-tertiary)',
-                      color: 'var(--text-secondary)'
+                      color:
+                        scen.difficulty === 'challenging'
+                          ? '#e53e3e'
+                          : scen.difficulty === 'medium'
+                          ? '#dd6b20'
+                          : '#38a169',
                     }}
                   >
-                    {scen.difficulty}
+                    {getDifficultyLabel(scen.difficulty)}
                   </span>
                 </div>
 
@@ -179,8 +247,19 @@ export default function ScenarioPage() {
                   {scen.description}
                 </p>
 
-                <div style={{ fontSize: '0.85rem', marginBottom: 'var(--space-sm)', color: 'var(--text-primary)', background: 'var(--bg-primary)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>{t('scenarios.role')}:</span> <strong>{scen.aiRole}</strong>
+                <div
+                  style={{
+                    fontSize: '0.85rem',
+                    marginBottom: 'var(--space-sm)',
+                    color: 'var(--text-primary)',
+                    background: 'var(--bg-primary)',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-color)',
+                  }}
+                >
+                  <span style={{ color: 'var(--text-secondary)' }}>{t('scenarios.role')}:</span>{' '}
+                  <strong>{getRoleLabel(scen.aiRole)}</strong>
                 </div>
               </div>
 

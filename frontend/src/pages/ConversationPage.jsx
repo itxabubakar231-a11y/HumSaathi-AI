@@ -4,6 +4,15 @@ import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 
+function getLocalizedText(val, lang, fallback = '') {
+  if (!val) return fallback;
+  if (typeof val === 'string') return val;
+  if (typeof val === 'object') {
+    return val[lang] || val.en || val.ur || val.ur_rm || fallback;
+  }
+  return String(val);
+}
+
 export default function ConversationPage() {
   const { sessionId } = useParams();
   const { user } = useUser();
@@ -19,14 +28,22 @@ export default function ConversationPage() {
   const [mode, setMode] = useState('text'); // text or voice
   const [speakingIdx, setSpeakingIdx] = useState(null);
 
-  // Voice mode state
-  const [isListening, setIsListening] = useState(false);
+  // Voice recording & preview states
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedTranscript, setRecordedTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState(null);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [speechError, setSpeechError] = useState('');
   const [speechSupported, setSpeechSupported] = useState(false);
-  const [transcriptPreview, setTranscriptPreview] = useState('');
 
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const audioPlayerRef = useRef(null);
+
+  const isRtl = language === 'ur';
 
   // Auto-scroll helper
   const scrollToBottom = () => {
@@ -68,25 +85,23 @@ export default function ConversationPage() {
     }
   };
 
-  useEffect(() => {
-    if (!user?.id) {
-      navigate('/login');
-      return;
-    }
-    // Fetch session directly by ID
+  // Fetch session details
+  const fetchSession = useCallback(() => {
+    setLoading(true);
+    setError('');
     api.getSession(sessionId)
       .then((data) => {
         const sess = data?.session || (data?.id ? data : null);
         if (!sess) {
-          setError('Session not found');
+          setError(t('common.error') || 'Session not found');
         } else {
           setSession(sess);
-          setMessages(sess.transcript || []);
+          const transcriptList = Array.isArray(sess.transcript) ? sess.transcript : [];
+          setMessages(transcriptList);
           setMode(sess.mode || 'text');
 
-          // Text to Speech initial greeting if voice mode
-          if (sess.mode === 'voice' && sess.transcript?.length > 0) {
-            speakText(sess.transcript[0].content, sess.language, 0);
+          if (sess.mode === 'voice' && transcriptList.length > 0) {
+            speakText(transcriptList[0].content, sess.language || language, 0);
           }
         }
       })
@@ -96,36 +111,55 @@ export default function ConversationPage() {
       .finally(() => {
         setLoading(false);
       });
+  }, [sessionId, language, speakText, t]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      navigate('/login');
+      return;
+    }
+    fetchSession();
 
     // Check speech recognition support
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       setSpeechSupported(true);
       const rec = new SpeechRecognition();
-      rec.continuous = false;
+      rec.continuous = true;
       rec.interimResults = true;
-      rec.lang = user?.language === 'ur' ? 'ur-PK' : 'en-US';
+      rec.lang = language === 'ur' ? 'ur-PK' : 'en-US';
 
       rec.onstart = () => {
-        setIsListening(true);
+        setIsRecording(true);
         setSpeechError('');
-        setTranscriptPreview('');
       };
 
       rec.onresult = (event) => {
-        const current = event.resultIndex;
-        const transcript = event.results[current][0].transcript;
-        setTranscriptPreview(transcript);
+        let interim = '';
+        let final = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            final += event.results[i][0].transcript;
+          } else {
+            interim += event.results[i][0].transcript;
+          }
+        }
+        if (final) {
+          setRecordedTranscript((prev) => (prev ? `${prev} ${final}` : final));
+        }
+        setInterimTranscript(interim);
       };
 
       rec.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setSpeechError(`${t('conversation.micError')} (${event.error})`);
-        setIsListening(false);
+        console.warn('Speech recognition notice:', event.error);
+        if (event.error !== 'no-speech') {
+          setSpeechError(`${t('voice.micError')} (${event.error})`);
+        }
+        setIsRecording(false);
       };
 
       rec.onend = () => {
-        setIsListening(false);
+        setIsRecording(false);
       };
 
       recognitionRef.current = rec;
@@ -136,51 +170,132 @@ export default function ConversationPage() {
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
+      if (audioPreviewUrl) {
+        URL.revokeObjectURL(audioPreviewUrl);
+      }
     };
-  }, [sessionId, user, navigate, t, speakText]);
+  }, [sessionId, user, navigate, language, fetchSession]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages, sending]);
 
-  const startListening = () => {
-    if (!speechSupported || !recognitionRef.current) return;
+  // Voice recording handlers
+  const startRecording = async () => {
     setSpeechError('');
-    try {
-      recognitionRef.current.start();
-    } catch (e) {
-      console.warn('Speech recognition start note:', e);
+    setRecordedTranscript('');
+    setInterimTranscript('');
+    if (audioPreviewUrl) {
+      URL.revokeObjectURL(audioPreviewUrl);
+      setAudioPreviewUrl(null);
     }
+    audioChunksRef.current = [];
+
+    // Start Audio recording via MediaRecorder if supported
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            audioChunksRef.current.push(e.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          if (audioChunksRef.current.length > 0) {
+            const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+            const url = URL.createObjectURL(blob);
+            setAudioPreviewUrl(url);
+          }
+          // Stop stream tracks
+          stream.getTracks().forEach((track) => track.stop());
+        };
+
+        mediaRecorder.start();
+      } catch (err) {
+        console.warn('MediaRecorder error or mic denied:', err);
+      }
+    }
+
+    // Start speech recognition
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.start();
+      } catch (e) {
+        console.warn('Speech recognition restart notice:', e);
+      }
+    }
+    setIsRecording(true);
   };
 
-  const stopListening = () => {
+  const stopRecording = () => {
+    setIsRecording(false);
     if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      if (transcriptPreview.trim()) {
-        handleSendMessage(transcriptPreview);
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        // ignore
+      }
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {
+        // ignore
       }
     }
   };
 
-  const handleSendClick = (e) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
-    handleSendMessage(inputText);
-    setInputText('');
+  const deleteRecording = () => {
+    if (audioPreviewUrl) {
+      URL.revokeObjectURL(audioPreviewUrl);
+      setAudioPreviewUrl(null);
+    }
+    audioChunksRef.current = [];
+    setRecordedTranscript('');
+    setInterimTranscript('');
+    setSpeechError('');
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+      setIsPlayingAudio(false);
+    }
+  };
+
+  const togglePlayAudio = () => {
+    if (!audioPreviewUrl) return;
+    if (!audioPlayerRef.current) {
+      audioPlayerRef.current = new Audio(audioPreviewUrl);
+      audioPlayerRef.current.onended = () => setIsPlayingAudio(false);
+    } else {
+      audioPlayerRef.current.src = audioPreviewUrl;
+    }
+
+    if (isPlayingAudio) {
+      audioPlayerRef.current.pause();
+      setIsPlayingAudio(false);
+    } else {
+      audioPlayerRef.current.play();
+      setIsPlayingAudio(true);
+    }
   };
 
   const handleSendMessage = async (text) => {
-    if (sending || !text.trim()) return;
+    const trimmed = (text || '').trim();
+    if (sending || !trimmed) return;
     setSending(true);
     setError('');
 
-    const newUserMessage = { role: 'user', content: text, timestamp: new Date().toISOString() };
+    const newUserMessage = { role: 'user', content: trimmed, timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, newUserMessage]);
+    deleteRecording();
 
     try {
       const res = await api.sendMessage(sessionId, {
         userId: user.id,
-        message: text,
+        message: trimmed,
       });
 
       if (res && res.session) {
@@ -188,13 +303,13 @@ export default function ConversationPage() {
         setMessages(updatedTranscript);
 
         if (res.response) {
-          speakText(res.response, res.session.language, updatedTranscript.length - 1);
+          speakText(res.response, res.session.language || language, updatedTranscript.length - 1);
         }
 
         if (res.completed) {
           setTimeout(() => {
             navigate(`/feedback/${sessionId}`);
-          }, 1500);
+          }, 1800);
         }
       }
     } catch (err) {
@@ -202,8 +317,14 @@ export default function ConversationPage() {
       setMessages((prev) => prev.slice(0, -1));
     } finally {
       setSending(false);
-      setTranscriptPreview('');
+      setInputText('');
     }
+  };
+
+  const handleSendClick = (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+    handleSendMessage(inputText);
   };
 
   const handleFinish = async () => {
@@ -216,9 +337,30 @@ export default function ConversationPage() {
     }
   };
 
+  const getRoleLabel = (roleStr) => {
+    if (!roleStr) return t('conversation.aiCoach');
+    const key = `role.${String(roleStr).toLowerCase().replace(/\s+/g, '_')}`;
+    const translated = t(key);
+    if (translated && translated !== key) return translated;
+    return getLocalizedText(roleStr, language, roleStr);
+  };
+
+  const getDifficultyLabel = (diff) => {
+    const key = `scenarios.${String(diff).toLowerCase()}`;
+    const translated = t(key);
+    if (translated && translated !== key) return translated;
+    return diff || 'Easy';
+  };
+
+  const scenarioData = session?.scenario || {};
+  const scenarioTitle = getLocalizedText(scenarioData.title, language, t('scenarios.title'));
+  const scenarioDesc = getLocalizedText(scenarioData.description, language, t('scenarios.intro'));
+  const scenarioRole = getRoleLabel(scenarioData.aiRole);
+  const scenarioOptions = Array.isArray(scenarioData.options) ? scenarioData.options : [];
+
   if (loading) {
     return (
-      <div className="loading-screen">
+      <div className="loading-screen" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="loading-spinner" />
         <p>{t('common.loading')}</p>
       </div>
@@ -227,56 +369,58 @@ export default function ConversationPage() {
 
   if (error && messages.length === 0) {
     return (
-      <div className="error-card">
+      <div className="error-card" dir={isRtl ? 'rtl' : 'ltr'} style={{ maxWidth: '600px', margin: 'var(--space-xl) auto', padding: 'var(--space-lg)' }}>
         <p className="error-text">{error}</p>
-        <button className="btn-primary" onClick={() => navigate('/scenarios')}>
-          Back to Scenarios
+        <button className="btn-primary" onClick={() => navigate('/scenarios')} style={{ marginTop: 'var(--space-md)' }}>
+          ← {t('conversation.backToScenarios')}
         </button>
       </div>
     );
   }
 
   return (
-    <div className="web-practice-workspace">
+    <div className="web-practice-workspace" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Left Sidebar: Scenario Information & Goals */}
       <aside className="practice-info-sidebar">
         <div className="practice-info-header">
           <span className="practice-badge-kicker">
-            🎯 {language === 'ur' ? 'بات چیت کا منظرنامہ' : 'Interactive Practice'}
+            🎯 {t('conversation.interactivePractice')}
           </span>
-          <h2 className="practice-scenario-title">{session?.scenario?.title}</h2>
-          <p className="practice-scenario-desc">{session?.scenario?.description}</p>
+          <h2 className="practice-scenario-title">{scenarioTitle}</h2>
+          <p className="practice-scenario-desc">{scenarioDesc}</p>
         </div>
 
         <div className="practice-meta-card">
           <div className="meta-row">
-            <span className="meta-label">🤖 {language === 'ur' ? 'کردار:' : 'AI Role:'}</span>
-            <strong className="meta-val">{session?.scenario?.aiRole}</strong>
+            <span className="meta-label">🤖 {t('conversation.aiRole')}</span>
+            <strong className="meta-val">{scenarioRole}</strong>
           </div>
           <div className="meta-row">
-            <span className="meta-label">🌐 {language === 'ur' ? 'زبان:' : 'Language:'}</span>
-            <strong className="meta-val">{(session?.language || user?.language || 'en').toUpperCase()}</strong>
+            <span className="meta-label">🌐 {t('conversation.language')}</span>
+            <strong className="meta-val">
+              {language === 'ur' ? 'اردو (Urdu)' : language === 'ur_rm' ? 'Roman Urdu' : 'English'}
+            </strong>
           </div>
           <div className="meta-row">
-            <span className="meta-label">⚡ {language === 'ur' ? 'لیول:' : 'Difficulty:'}</span>
+            <span className="meta-label">⚡ {t('conversation.difficulty')}</span>
             <strong className="meta-val" style={{ textTransform: 'capitalize' }}>
-              {session?.scenario?.difficulty || 'Intermediate'}
+              {getDifficultyLabel(scenarioData.difficulty)}
             </strong>
           </div>
         </div>
 
         <div className="practice-tips-card">
-          <h4>💡 {language === 'ur' ? 'رہنمائی اور نکات:' : 'Communication Pro-Tips:'}</h4>
+          <h4>💡 {t('conversation.tipsTitle')}</h4>
           <ul>
-            <li>{language === 'ur' ? 'پراعتماد انداز میں اپنا مدعا بیان کریں۔' : 'Take turns and answer naturally.'}</li>
-            <li>{language === 'ur' ? 'ضرورت پڑنے پر وضاحت طلب کریں۔' : 'Ask questions for clarification when needed.'}</li>
-            <li>{language === 'ur' ? 'شائستہ اختتامی کلمات استعمال کریں۔' : 'End conversations with polite remarks.'}</li>
+            <li>{t('conversation.tip1')}</li>
+            <li>{t('conversation.tip2')}</li>
+            <li>{t('conversation.tip3')}</li>
           </ul>
         </div>
 
         <div className="practice-sidebar-actions">
           <button className="btn-secondary end-session-btn" onClick={handleFinish}>
-            🏁 {t('conversation.endBtn') || 'Finish & View Feedback'}
+            🏁 {t('conversation.endBtn')}
           </button>
         </div>
       </aside>
@@ -288,10 +432,8 @@ export default function ConversationPage() {
           <div className="chat-partner-status">
             <span className="online-indicator-dot" />
             <div>
-              <span className="partner-name">{session?.scenario?.aiRole} (AI Coach)</span>
-              <span className="partner-sub">
-                {language === 'ur' ? 'محفوظ مشق جاری ہے' : 'Safe simulation active'}
-              </span>
+              <span className="partner-name">{scenarioRole} ({t('conversation.aiCoach')})</span>
+              <span className="partner-sub">{t('conversation.safeSimulation')}</span>
             </div>
           </div>
 
@@ -304,14 +446,14 @@ export default function ConversationPage() {
                 stopSpeaking();
               }}
             >
-              💬 Text Mode
+              💬 {t('conversation.modeText')}
             </button>
             <button
               type="button"
               className={`mode-toggle-btn ${mode === 'voice' ? 'is-active' : ''}`}
               onClick={() => setMode('voice')}
             >
-              🎙️ Voice Mode
+              🎙️ {t('conversation.modeVoice')}
             </button>
           </div>
         </div>
@@ -338,18 +480,20 @@ export default function ConversationPage() {
                       if (speakingIdx === idx) {
                         stopSpeaking();
                       } else {
-                        speakText(msg.content, session?.language || user?.language || 'en', idx);
+                        speakText(msg.content, session?.language || language, idx);
                       }
                     }}
                     title="Play voice audio"
                     aria-label="Listen to message audio"
                   >
-                    {speakingIdx === idx ? '⏹️ Stop' : '🔊 Listen'}
+                    {speakingIdx === idx ? `⏹️ ${t('conversation.stop')}` : `🔊 ${t('conversation.listen')}`}
                   </button>
                 )}
               </div>
               {msg.role === 'user' && (
-                <div className="bubble-avatar-user">{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</div>
+                <div className="bubble-avatar-user">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                </div>
               )}
             </div>
           ))}
@@ -369,44 +513,178 @@ export default function ConversationPage() {
 
         {error && <p className="error-text" style={{ padding: '0 1.5rem', fontSize: '0.85rem' }}>{error}</p>}
 
+        {/* Quick Suggested Response Option Chips (4 structured options) */}
+        {scenarioOptions.length > 0 && !sending && (
+          <div
+            className="suggested-options-container"
+            style={{
+              padding: '0.6rem 1.25rem',
+              background: 'var(--bg-secondary)',
+              borderTop: '1px solid var(--border-color)',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+                display: 'block',
+                marginBottom: '0.4rem',
+              }}
+            >
+              💡 {t('conversation.suggestedOptions')}
+            </span>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: '0.4rem',
+              }}
+            >
+              {scenarioOptions.slice(0, 4).map((opt, i) => {
+                const optText = getLocalizedText(opt.text, language, opt.text);
+                return (
+                  <button
+                    key={opt.id || i}
+                    type="button"
+                    className="suggested-option-chip"
+                    style={{
+                      textAlign: isRtl ? 'right' : 'left',
+                      padding: '0.5rem 0.75rem',
+                      fontSize: '0.85rem',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      lineHeight: '1.35',
+                    }}
+                    onClick={() => handleSendMessage(optText)}
+                    disabled={sending}
+                  >
+                    💬 {optText}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Floating Input Area */}
         {mode === 'voice' ? (
-          <div className="chat-input-area voice-input-area">
+          <div className="chat-input-area voice-input-area" style={{ padding: '1rem 1.25rem' }}>
             {speechSupported ? (
-              <>
-                {transcriptPreview && (
-                  <div className="voice-preview-text">
-                    "{transcriptPreview}"
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {/* Status & Live transcript preview */}
+                {(isRecording || recordedTranscript || interimTranscript) && (
+                  <div
+                    className="voice-preview-box"
+                    style={{
+                      padding: '0.75rem 1rem',
+                      borderRadius: 'var(--radius-md)',
+                      background: 'var(--bg-tertiary)',
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.95rem',
+                      fontStyle: 'italic',
+                      color: 'var(--text-primary)',
+                      lineHeight: '1.4',
+                    }}
+                  >
+                    {recordedTranscript || interimTranscript ? (
+                      <span>"{recordedTranscript} {interimTranscript}"</span>
+                    ) : (
+                      <span style={{ color: 'var(--text-secondary)' }}>
+                        🎙️ {t('voice.recording')}
+                      </span>
+                    )}
                   </div>
                 )}
-                {speechError && <p className="error-text" style={{ fontSize: '0.8rem' }}>{speechError}</p>}
 
-                <div className="voice-controls-row">
+                {speechError && <p className="error-text" style={{ fontSize: '0.85rem', margin: 0 }}>{speechError}</p>}
+
+                {/* Primary Voice Controls */}
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {!isRecording && !recordedTranscript && (
+                    <button
+                      className="btn-primary"
+                      type="button"
+                      style={{ padding: '0.65rem 1.25rem', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                      onClick={startRecording}
+                      disabled={sending}
+                    >
+                      🎙️ {t('voice.tapToSpeak')}
+                    </button>
+                  )}
+
+                  {isRecording && (
+                    <button
+                      className="btn-primary"
+                      type="button"
+                      style={{
+                        padding: '0.65rem 1.25rem',
+                        fontSize: '0.95rem',
+                        background: '#e53e3e',
+                        borderColor: '#e53e3e',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                      }}
+                      onClick={stopRecording}
+                    >
+                      ⏹️ {t('conversation.stop')}
+                    </button>
+                  )}
+
+                  {!isRecording && recordedTranscript && (
+                    <>
+                      {audioPreviewUrl && (
+                        <button
+                          className="btn-secondary"
+                          type="button"
+                          style={{ padding: '0.6rem 1rem', fontSize: '0.9rem' }}
+                          onClick={togglePlayAudio}
+                        >
+                          {isPlayingAudio ? '⏸️ Stop' : `▶️ ${t('voice.playPreview')}`}
+                        </button>
+                      )}
+                      <button
+                        className="btn-secondary"
+                        type="button"
+                        style={{ padding: '0.6rem 1rem', fontSize: '0.9rem', color: '#e53e3e' }}
+                        onClick={deleteRecording}
+                      >
+                        🗑️ {t('voice.deleteRecording')}
+                      </button>
+                      <button
+                        className="btn-primary"
+                        type="button"
+                        style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem' }}
+                        onClick={() => handleSendMessage(recordedTranscript)}
+                        disabled={sending}
+                      >
+                        🚀 {sending ? t('conversation.sending') : t('voice.sendVoiceMessage')}
+                      </button>
+                    </>
+                  )}
+
                   <button
-                    className={`voice-btn-large ${isListening ? 'is-listening' : ''}`}
+                    className="btn-secondary"
                     type="button"
-                    onClick={isListening ? stopListening : startListening}
-                  >
-                    {isListening ? (
-                      <>🔴 {t('conversation.listening') || 'Listening... (Tap to Send)'}</>
-                    ) : (
-                      <>🎙️ {language === 'ur' ? 'بولنے کے لیے کلک کریں' : 'Tap to Speak'}</>
-                    )}
-                  </button>
-                  <button
-                    className="btn-secondary btn-sm"
-                    type="button"
+                    style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', marginInlineStart: 'auto' }}
                     onClick={() => setMode('text')}
                   >
-                    💬 {language === 'ur' ? 'ٹیکسٹ پر جائیں' : 'Switch to Text'}
+                    💬 {t('voice.switchToText')}
                   </button>
                 </div>
-              </>
+              </div>
             ) : (
-              <div className="mic-unsupported-box">
-                <p>{t('conversation.micError') || 'Microphone not supported in this browser. Please use text mode.'}</p>
-                <button className="btn-secondary" type="button" onClick={() => setMode('text')}>
-                  Switch to Text Mode
+              <div className="mic-unsupported-box" style={{ padding: '1rem', textAlign: 'center', width: '100%' }}>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                  {t('voice.micError')}
+                </p>
+                <button className="btn-primary" type="button" onClick={() => setMode('text')}>
+                  💬 {t('voice.switchToText')}
                 </button>
               </div>
             )}
@@ -418,23 +696,23 @@ export default function ConversationPage() {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={language === 'ur' ? 'اپنا جواب یہاں لکھیں...' : t('conversation.placeholder')}
+              placeholder={t('conversation.placeholder')}
               disabled={sending}
             />
             <button
               className="chat-send-btn"
               type="submit"
               disabled={sending || !inputText.trim()}
-              title="Send Message"
+              title={t('conversation.send')}
             >
-              ➔
+              {sending ? '...' : (isRtl ? '➔' : '➔')}
             </button>
             {speechSupported && (
               <button
                 className="voice-quick-btn"
                 type="button"
                 onClick={() => setMode('voice')}
-                title="Switch to Voice Mode"
+                title={t('scenarios.startVoice')}
               >
                 🎙️
               </button>

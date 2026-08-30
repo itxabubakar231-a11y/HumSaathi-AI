@@ -91,28 +91,45 @@ def seed_foundational_activities():
                 db.add_all(new_activities)
                 db.commit()
 
-            existing_scen_ids = {s.id for s in db.query(CommunicationScenario.id).all()}
+            existing_scenarios = {s.id: s for s in db.query(CommunicationScenario).all()}
             new_scenarios = []
             for s in DEFAULT_SCENARIOS:
-                if s['id'] not in existing_scen_ids:
+                title_val = s['title']['en'] if isinstance(s['title'], dict) else s['title']
+                desc_val = s['description']['en'] if isinstance(s['description'], dict) else s['description']
+                role_val = s['aiRole']['en'] if isinstance(s['aiRole'], dict) else s['aiRole']
+                obj_val = s['objectives']['en'] if isinstance(s['objectives'], dict) else s['objectives']
+
+                if s['id'] not in existing_scenarios:
                     scen = CommunicationScenario(
                         id=s['id'],
-                        title=s['title'],
-                        description=s['description'],
-                        aiRole=s['aiRole'],
+                        title=title_val,
+                        description=desc_val,
+                        aiRole=role_val,
                         personas=stringify_json(s['personas']),
                         languages=stringify_json(s['languages']),
                         difficulty=s['difficulty'],
-                        objectives=stringify_json(s['objectives']),
+                        objectives=stringify_json(obj_val),
                         context=s['context'],
                         initialPrompt=stringify_json(s['initialPrompt']),
                         isActive=True,
                         createdAt=datetime.utcnow(),
                     )
                     new_scenarios.append(scen)
+                else:
+                    existing = existing_scenarios[s['id']]
+                    existing.title = title_val
+                    existing.description = desc_val
+                    existing.aiRole = role_val
+                    existing.personas = stringify_json(s['personas'])
+                    existing.languages = stringify_json(s['languages'])
+                    existing.difficulty = s['difficulty']
+                    existing.objectives = stringify_json(obj_val)
+                    existing.context = s['context']
+                    existing.initialPrompt = stringify_json(s['initialPrompt'])
+
             if new_scenarios:
                 db.add_all(new_scenarios)
-                db.commit()
+            db.commit()
         except Exception:
             db.rollback()
         finally:

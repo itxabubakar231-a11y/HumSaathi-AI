@@ -74,10 +74,16 @@ def get_next_recommendation(db: Session, user_id: str, last_scenario_id: str = "
     }
 
     user_lang = user.language or 'en'
+    from app.data.scenarios import DEFAULT_SCENARIOS
+    def_s = next((s for s in DEFAULT_SCENARIOS if s["id"] == selected.id), None)
+    if def_s and isinstance(def_s.get("title"), dict):
+        title_str = def_s["title"].get(user_lang, def_s["title"].get("en", selected.title))
+    else:
+        title_str = selected.title
 
     return {
         "scenarioId": selected.id,
-        "title": selected.title,
+        "title": title_str,
         "reason": reasons.get(user_lang, reasons['en']),
     }
 

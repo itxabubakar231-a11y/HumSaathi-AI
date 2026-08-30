@@ -1993,10 +1993,40 @@ body {
   animation: listeningPulse 1.5s infinite;
 }
 
-@keyframes listeningPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  50% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
+.suggested-options-container {
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
+
+.suggested-option-chip {
+  transition: all 0.2s ease-in-out;
+}
+
+.suggested-option-chip:hover {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--accent-primary) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+[dir="rtl"] .chat-bubble-row.user-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .chat-bubble-row.ai-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .bubble-avatar-ai,
+[dir="rtl"] .bubble-avatar-user {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+[dir="rtl"] .meta-row {
+  flex-direction: row-reverse;
+}
+
 
 /* ==========================================================================
    PROGRESS PAGE & ANALYTICS

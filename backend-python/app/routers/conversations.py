@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Any, Union
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -8,22 +8,77 @@ from app.models.conversation import CommunicationScenario, ConversationSession
 from app.schemas.common import parse_json
 from app.schemas.conversation import StartConversationRequest, SendMessageRequest
 from app.services.conversation_service import start_session, send_message, end_session
+from app.data.scenarios import DEFAULT_SCENARIOS
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
-def format_scenario(s: CommunicationScenario):
+def format_scenario(s: Union[CommunicationScenario, Dict[str, Any]], language: Optional[str] = None):
+    s_id = s.id if hasattr(s, "id") else s.get("id")
+    s_def = next((item for item in DEFAULT_SCENARIOS if item["id"] == s_id), None)
+
+    title_data = s_def["title"] if s_def and isinstance(s_def.get("title"), dict) else (getattr(s, "title", None) or (s.get("title") if isinstance(s, dict) else ""))
+    desc_data = s_def["description"] if s_def and isinstance(s_def.get("description"), dict) else (getattr(s, "description", None) or (s.get("description") if isinstance(s, dict) else ""))
+    role_data = s_def["aiRole"] if s_def and isinstance(s_def.get("aiRole"), dict) else (getattr(s, "aiRole", None) or (s.get("aiRole") if isinstance(s, dict) else ""))
+
+    obj_raw = getattr(s, "objectives", None) if hasattr(s, "objectives") else (s.get("objectives") if isinstance(s, dict) else [])
+    obj_data = s_def["objectives"] if s_def and isinstance(s_def.get("objectives"), dict) else parse_json(obj_raw, [])
+
+    init_raw = getattr(s, "initialPrompt", None) if hasattr(s, "initialPrompt") else (s.get("initialPrompt") if isinstance(s, dict) else {})
+    init_data = s_def["initialPrompt"] if s_def and isinstance(s_def.get("initialPrompt"), dict) else parse_json(init_raw, {})
+
+    personas_raw = getattr(s, "personas", None) if hasattr(s, "personas") else (s.get("personas") if isinstance(s, dict) else [])
+    personas = s_def["personas"] if s_def else parse_json(personas_raw, [])
+
+    langs_raw = getattr(s, "languages", None) if hasattr(s, "languages") else (s.get("languages") if isinstance(s, dict) else [])
+    languages = s_def["languages"] if s_def else parse_json(langs_raw, [])
+
+    difficulty = s_def["difficulty"] if s_def else (getattr(s, "difficulty", "easy") if hasattr(s, "difficulty") else s.get("difficulty", "easy"))
+    context = s_def["context"] if s_def else (getattr(s, "context", "") if hasattr(s, "context") else s.get("context", ""))
+    options_data = s_def.get("options", []) if s_def else []
+
+    lang = language or "en"
+
+    # Resolve strings for requested language
+    resolved_title = title_data.get(lang, title_data.get("en", str(title_data))) if isinstance(title_data, dict) else str(title_data)
+    resolved_desc = desc_data.get(lang, desc_data.get("en", str(desc_data))) if isinstance(desc_data, dict) else str(desc_data)
+    resolved_role = role_data.get(lang, role_data.get("en", str(role_data))) if isinstance(role_data, dict) else str(role_data)
+
+    if isinstance(obj_data, dict):
+        resolved_objs = obj_data.get(lang, obj_data.get("en", []))
+    elif isinstance(obj_data, list):
+        resolved_objs = obj_data
+    else:
+        resolved_objs = [str(obj_data)]
+
+    resolved_options = []
+    for o in options_data:
+        o_text = o.get("text", {})
+        o_feedback = o.get("feedback", {})
+        resolved_options.append({
+            "id": o.get("id"),
+            "type": o.get("type", "best"),
+            "score": o.get("score", 100),
+            "text": o_text.get(lang, o_text.get("en", str(o_text))) if isinstance(o_text, dict) else str(o_text),
+            "feedback": o_feedback.get(lang, o_feedback.get("en", str(o_feedback))) if isinstance(o_feedback, dict) else str(o_feedback),
+        })
+
     return {
-        "id": s.id,
-        "title": s.title,
-        "description": s.description,
-        "aiRole": s.aiRole,
-        "personas": parse_json(s.personas, []),
-        "languages": parse_json(s.languages, []),
-        "difficulty": s.difficulty,
-        "objectives": parse_json(s.objectives, []),
-        "context": s.context,
-        "initialPrompt": parse_json(s.initialPrompt, {}),
-        "isActive": s.isActive,
+        "id": s_id,
+        "title": resolved_title,
+        "rawTitle": title_data if isinstance(title_data, dict) else {"en": str(title_data)},
+        "description": resolved_desc,
+        "rawDescription": desc_data if isinstance(desc_data, dict) else {"en": str(desc_data)},
+        "aiRole": resolved_role,
+        "rawAiRole": role_data if isinstance(role_data, dict) else {"en": str(role_data)},
+        "personas": personas,
+        "languages": languages,
+        "difficulty": difficulty,
+        "objectives": resolved_objs,
+        "rawObjectives": obj_data if isinstance(obj_data, dict) else {"en": resolved_objs},
+        "context": context,
+        "initialPrompt": init_data,
+        "options": resolved_options,
+        "isActive": True,
     }
 
 def format_session(s: ConversationSession):
@@ -38,10 +93,8 @@ def format_session(s: ConversationSession):
         "completed": s.completed,
         "createdAt": s.createdAt.isoformat() if s.createdAt else None,
         "completedAt": s.completedAt.isoformat() if s.completedAt else None,
-        "scenario": format_scenario(s.scenario) if s.scenario else None,
+        "scenario": format_scenario(s.scenario or {"id": s.scenarioId}, language=s.language) if (s.scenario or s.scenarioId) else None,
     }
-
-from app.data.scenarios import DEFAULT_SCENARIOS
 
 @router.get("/scenarios")
 def list_scenarios(
@@ -51,61 +104,34 @@ def list_scenarios(
     db: Session = Depends(get_db),
 ):
     results = []
-    try:
-        query = db.query(CommunicationScenario).filter(CommunicationScenario.isActive == True)
-        if difficulty:
-            query = query.filter(CommunicationScenario.difficulty == difficulty)
-        all_scenarios = query.all()
-
-        for s in all_scenarios:
-            s_personas = parse_json(s.personas, [])
-            s_languages = parse_json(s.languages, [])
-
-            if persona and persona not in s_personas:
-                continue
-            if language and language not in s_languages:
-                continue
-
-            results.append(format_scenario(s))
-    except Exception:
-        results = []
-
-    if not results:
-        for s in DEFAULT_SCENARIOS:
-            if persona and persona not in s["personas"]:
-                continue
-            if language and language not in s["languages"]:
-                continue
-            if difficulty and s["difficulty"] != difficulty:
-                continue
-            results.append({
-                "id": s["id"],
-                "title": s["title"],
-                "description": s["description"],
-                "aiRole": s["aiRole"],
-                "personas": s["personas"],
-                "languages": s["languages"],
-                "difficulty": s["difficulty"],
-                "objectives": s["objectives"],
-                "context": s["context"],
-                "initialPrompt": s["initialPrompt"],
-                "isActive": True,
-            })
+    # Always prioritize DEFAULT_SCENARIOS definitions to ensure accurate persona isolation, difficulty distribution, and translations
+    for s in DEFAULT_SCENARIOS:
+        if persona and persona not in s["personas"]:
+            continue
+        if language and language not in s["languages"]:
+            continue
+        if difficulty and difficulty != "all" and s["difficulty"] != difficulty:
+            continue
+        results.append(format_scenario(s, language=language))
 
     return {"scenarios": results}
 
 @router.get("/scenarios/{scenario_id}")
-def get_scenario(scenario_id: str, db: Session = Depends(get_db)):
+def get_scenario(
+    scenario_id: str,
+    language: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    s_def = next((item for item in DEFAULT_SCENARIOS if item["id"] == scenario_id), None)
+    if s_def:
+        return {"scenario": format_scenario(s_def, language=language)}
+
     try:
         s = db.query(CommunicationScenario).filter(CommunicationScenario.id == scenario_id).first()
         if s:
-            return {"scenario": format_scenario(s)}
+            return {"scenario": format_scenario(s, language=language)}
     except Exception:
         pass
-
-    fallback = next((item for item in DEFAULT_SCENARIOS if item["id"] == scenario_id), None)
-    if fallback:
-        return {"scenario": fallback}
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -174,4 +200,3 @@ def list_user_sessions(user_id: str, db: Session = Depends(get_db)):
         .all()
     )
     return {"sessions": [format_session(s) for s in sessions]}
-
