@@ -49,10 +49,14 @@ def init_db_tables():
         logger.warning(f"Non-blocking database initialization notice: {e}")
 
 def ensure_auth_columns():
-    """Ensure email, passwordHash, isActive, and lastActiveAt columns exist on User table without data loss."""
+    """Ensure email, passwordHash, isActive, and lastActiveAt columns exist on User table, and role is VARCHAR without enum conflicts."""
     try:
         from sqlalchemy import text
         stmts = [
+            'ALTER TABLE "User" ALTER COLUMN "role" TYPE VARCHAR(50) USING "role"::VARCHAR(50);',
+            'ALTER TABLE "User" ALTER COLUMN role TYPE VARCHAR(50) USING role::VARCHAR(50);',
+            'ALTER TABLE "user" ALTER COLUMN "role" TYPE VARCHAR(50) USING "role"::VARCHAR(50);',
+            'ALTER TABLE "user" ALTER COLUMN role TYPE VARCHAR(50) USING role::VARCHAR(50);',
             'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "email" VARCHAR;',
             'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "passwordHash" VARCHAR;',
             'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS email VARCHAR;',

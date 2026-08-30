@@ -27,9 +27,17 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> list[str]:
+        defaults = [
+            "https://hum-saathi-ai.vercel.app",
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:3000",
+        ]
         if not self.ALLOWED_ORIGINS or self.ALLOWED_ORIGINS.strip() == "*":
             return ["*"]
-        return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
+        custom = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
+        return list(set(defaults + custom))
 
     @property
     def clean_database_url(self) -> str:
