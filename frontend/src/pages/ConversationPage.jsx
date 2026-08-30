@@ -75,7 +75,8 @@ export default function ConversationPage() {
     }
     // Fetch session directly by ID
     api.getSession(sessionId)
-      .then(({ session: sess }) => {
+      .then((data) => {
+        const sess = data?.session || (data?.id ? data : null);
         if (!sess) {
           setError('Session not found');
         } else {

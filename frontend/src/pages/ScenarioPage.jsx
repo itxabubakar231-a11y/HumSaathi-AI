@@ -11,13 +11,17 @@ export default function ScenarioPage() {
   const [scenarios, setScenarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [filterDifficulty, setFilterDifficulty] = useState('all');
 
   useEffect(() => {
     if (!user?.id) {
       navigate('/setup');
       return;
     }
-    api.getScenarios({ persona: user.persona, language: user.language })
+    const currentPersona = user?.persona || 'teen';
+    const currentLang = user?.language || language || 'en';
+
+    api.getScenarios({ persona: currentPersona, language: currentLang })
       .then((data) => {
         const list = data?.scenarios || (Array.isArray(data) ? data : []);
         setScenarios(list);
@@ -28,12 +32,12 @@ export default function ScenarioPage() {
       .finally(() => {
         setLoading(false);
       });
-  }, [user, navigate, t]);
+  }, [user, language, navigate, t]);
 
   const handleStart = async (scenarioId, mode) => {
     try {
       const res = await api.startConversation({
-        userId: user.id,
+        userId: user?.id,
         scenarioId,
         mode
       });
@@ -44,7 +48,7 @@ export default function ScenarioPage() {
         setError(t('common.error') || 'Unable to start conversation session');
       }
     } catch (err) {
-      setError(err.message || t('common.error'));
+      setError(err?.message || t('common.error'));
     }
   };
 
@@ -65,9 +69,8 @@ export default function ScenarioPage() {
     );
   }
 
-  const [filterDifficulty, setFilterDifficulty] = useState('all');
-
-  const filteredScenarios = scenarios.filter((scen) => {
+  const filteredScenarios = (scenarios || []).filter((scen) => {
+    if (!scen) return false;
     if (filterDifficulty === 'all') return true;
     return scen.difficulty === filterDifficulty;
   });
@@ -87,13 +90,13 @@ export default function ScenarioPage() {
       {/* Difficulty Filter Chips */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-md)', flexWrap: 'wrap', alignItems: 'center' }}>
         <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-          ⚡ {language === 'ur' ? 'درجہ بندی:' : language === 'ur_rm' ? 'Filter Difficulty:' : 'Filter Difficulty:'}
+          ⚡ {t('scenarios.filterDifficulty')}
         </span>
         {[
-          { id: 'all', label: language === 'ur' ? 'تمام منظرنامے' : language === 'ur_rm' ? 'Tamam Scenarios' : 'All Scenarios' },
-          { id: 'easy', label: language === 'ur' ? 'آسان (Easy)' : language === 'ur_rm' ? 'Easy' : 'Easy' },
-          { id: 'medium', label: language === 'ur' ? 'متوسط (Medium)' : language === 'ur_rm' ? 'Medium' : 'Medium' },
-          { id: 'challenging', label: language === 'ur' ? 'چیلنجنگ (Challenging)' : language === 'ur_rm' ? 'Challenging' : 'Challenging' },
+          { id: 'all', label: t('scenarios.all') },
+          { id: 'easy', label: t('scenarios.easy') },
+          { id: 'medium', label: t('scenarios.medium') },
+          { id: 'challenging', label: t('scenarios.challenging') },
         ].map((d) => (
           <button
             key={d.id}
@@ -119,10 +122,10 @@ export default function ScenarioPage() {
         >
           <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: 'var(--space-xs)' }}>💬</span>
           <h3 style={{ fontSize: '1.25rem', marginBottom: 'var(--space-xs)' }}>
-            {language === 'ur' ? 'کوئی منظرنامہ دستیاب نہیں ہے' : language === 'ur_rm' ? 'Koi scenario dastyab nahi hai' : 'No scenarios available'}
+            {t('scenarios.noAvailable')}
           </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-            {language === 'ur' ? 'براہ کرم تمام منظرنامے منتخب کریں یا بعد میں دوبارہ کوشش کریں۔' : language === 'ur_rm' ? 'Barah-e-karam tamam scenarios select karein.' : 'Try selecting All Scenarios or check back later.'}
+            {t('scenarios.noAvailableSub')}
           </p>
         </div>
       ) : (
