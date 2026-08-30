@@ -82,20 +82,27 @@ class ResponseEnvelopeMiddleware(BaseHTTPMiddleware):
             if isinstance(data, dict) and ("success" in data):
                 return JSONResponse(content=data, status_code=response.status_code)
 
-            # Error responses
+            # Error response wrapped in error envelope
+            no_cache_headers = {
+                "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+                "Pragma": "no-cache",
+                "Expires": "0",
+            }
             if response.status_code >= 400:
-                error_msg = data.get("error") or data.get("detail") or "Request failed"
-                if isinstance(error_msg, list):
-                    error_msg = "; ".join([str(item.get("msg", item)) for item in error_msg])
+                error_msg = data.get("detail") or data.get("message") or data.get("error") or "Request failed"
+                if isinstance(error_msg, list) and len(error_msg) > 0:
+                    error_msg = error_msg[0].get("msg", str(error_msg))
                 return JSONResponse(
                     content={"success": False, "error": str(error_msg)},
                     status_code=response.status_code,
+                    headers=no_cache_headers,
                 )
 
             # Successful response wrapped in data envelope
             return JSONResponse(
                 content={"success": True, "data": data},
                 status_code=response.status_code,
+                headers=no_cache_headers,
             )
 
         except Exception as exc:
@@ -103,6 +110,11 @@ class ResponseEnvelopeMiddleware(BaseHTTPMiddleware):
             return JSONResponse(
                 content={"success": False, "error": f"Internal server error: {exc}"},
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                headers={
+                    "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+                    "Pragma": "no-cache",
+                    "Expires": "0",
+                },
             )
 
 app.add_middleware(ResponseEnvelopeMiddleware)

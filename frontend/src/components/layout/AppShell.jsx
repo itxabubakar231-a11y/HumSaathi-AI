@@ -111,6 +111,31 @@ export default function AppShell({ children }) {
             </button>
           )}
 
+          {/* Admin Panel Quick Access Button */}
+          {user?.role === 'ADMIN' && (
+            <button
+              className="admin-badge-btn"
+              onClick={() => navigate('/admin/dashboard')}
+              title="Open Administrator Control Center"
+              style={{
+                background: 'linear-gradient(135deg, #1e293b, #0f172a)',
+                border: '1px solid #3b82f6',
+                color: '#60a5fa',
+                padding: '0.4rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+              }}
+            >
+              <span>🛡️</span>
+              <span>Admin Panel</span>
+            </button>
+          )}
+
           {/* User Profile Chip */}
           {user?.name && (
             <div className="user-profile-chip" onClick={() => navigate('/settings')} role="button" title="View Profile & Settings">
@@ -160,6 +185,26 @@ export default function AppShell({ children }) {
             </div>
 
             <nav className="sidebar-nav">
+              {user?.role === 'ADMIN' && (
+                <button
+                  className="nav-item admin-portal-nav-btn"
+                  type="button"
+                  onClick={() => {
+                    navigate('/admin/dashboard');
+                    setMobileMenuOpen(false);
+                  }}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(30, 41, 59, 0.4))',
+                    border: '1px solid rgba(59, 130, 246, 0.4)',
+                    color: '#60a5fa',
+                    fontWeight: 600,
+                    marginBottom: '0.75rem',
+                  }}
+                >
+                  <span className="nav-icon" aria-hidden="true">🛡️</span>
+                  <span className="nav-text">Admin Panel ➔</span>
+                </button>
+              )}
               <p className="sidebar-label">{language === 'ur' ? 'رہنمائی' : 'Main Menu'}</p>
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
