@@ -290,7 +290,7 @@ export default function SkillModulePage() {
             <form onSubmit={handleSubmit}>
               {!isCustomMode ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)', marginBottom: 'var(--space-md)' }}>
-                  {currentScenario.options.map((opt) => (
+                  {currentScenario.options.map((opt, idx) => (
                     <label
                       key={opt.id}
                       style={{
@@ -313,6 +313,9 @@ export default function SkillModulePage() {
                         onChange={() => setSelectedOptionId(opt.id)}
                         style={{ marginTop: '4px' }}
                       />
+                      <span style={{ fontWeight: 700, color: 'var(--interactive-primary)', minWidth: '1.4rem', fontSize: '0.95rem' }}>
+                        {String.fromCharCode(65 + idx)}.
+                      </span>
                       <span style={{ fontSize: '0.96rem', lineHeight: '1.5', color: 'var(--text-primary)' }}>{opt.text}</span>
                     </label>
                   ))}
