@@ -69,4 +69,35 @@ export const api = {
     return request(`/api/skills/module/${moduleId}${qs ? `?${qs}` : ''}`);
   },
   evaluateSkillSolution: (body) => request('/api/skills/evaluate', { method: 'POST', body: JSON.stringify(body) }),
+
+  // ==========================================
+  // Admin API Endpoints
+  // ==========================================
+  adminGetDashboard: () => request('/api/admin/dashboard'),
+  adminGetUsers: (params) => {
+    const cleanParams = Object.fromEntries(Object.entries(params || {}).filter(([_, v]) => v !== undefined && v !== null && v !== ''));
+    const qs = new URLSearchParams(cleanParams).toString();
+    return request(`/api/admin/users${qs ? `?${qs}` : ''}`);
+  },
+  adminGetUser: (userId) => request(`/api/admin/users/${userId}`),
+  adminUpdateUserStatus: (userId, isActive) => request(`/api/admin/users/${userId}/status`, { method: 'PATCH', body: JSON.stringify({ isActive }) }),
+  adminUpdateUserPersona: (userId, persona) => request(`/api/admin/users/${userId}/persona`, { method: 'PATCH', body: JSON.stringify({ persona }) }),
+  adminDeleteUser: (userId) => request(`/api/admin/users/${userId}`, { method: 'DELETE' }),
+  adminGetScenarios: (params) => {
+    const cleanParams = Object.fromEntries(Object.entries(params || {}).filter(([_, v]) => v !== undefined && v !== null && v !== ''));
+    const qs = new URLSearchParams(cleanParams).toString();
+    return request(`/api/admin/scenarios${qs ? `?${qs}` : ''}`);
+  },
+  adminUpdateScenario: (scenarioId, payload) => request(`/api/admin/scenarios/${scenarioId}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  adminGetAnalytics: () => request('/api/admin/analytics'),
+  adminGetPermissions: () => request('/api/admin/permissions'),
+  adminGrantPermission: (userId, permissionId) => request('/api/admin/permissions/grant', { method: 'POST', body: JSON.stringify({ userId, permissionId }) }),
+  adminRevokePermission: (userId, permissionId) => request('/api/admin/permissions/revoke', { method: 'POST', body: JSON.stringify({ userId, permissionId }) }),
+  adminGetAuditLogs: (params) => {
+    const cleanParams = Object.fromEntries(Object.entries(params || {}).filter(([_, v]) => v !== undefined && v !== null && v !== ''));
+    const qs = new URLSearchParams(cleanParams).toString();
+    return request(`/api/admin/audit-logs${qs ? `?${qs}` : ''}`);
+  },
+  adminGetAiMonitoring: () => request('/api/admin/ai-monitoring'),
+  adminGetSystemStatus: () => request('/api/admin/system-status'),
 };

@@ -20,6 +20,8 @@ class User(Base):
     sensoryPrefs = Column(String, default="{}", nullable=False)
     parentPin = Column(String, default="1234", nullable=False)
     setupComplete = Column(Boolean, default=False, nullable=False)
+    isActive = Column(Boolean, default=True, nullable=False)
+    lastActiveAt = Column(DateTime, nullable=True)
     createdAt = Column(DateTime, default=datetime.utcnow, nullable=False)
     updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -126,3 +128,43 @@ class AiRecommendation(Base):
     __table_args__ = (
         Index("ix_airec_userId", "userId"),
     )
+
+class AuditLog(Base):
+    __tablename__ = "AuditLog"
+
+    id = Column(String, primary_key=True, default=generate_cuid)
+    adminId = Column(String, nullable=True)
+    adminEmail = Column(String, nullable=True)
+    action = Column(String, nullable=False)
+    targetType = Column(String, nullable=True)  # e.g. "user", "scenario", "permission", "system"
+    targetId = Column(String, nullable=True)
+    details = Column(String, default="{}", nullable=False)  # JSON string
+    createdAt = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        Index("ix_audit_action", "action"),
+        Index("ix_audit_createdAt", "createdAt"),
+    )
+
+class Permission(Base):
+    __tablename__ = "Permission"
+
+    id = Column(String, primary_key=True)  # e.g. "manage_users", "manage_scenarios", "view_analytics"
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    category = Column(String, default="General", nullable=False)
+
+class UserPermission(Base):
+    __tablename__ = "UserPermission"
+
+    id = Column(String, primary_key=True, default=generate_cuid)
+    userId = Column(String, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    permissionId = Column(String, ForeignKey("Permission.id", ondelete="CASCADE"), nullable=False)
+    grantedAt = Column(DateTime, default=datetime.utcnow, nullable=False)
+    grantedBy = Column(String, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("userId", "permissionId", name="uq_user_permission"),
+        Index("ix_userperm_userId", "userId"),
+    )
+

@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     PORT: int = int(os.getenv("PORT", "8000"))
     ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "*")
     
+    # Server-side Admin Initial Provisioning (optional via env)
+    ADMIN_EMAIL: str = os.getenv("ADMIN_EMAIL", "")
+    ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "")
+    
     # AI configuration
     AI_API_KEY: str = (
         os.getenv("AI_API_KEY") or

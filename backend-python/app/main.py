@@ -18,6 +18,7 @@ from app.routers import (
     attempts,
     assessment,
     evaluations,
+    admin,
 )
 
 # Configure logging
@@ -118,6 +119,7 @@ app.include_router(evaluations.router, prefix="/api/evaluations")
 app.include_router(skills.router, prefix="/api")
 app.include_router(attempts.router, prefix="/api")
 app.include_router(assessment.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
 
 @app.get("/")
 def root_status():

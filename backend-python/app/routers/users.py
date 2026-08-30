@@ -34,7 +34,8 @@ def format_user(user: User) -> Dict[str, Any]:
         "language": user.language,
         "sensoryPrefs": parse_json(user.sensoryPrefs, DEFAULT_SENSORY),
         "setupComplete": user.setupComplete,
-        "role": user.role,
+        "role": user.role or "learner",
+        "isActive": getattr(user, "isActive", True),
     }
 
 @router.post("/signup")
@@ -78,16 +79,20 @@ def signup_user(payload: UserSignupRequest, db: Session = Depends(get_db)):
     if payload.sensoryPrefs:
         sensory_dict.update({k: v for k, v in payload.sensoryPrefs.model_dump().items() if v is not None})
 
+    # Strict server-side role assignment: normal signup is always 'learner'
     user = User(
         name=name,
         email=email,
         passwordHash=password_hash,
+        role="learner",
         persona=payload.persona or "child",
         language=payload.language or "en",
         sensoryPrefs=stringify_json(sensory_dict),
+        isActive=True,
         setupComplete=True,
         createdAt=datetime.utcnow(),
         updatedAt=datetime.utcnow(),
+        lastActiveAt=datetime.utcnow(),
     )
     db.add(user)
     db.commit()
@@ -142,12 +147,15 @@ def login_user(payload: UserLoginRequest, db: Session = Depends(get_db)):
         if not user:
             user = User(
                 name=trimmed_name,
+                role="learner",
                 persona="child",
                 language="en",
                 sensoryPrefs=stringify_json(DEFAULT_SENSORY),
+                isActive=True,
                 setupComplete=True,
                 createdAt=datetime.utcnow(),
                 updatedAt=datetime.utcnow(),
+                lastActiveAt=datetime.utcnow(),
             )
             db.add(user)
             db.commit()
@@ -158,6 +166,19 @@ def login_user(payload: UserLoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Account not found or invalid credentials.",
         )
+
+    if hasattr(user, "isActive") and user.isActive is False:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account has been deactivated. Please contact an administrator.",
+        )
+
+    # Update last active timestamp
+    try:
+        user.lastActiveAt = datetime.utcnow()
+        db.commit()
+    except Exception:
+        pass
 
     token = create_access_token(user.id)
 
