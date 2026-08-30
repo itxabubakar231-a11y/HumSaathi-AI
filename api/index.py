@@ -4,7 +4,13 @@ import os
 # Ensure backend-python is in the module search path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend-python')))
 
+from app.database import init_db_tables
+try:
+    init_db_tables()
+except Exception:
+    pass
+
 from app.main import app
 
 # Export for ASGI serverless handlers
-export_app = app  # v1.0.7-child-activity-fix
+export_app = app  # v1.0.8-security-auth-deploy

@@ -52,17 +52,25 @@ def ensure_auth_columns():
     """Ensure email and passwordHash columns exist on User table without data loss."""
     try:
         from sqlalchemy import text
+        stmts = [
+            'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "email" VARCHAR;',
+            'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "passwordHash" VARCHAR;',
+            'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS email VARCHAR;',
+            'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS passwordHash VARCHAR;',
+            'ALTER TABLE "User" ADD COLUMN email VARCHAR;',
+            'ALTER TABLE "User" ADD COLUMN "passwordHash" VARCHAR;',
+            'ALTER TABLE User ADD COLUMN email VARCHAR;',
+            'ALTER TABLE User ADD COLUMN passwordHash VARCHAR;',
+            'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "email" VARCHAR;',
+            'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "passwordHash" VARCHAR;',
+        ]
         with engine.connect() as conn:
-            try:
-                conn.execute(text("ALTER TABLE User ADD COLUMN email VARCHAR;"))
-                conn.commit()
-            except Exception:
-                pass
-            try:
-                conn.execute(text("ALTER TABLE User ADD COLUMN passwordHash VARCHAR;"))
-                conn.commit()
-            except Exception:
-                pass
+            for s in stmts:
+                try:
+                    conn.execute(text(s))
+                    conn.commit()
+                except Exception:
+                    pass
     except Exception as e:
         logger.debug(f"Notice during column verification: {e}")
 
