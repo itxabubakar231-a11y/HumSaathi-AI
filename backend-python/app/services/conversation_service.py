@@ -742,6 +742,7 @@ def start_session(db: Session, user_id: str, scenario_id: str, mode: str = "text
         completed=False,
         createdAt=datetime.utcnow(),
     )
+    user.lastActiveAt = datetime.utcnow()
     db.add(session)
     db.commit()
     db.refresh(session)
@@ -869,6 +870,9 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
     if is_session_completed and not session.completedAt:
         session.completedAt = datetime.utcnow()
 
+    if user:
+        user.lastActiveAt = datetime.utcnow()
+
     db.commit()
     db.refresh(session)
 
@@ -902,6 +906,10 @@ def end_session(db: Session, session_id: str) -> Dict[str, Any]:
     session.completed = True
     if not session.completedAt:
         session.completedAt = datetime.utcnow()
+
+    user = db.query(User).filter(User.id == session.userId).first()
+    if user:
+        user.lastActiveAt = datetime.utcnow()
 
     db.commit()
     db.refresh(session)

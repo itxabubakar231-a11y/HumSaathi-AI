@@ -103,6 +103,7 @@ async def submit_attempt(
         createdAt=datetime.utcnow(),
         completedAt=datetime.utcnow(),
     )
+    user.lastActiveAt = datetime.utcnow()
     db.add(attempt)
     db.commit()
     db.refresh(attempt)

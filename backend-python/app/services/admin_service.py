@@ -200,6 +200,41 @@ def get_admin_user_detail(db: Session, user_id: str) -> Optional[Dict[str, Any]]
     completed_sess = db.query(ConversationSession).filter(ConversationSession.userId == user.id, ConversationSession.completed == True).count()
     att_count = db.query(Attempt).filter(Attempt.userId == user.id).count()
 
+    # Calculate real average score from user's attempts and evaluations
+    scores = []
+    attempts = db.query(Attempt).filter(Attempt.userId == user.id).all()
+    for a in attempts:
+        if a.score is not None:
+            scores.append(float(a.score))
+
+    evals = db.query(ConversationEvaluation).join(
+        ConversationSession, ConversationEvaluation.sessionId == ConversationSession.id
+    ).filter(ConversationSession.userId == user.id).all()
+    for e in evals:
+        if e.overallScore is not None:
+            scores.append(float(e.overallScore))
+
+    avg_score = round(sum(scores) / len(scores), 1) if scores else None
+
+    # Retrieve real recent activity records
+    recent_items = []
+    for a in db.query(Attempt).filter(Attempt.userId == user.id).order_by(desc(Attempt.createdAt)).limit(5).all():
+        recent_items.append({
+            "type": "activity_attempt",
+            "title": f"Practice Activity ({a.activityId or 'General'})",
+            "score": a.score,
+            "timestamp": a.createdAt.isoformat() if a.createdAt else None,
+        })
+    for s in db.query(ConversationSession).filter(ConversationSession.userId == user.id).order_by(desc(ConversationSession.createdAt)).limit(5).all():
+        recent_items.append({
+            "type": "practice_scenario",
+            "title": f"Scenario Session ({s.scenarioId})",
+            "completed": s.completed,
+            "turns": s.turnCount,
+            "timestamp": s.createdAt.isoformat() if s.createdAt else None,
+        })
+    recent_items.sort(key=lambda x: x.get("timestamp") or "", reverse=True)
+
     return {
         "id": user.id,
         "name": user.name,
@@ -210,10 +245,12 @@ def get_admin_user_detail(db: Session, user_id: str) -> Optional[Dict[str, Any]]
         "isActive": getattr(user, "isActive", True),
         "createdAt": user.createdAt.isoformat() if user.createdAt else None,
         "updatedAt": user.updatedAt.isoformat() if user.updatedAt else None,
-        "lastActiveAt": user.lastActiveAt.isoformat() if getattr(user, "lastActiveAt", None) else None,
+        "lastActiveAt": user.lastActiveAt.isoformat() if getattr(user, "lastActiveAt", None) else (user.updatedAt.isoformat() if user.updatedAt else None),
         "sessionCount": sess_count,
         "completedSessions": completed_sess,
         "attemptCount": att_count,
+        "averageScore": avg_score,
+        "recentActivity": recent_items[:10],
         "sensoryPrefs": parse_json(user.sensoryPrefs, {}),
     }
 

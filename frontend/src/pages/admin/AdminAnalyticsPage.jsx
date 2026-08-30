@@ -50,7 +50,7 @@ export default function AdminAnalyticsPage() {
       <div className="admin-analytics-summary-strip">
         <div className="summary-strip-card">
           <span>Overall Success Rate</span>
-          <strong>{overview.totalSessions > 0 ? Math.round((overview.completedScenarios / overview.totalSessions) * 100) : 100}%</strong>
+          <strong>{overview.totalSessions > 0 ? Math.round((overview.completedScenarios / overview.totalSessions) * 100) : 0}%</strong>
           <small>{overview.completedScenarios} completed of {overview.totalSessions} sessions</small>
         </div>
         <div className="summary-strip-card">

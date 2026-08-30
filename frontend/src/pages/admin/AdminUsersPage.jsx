@@ -8,8 +8,8 @@ export default function AdminUsersPage() {
   const [personaFilter, setPersonaFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState(null);
   const [viewModalUser, setViewModalUser] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [confirmDeleteUser, setConfirmDeleteUser] = useState(null);
@@ -38,6 +38,21 @@ export default function AdminUsersPage() {
   useEffect(() => {
     fetchUsers(1);
   }, [fetchUsers]);
+
+  const handleOpenDetails = async (user) => {
+    setViewModalUser(user);
+    setDetailLoading(true);
+    try {
+      const detailed = await api.adminGetUser(user.id);
+      if (detailed) {
+        setViewModalUser(detailed);
+      }
+    } catch {
+      // Keep basic row snapshot if detailed fetch fails
+    } finally {
+      setDetailLoading(false);
+    }
+  };
 
   const handleToggleStatus = async (user) => {
     const nextStatus = !user.isActive;
@@ -98,48 +113,54 @@ export default function AdminUsersPage() {
       </div>
 
       {feedbackMsg && (
-        <div className="admin-alert-banner">
-          <span>{feedbackMsg}</span>
-          <button className="admin-close-btn" onClick={() => setFeedbackMsg('')}>✕</button>
+        <div className="admin-feedback-banner">
+          {feedbackMsg}
+          <button className="banner-close" onClick={() => setFeedbackMsg('')}>✕</button>
         </div>
       )}
 
-      {/* Filter Toolbar */}
+      {/* Filters & Search Toolbar */}
       <div className="admin-filters-toolbar">
         <div className="search-input-wrapper">
           <span className="search-icon">🔍</span>
           <input
             type="text"
             className="admin-search-input"
-            placeholder="Search by name or email..."
+            placeholder="Search learners by name or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
-        <div className="filter-select-group">
+        <div className="filters-group">
           <select
             className="admin-select"
             value={personaFilter}
             onChange={(e) => setPersonaFilter(e.target.value)}
-            aria-label="Filter by Persona"
           >
             <option value="all">All Portals</option>
-            <option value="child">Child Portal</option>
-            <option value="teen">Teen Portal</option>
-            <option value="adult">Adult Portal</option>
+            <option value="child">Child (4-12)</option>
+            <option value="teen">Teen (13-17)</option>
+            <option value="adult">Adult (18+)</option>
           </select>
 
           <select
             className="admin-select"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            aria-label="Filter by Status"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active Only</option>
-            <option value="deactivated">Deactivated Only</option>
+            <option value="all">All Statuses</option>
+            <option value="active">Active Accounts</option>
+            <option value="deactivated">Deactivated</option>
           </select>
+
+          <button
+            className="admin-btn-secondary"
+            onClick={() => fetchUsers(pagination.page)}
+            disabled={loading}
+          >
+            🔄 Refresh
+          </button>
         </div>
       </div>
 
@@ -166,6 +187,7 @@ export default function AdminUsersPage() {
                   <th>Role</th>
                   <th>Status</th>
                   <th>Sessions</th>
+                  <th>Last Active</th>
                   <th>Registered</th>
                   <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
@@ -204,6 +226,11 @@ export default function AdminUsersPage() {
                     </td>
                     <td>
                       <span className="date-text">
+                        {u.lastActiveAt ? new Date(u.lastActiveAt).toLocaleString() : '—'}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="date-text">
                         {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}
                       </span>
                     </td>
@@ -212,7 +239,7 @@ export default function AdminUsersPage() {
                         <button
                           className="action-btn"
                           title="View Details"
-                          onClick={() => setViewModalUser(u)}
+                          onClick={() => handleOpenDetails(u)}
                         >
                           👁️
                         </button>
@@ -278,38 +305,116 @@ export default function AdminUsersPage() {
       {/* Modal: View Details */}
       {viewModalUser && (
         <div className="admin-modal-overlay" onClick={() => setViewModalUser(null)}>
-          <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
+          <div className="admin-modal-card" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>User Details</h2>
+              <h2>Learner Profile & Activity Summary</h2>
               <button className="modal-close-btn" onClick={() => setViewModalUser(null)}>✕</button>
             </div>
             <div className="modal-body">
-              <div className="detail-grid">
-                <div>
-                  <label className="detail-label">Full Name</label>
-                  <p className="detail-value">{viewModalUser.name}</p>
+              {detailLoading ? (
+                <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+                  <div className="loading-spinner" />
+                  <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>Loading user activity details...</p>
                 </div>
-                <div>
-                  <label className="detail-label">Email</label>
-                  <p className="detail-value">{viewModalUser.email}</p>
-                </div>
-                <div>
-                  <label className="detail-label">Assigned Portal</label>
-                  <p className="detail-value">{viewModalUser.persona?.toUpperCase()}</p>
-                </div>
-                <div>
-                  <label className="detail-label">Account Role</label>
-                  <p className="detail-value">{viewModalUser.role}</p>
-                </div>
-                <div>
-                  <label className="detail-label">Account Status</label>
-                  <p className="detail-value">{viewModalUser.isActive ? 'Active' : 'Deactivated'}</p>
-                </div>
-                <div>
-                  <label className="detail-label">Practice Sessions</label>
-                  <p className="detail-value">{viewModalUser.sessionCount}</p>
-                </div>
-              </div>
+              ) : (
+                <>
+                  <div className="detail-grid">
+                    <div>
+                      <label className="detail-label">Full Name</label>
+                      <p className="detail-value">{viewModalUser.name}</p>
+                    </div>
+                    <div>
+                      <label className="detail-label">Email Address</label>
+                      <p className="detail-value">{viewModalUser.email || 'Not provided'}</p>
+                    </div>
+                    <div>
+                      <label className="detail-label">Assigned Portal</label>
+                      <p className="detail-value">{viewModalUser.persona?.toUpperCase() || 'CHILD'}</p>
+                    </div>
+                    <div>
+                      <label className="detail-label">Preferred Language</label>
+                      <p className="detail-value">
+                        {viewModalUser.language === 'ur' ? 'Urdu (اردو)' : viewModalUser.language === 'ur_rm' ? 'Roman Urdu' : 'English'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="detail-label">Account Role</label>
+                      <p className="detail-value">{viewModalUser.role}</p>
+                    </div>
+                    <div>
+                      <label className="detail-label">Account Status</label>
+                      <p className="detail-value">{viewModalUser.isActive ? 'Active' : 'Deactivated'}</p>
+                    </div>
+                    <div>
+                      <label className="detail-label">Registered At</label>
+                      <p className="detail-value">
+                        {viewModalUser.createdAt ? new Date(viewModalUser.createdAt).toLocaleString() : '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="detail-label">Last Active</label>
+                      <p className="detail-value">
+                        {viewModalUser.lastActiveAt ? new Date(viewModalUser.lastActiveAt).toLocaleString() : 'Never'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="detail-label">Practice Sessions</label>
+                      <p className="detail-value">{viewModalUser.sessionCount ?? 0} ({viewModalUser.completedSessions ?? 0} completed)</p>
+                    </div>
+                    <div>
+                      <label className="detail-label">Activity Attempts</label>
+                      <p className="detail-value">{viewModalUser.attemptCount ?? 0}</p>
+                    </div>
+                    <div>
+                      <label className="detail-label">Average Score</label>
+                      <p className="detail-value" style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
+                        {viewModalUser.averageScore !== null && viewModalUser.averageScore !== undefined
+                          ? `${viewModalUser.averageScore}%`
+                          : 'No scored activities yet'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Recent Activity List */}
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
+                      Recent Activity
+                    </h3>
+                    {!viewModalUser.recentActivity || viewModalUser.recentActivity.length === 0 ? (
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                        No activity records found for this learner.
+                      </p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '180px', overflowY: 'auto' }}>
+                        {viewModalUser.recentActivity.map((act, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: '0.5rem 0.75rem',
+                              background: 'var(--bg-secondary)',
+                              borderRadius: 'var(--radius-sm)',
+                              fontSize: '0.82rem',
+                            }}
+                          >
+                            <div>
+                              <strong>{act.title}</strong>
+                              <span style={{ marginLeft: '0.5rem', color: 'var(--text-secondary)' }}>
+                                {act.type === 'practice_scenario' ? (act.completed ? '✓ Completed' : `${act.turns} turns`) : (act.score !== undefined ? `Score: ${act.score}%` : '')}
+                              </span>
+                            </div>
+                            <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
+                              {act.timestamp ? new Date(act.timestamp).toLocaleTimeString() : ''}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
             <div className="modal-footer">
               <button className="admin-btn-secondary" onClick={() => setViewModalUser(null)}>Close</button>
@@ -352,30 +457,27 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* Modal: Confirm Delete User */}
+      {/* Modal: Confirm Delete */}
       {confirmDeleteUser && (
         <div className="admin-modal-overlay" onClick={() => setConfirmDeleteUser(null)}>
           <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header" style={{ borderBottomColor: '#fca5a5' }}>
-              <h2 style={{ color: '#dc2626' }}>Delete User Account</h2>
+            <div className="modal-header">
+              <h2>Confirm User Deletion</h2>
               <button className="modal-close-btn" onClick={() => setConfirmDeleteUser(null)}>✕</button>
             </div>
             <div className="modal-body">
+              <div className="danger-modal-icon">⚠️</div>
               <p>
-                Are you sure you want to permanently delete the account for <strong>{confirmDeleteUser.name}</strong> ({confirmDeleteUser.email})?
+                Are you sure you want to permanently delete learner <strong>{confirmDeleteUser.name}</strong> ({confirmDeleteUser.email || 'No email'})?
               </p>
-              <p style={{ color: '#dc2626', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                ⚠️ This action is irreversible. All practice sessions, attempts, and progress records for this user will be removed.
+              <p className="danger-subtext">
+                This action is irreversible. All related sessions, attempts, and progress records for this user will be removed.
               </p>
             </div>
             <div className="modal-footer">
               <button className="admin-btn-secondary" onClick={() => setConfirmDeleteUser(null)}>Cancel</button>
-              <button
-                className="admin-btn-danger"
-                onClick={handleDeleteUser}
-                disabled={actionLoading}
-              >
-                {actionLoading ? 'Deleting...' : 'Yes, Delete Account'}
+              <button className="admin-btn-danger" onClick={handleDeleteUser} disabled={actionLoading}>
+                {actionLoading ? 'Deleting...' : 'Permanently Delete'}
               </button>
             </div>
           </div>

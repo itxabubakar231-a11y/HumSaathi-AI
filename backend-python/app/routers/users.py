@@ -188,8 +188,16 @@ def login_user(payload: UserLoginRequest, db: Session = Depends(get_db)):
     }
 
 @router.get("/me")
-def get_current_user_profile(current_user: User = Depends(get_current_user)):
-    """Retrieve the profile of the currently authenticated user."""
+def get_current_user_profile(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Retrieve the profile of the currently authenticated user and update last active timestamp."""
+    try:
+        current_user.lastActiveAt = datetime.utcnow()
+        db.commit()
+    except Exception:
+        pass
     return {"user": format_user(current_user)}
 
 @router.post("/logout")

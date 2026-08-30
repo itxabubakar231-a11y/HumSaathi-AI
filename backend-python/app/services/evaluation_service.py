@@ -236,6 +236,8 @@ async def evaluate_session(db: Session, session_id: str, user_id: str) -> Dict[s
         feedback=feedback_text,
         createdAt=datetime.utcnow(),
     )
+    if user:
+        user.lastActiveAt = datetime.utcnow()
     db.add(eval_record)
     db.commit()
     db.refresh(eval_record)
