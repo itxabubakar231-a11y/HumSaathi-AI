@@ -192,6 +192,146 @@ FALLBACK_SCRIPTS = {
             "Excellent. Koi aur question ho to zaroor batayein. Good luck!",
         ],
     },
+    'Requesting an Assignment Extension': {
+        'en': [
+            "Hello! Yes, what assignment did you want to discuss with me?",
+            "I appreciate you explaining your situation in advance rather than after the deadline. What submission time are you proposing?",
+            "That sounds fair. Let's agree on tomorrow by 4:00 PM. Make sure to submit through the portal.",
+            "You are welcome! Work hard and see you tomorrow.",
+        ],
+        'ur': [
+            "ہیلو! جی ہاں، آپ کس اسائنمنٹ کے حوالے سے بات کرنا چاہتے تھے؟",
+            "ڈیڈلائن گزرنے کے بعد نہیں بلکہ پہلے آ کر وجہ بتانے کا شکریہ۔ آپ کس وقت تک جمع کروا سکتے ہیں؟",
+            "یہ مناسب ہے۔ کل شام 4 بجے تک پورٹل پر جمع کروا دیں۔",
+            "خوش آمدید! محنت سے کام مکمل کریں اور کل ملتے ہیں۔",
+        ],
+        'ur_rm': [
+            "Hello! Haan, aap kis assignment ke baare mein baat karna chahte the?",
+            "Advance mein aakar explain karne ka shukriya. Aap kab tak submit kar sakte hain?",
+            "Theek hai, kal 4:00 PM tak portal par submit kar dein.",
+            "You are welcome! Kal milte hain.",
+        ],
+    },
+    'Resolving a Team Project Disagreement': {
+        'en': [
+            "Thanks for bringing this up calmly. Why do you feel the digital presentation will work better?",
+            "I see your point about interactive charts. What if we create the digital slides and print key infographics for our table?",
+            "That combines the best of both ideas! Let's divide the tasks so we finish early.",
+            "Great teamwork! Let's get started.",
+        ],
+        'ur': [
+            "پرسکون انداز میں بات کرنے کا شکریہ۔ آپ کے خیال میں ڈیجیٹل پریزنٹیشن کیوں بہتر ہے؟",
+            "میں آپ کا نکتہ سمجھتی ہوں۔ کیسا رہے گا اگر ہم سلائیڈز بنائیں اور اہم چارٹس پرنٹ کر کے ٹیبل پر لگا دیں؟",
+            "یہ دونوں خیالات کا بہترین امتزاج ہے! آئیے کام تقسیم کر کے جلدی مکمل کرتے ہیں۔",
+            "شاندار ٹیم ورک! آئیے کام شروع کرتے ہیں۔",
+        ],
+        'ur_rm': [
+            "Calmly baat karne ka shukriya. Aap ko digital presentation kyun better lagti hai?",
+            "Aap ka point acha hai. Kaisa rahega agar hum slides banayein aur main charts print bhi kar lein?",
+            "Dono ideas combine ho gaye! Aaiye tasks divide karte hain.",
+            "Great teamwork! Kaam shuru karte hain.",
+        ],
+    },
+    'Expressing Preferences in a Social Group': {
+        'en': [
+            "Oh, that place sounds delicious! What is your favorite dish there?",
+            "Sounds like a great choice. Let's check with the rest of the group to make sure everyone is happy with that.",
+            "Awesome, everyone agreed on that spot! Let's head over right after class.",
+            "See you there!",
+        ],
+        'ur': [
+            "اوہ، وہ جگہ بہت اچھی لگتی ہے! وہاں آپ کی پسندیدہ ڈش کیا ہے؟",
+            "یہ بہترین انتخاب ہے۔ آئیے باقی دوستوں سے بھی تصدیق کر لیں تاکہ سب راضی ہوں۔",
+            "زبردست، سب دوست متفق ہیں! کلاس کے بعد وہیں چلتے ہیں۔",
+            "وہیں ملتے ہیں!",
+        ],
+        'ur_rm': [
+            "Oh, woh jagah bohot achi hai! Wahan aap ki favorite dish kya hai?",
+            "Bohot acha choice hai. Baqi friends se bhi confirm kar lete hain.",
+            "Awesome, sab agree kar gaye! Class ke baad wahan chalte hain.",
+            "Wahan milte hain!",
+        ],
+    },
+    'Speaking to a Pharmacist About Medication': {
+        'en': [
+            "Hello! For these tablets, take one pill twice daily after meals with water.",
+            "Yes, taking it after meals protects against stomach upset. Avoid drinking excess caffeine with it.",
+            "Is everything clear regarding the 5-day dosage duration?",
+            "You are welcome! Take care and get well soon.",
+        ],
+        'ur': [
+            "ہیلو! ان گولیوں کے لیے، کھانے کے بعد دن میں دو بار پانی کے ساتھ ایک گولی لیں۔",
+            "جی ہاں، کھانے کے بعد لینے سے معدہ محفوظ رہتا ہے۔ اس کے ساتھ زیادہ چائے یا کافی سے پرہیز کریں۔",
+            "کیا 5 دن کی خوراک کے بارے میں سب کچھ واضح ہے؟",
+            "خوش آمدید! اپنا خیال رکھیں اور جلد صحت یاب ہوں۔",
+        ],
+        'ur_rm': [
+            "Hello! Yeh tablet din mein 2 baar khane ke baad paani ke sath lein.",
+            "Haan, khane ke baad lene se stomach theek rehta hai.",
+            "Kya 5 days ki dosage duration clear hai?",
+            "You are welcome! Apna khayal rakhein aur jaldi theek hon.",
+        ],
+    },
+    'Requesting a Shift Swap with a Coworker': {
+        'en': [
+            "Hey! Yes, I understand personal appointments come up. Which day would you cover for me in return?",
+            "Thursday morning works really well for my schedule. That works out great for both of us.",
+            "Let's put in the official shift change request in the staff portal so the manager can sign off.",
+            "Have a good appointment on Friday!",
+        ],
+        'ur': [
+            "ہیلو! جی ہاں، میں سمجھتا ہوں کہ ضروری کام آ سکتے ہیں۔ اس کے بدلے آپ کس دن میری ڈیوٹی کریں گے؟",
+            "جمعرات کی صبح میرے لیے بالکل مناسب ہے۔ یہ ہم دونوں کے لیے فائدہ مند ہے۔",
+            "آئیے اسٹاف پورٹل میں باقاعدہ شفٹ کی تبدیلی کی درخواست جمع کرا دیتے ہیں تاکہ مینیجر منظور کر لے۔",
+            "جمعہ کے دن آپ کا کام خیریت سے مکمل ہو!",
+        ],
+        'ur_rm': [
+            "Hey! Haan bilkul, family emergency samajh aati hai. Return mein aap kab shift cover karenge?",
+            "Thursday morning mere liye perfect hai. Dono ke liye convenient ho gaya.",
+            "Aaiye staff portal par official request submit kar dete hain manager sign-off ke liye.",
+            "Best of luck!",
+        ],
+    },
+    'Calling Customer Support About Billing Discrepancy': {
+        'en': [
+            "Thank you for providing your account number. Let me check the recent charges on your account.",
+            "I see the Rs. 1,500 streaming add-on was activated automatically during a system update. I apologize for the error.",
+            "I have applied an immediate credit of Rs. 1,500 to your account. Your adjusted payable balance is now Rs. 2,000. Your reference ID is CR-49821.",
+            "Thank you for contacting customer support. Have a great day!",
+        ],
+        'ur': [
+            "اکاؤنٹ نمبر دینے کا شکریہ۔ مجھے آپ کے اکاؤنٹ کے حالیہ چارجز دیکھنے دیں۔",
+            "میں دیکھ سکتی ہوں کہ سسٹم اپ ڈیٹ کے دوران 1500 روپے کا پیکج شامل ہوا تھا۔ میں اس غلطی پر معذرت خواہ ہوں۔",
+            "میں نے فوری طور پر 1500 روپے کی رعایت آپ کے بل میں شامل کر دی ہے۔ اب آپ کا بل 2000 روپے ہے۔ آپ کا ریفرنس نمبر CR-49821 ہے۔",
+            "کسٹمر سپورٹ سے رابطہ کرنے کا شکریہ۔ آپ کا دن اچھا گزرے!",
+        ],
+        'ur_rm': [
+            "Account number dene ka shukriya. Main charges check karti hoon.",
+            "Main dekh sakti hoon ke 1,500 ka package ghalati se add hua tha. Apology for the mistake.",
+            "Main ne Rs. 1,500 reverse kar diye hain. Net payable ab Rs. 2,000 hai. Reference number CR-49821 hai.",
+            "Thank you for calling FastNet support!",
+        ],
+    },
+    'Booking & Rescheduling a Medical Appointment': {
+        'en': [
+            "Hello! Dr. Malik has openings on Tuesday at 10:30 AM or Thursday at 3:00 PM. Which suits you better?",
+            "Thursday at 3:00 PM is booked for you. Please bring your previous medical history or test reports.",
+            "We have sent a confirmation SMS to your registered number. Please arrive 10 minutes early at Room 204.",
+            "Thank you! See you on Thursday.",
+        ],
+        'ur': [
+            "ہیلو! ڈاکٹر ملک کے پاس منگل کو صبح 10:30 بجے یا جمعرات کو سہ پہر 3:00 بجے وقت دستیاب ہے۔ آپ کے لیے کون سا وقت مناسب ہے؟",
+            "جمعرات کو سہ پہر 3:00 بجے کا وقت آپ کے لیے طے کر دیا گیا ہے۔ براہ کرم اپنی پرانی رپورٹس ساتھ لائیں۔",
+            "ہم نے آپ کے نمبر پر تصدیقی ایس ایم ایس بھیج دیا ہے۔ براہ کرم کمرہ نمبر 204 میں 10 منٹ پہلے پہنچیں۔",
+            "شکریہ! جمعرات کو ملاقات ہوگی۔",
+        ],
+        'ur_rm': [
+            "Hello! Dr. Malik ke paas Tuesday 10:30 AM ya Thursday 3:00 PM slot hai. Konsa convenient hai?",
+            "Thursday 3:00 PM confirm kar diya hai. Previous medical reports sath layein.",
+            "Confirmation SMS bhej diya hai. Room 204 mein 10 mins pehle pahunchein.",
+            "Thank you! See you on Thursday.",
+        ],
+    },
     'Explaining a Project Delay to a Colleague': {
         'en': [
             "Thanks for the update. How much more time do you think you will need to finalize the data?",

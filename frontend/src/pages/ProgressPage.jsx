@@ -43,18 +43,20 @@ export default function ProgressPage() {
       {/* Page Header */}
       <div className="progress-page-header">
         <div>
-          <p className="eyebrow">{language === 'ur' ? 'کارکردگی کی رپورٹ' : 'PROGRESS & ANALYTICS'}</p>
+          <p className="eyebrow">{language === 'ur' ? 'کارکردگی کی رپورٹ' : language === 'ur_rm' ? 'Progress aur Analytics' : 'PROGRESS & ANALYTICS'}</p>
           <h1 className="progress-title">
-            {language === 'ur' ? 'پیشرفت کا جائزہ (Progress Overview)' : t('progress.title')}
+            {language === 'ur' ? 'پیشرفت کا جائزہ' : language === 'ur_rm' ? 'Tafseeli Jaiza' : t('progress.title')}
           </h1>
           <p className="progress-subtitle">
             {language === 'ur'
               ? 'آپ کی روزانہ کی سرگرمیوں اور مہارتوں کے ارتقا کا تفصیلی چارٹ۔'
+              : language === 'ur_rm'
+              ? 'Aap ki rozmarrah activities aur skills ki progress ka jaiza.'
               : 'Track your growth, accuracy trends, and skill milestones over time.'}
           </p>
         </div>
         <div className="progress-header-badge">
-          📅 {language === 'ur' ? 'اس ہفتے' : 'This Week'}
+          📅 {language === 'ur' ? 'اس ہفتے' : language === 'ur_rm' ? 'Is hafte' : 'This Week'}
         </div>
       </div>
 
@@ -67,7 +69,7 @@ export default function ProgressPage() {
           <div className="stat-card-content">
             <span className="stat-label">{language === 'ur' ? 'مکمل سرگرمیاں' : t('progress.completed')}</span>
             <span className="stat-value">{dashboard.completedCount}</span>
-            <span className="stat-hint">🎯 {language === 'ur' ? 'ہفتہ وار ہدف جاری ہے' : 'Target on track'}</span>
+            <span className="stat-hint">🎯 {language === 'ur' ? 'ہفتہ وار ہدف جاری ہے' : language === 'ur_rm' ? 'Hadaf jari hai' : 'Target on track'}</span>
           </div>
         </div>
 
@@ -78,7 +80,7 @@ export default function ProgressPage() {
           <div className="stat-card-content">
             <span className="stat-label">{language === 'ur' ? 'اوسط درستگی' : t('progress.accuracy')}</span>
             <span className="stat-value">{Math.round(dashboard.avgAccuracy)}%</span>
-            <span className="stat-hint">📈 +5% {language === 'ur' ? 'پچھلے ہفتے سے بہتر' : 'vs last week'}</span>
+            <span className="stat-hint">📈 +5% {language === 'ur' ? 'پچھلے ہفتے سے بہتر' : language === 'ur_rm' ? 'Pichlay hafte se behtar' : 'vs last week'}</span>
           </div>
         </div>
 
@@ -87,8 +89,8 @@ export default function ProgressPage() {
             🔥
           </div>
           <div className="stat-card-content">
-            <span className="stat-label">{language === 'ur' ? 'مسلسل سلسلہ' : 'Active Streak'}</span>
-            <span className="stat-value">7 {language === 'ur' ? 'دن' : 'Days'}</span>
+            <span className="stat-label">{language === 'ur' ? 'مسلسل سلسلہ' : language === 'ur_rm' ? 'Active Streak' : 'Active Streak'}</span>
+            <span className="stat-value">7 {language === 'ur' ? 'دن' : language === 'ur_rm' ? 'Din' : 'Days'}</span>
             <span className="stat-hint">⚡ Level: <strong style={{ textTransform: 'capitalize' }}>{dashboard.currentLevel}</strong></span>
           </div>
         </div>

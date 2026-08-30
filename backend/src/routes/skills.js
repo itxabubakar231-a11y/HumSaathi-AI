@@ -17,8 +17,8 @@ router.get('/modules/:persona', async (req, res) => {
 router.get('/module/:moduleId', async (req, res) => {
   try {
     const { moduleId } = req.params;
-    const { language } = req.query;
-    const moduleDetails = await getSkillModuleDetails(moduleId, language || 'en');
+    const { language, difficulty } = req.query;
+    const moduleDetails = await getSkillModuleDetails(moduleId, language || 'en', difficulty);
     if (!moduleDetails) return res.status(404).json({ error: 'Module not found' });
     res.json({ module: moduleDetails });
   } catch (error) {

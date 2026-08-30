@@ -24,8 +24,12 @@ def list_skill_modules(persona: str, language: Optional[str] = Query("en")):
     return {"modules": modules}
 
 @router.get("/module/{module_id}")
-def get_skill_module(module_id: str, language: Optional[str] = Query("en")):
-    details = get_skill_module_details(module_id, language or "en")
+def get_skill_module(
+    module_id: str,
+    language: Optional[str] = Query("en"),
+    difficulty: Optional[str] = Query(None),
+):
+    details = get_skill_module_details(module_id, language or "en", difficulty)
     if not details:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

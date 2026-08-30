@@ -61,8 +61,15 @@ export default function ScenarioPage() {
     );
   }
 
+  const [filterDifficulty, setFilterDifficulty] = useState('all');
+
+  const filteredScenarios = scenarios.filter((scen) => {
+    if (filterDifficulty === 'all') return true;
+    return scen.difficulty === filterDifficulty;
+  });
+
   return (
-    <div className="scenarios-page">
+    <div className="scenarios-page" style={{ maxWidth: '1000px', margin: '0 auto', padding: 'var(--space-md) var(--space-sm)' }}>
       <div style={{ marginBottom: 'var(--space-md)' }}>
         <p className="eyebrow">{t('nav.scenarios')}</p>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', fontWeight: '600' }}>
@@ -73,16 +80,39 @@ export default function ScenarioPage() {
         </p>
       </div>
 
+      {/* Difficulty Filter Chips */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-md)', flexWrap: 'wrap', alignItems: 'center' }}>
+        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+          ⚡ {language === 'ur' ? 'درجہ بندی:' : language === 'ur_rm' ? 'Filter Difficulty:' : 'Filter Difficulty:'}
+        </span>
+        {[
+          { id: 'all', label: language === 'ur' ? 'تمام منظرنامے' : language === 'ur_rm' ? 'Tamam Scenarios' : 'All Scenarios' },
+          { id: 'easy', label: language === 'ur' ? 'آسان (Easy)' : language === 'ur_rm' ? 'Easy' : 'Easy' },
+          { id: 'medium', label: language === 'ur' ? 'متوسط (Medium)' : language === 'ur_rm' ? 'Medium' : 'Medium' },
+          { id: 'challenging', label: language === 'ur' ? 'چیلنجنگ (Challenging)' : language === 'ur_rm' ? 'Challenging' : 'Challenging' },
+        ].map((d) => (
+          <button
+            key={d.id}
+            type="button"
+            className={`btn-secondary ${filterDifficulty === d.id ? 'btn-primary' : ''}`}
+            style={{ padding: '4px 14px', fontSize: '0.85rem', borderRadius: 'var(--radius-full)' }}
+            onClick={() => setFilterDifficulty(d.id)}
+          >
+            {d.label}
+          </button>
+        ))}
+      </div>
+
       <div
         className="activities-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
           gap: 'var(--space-md)',
-          marginTop: 'var(--space-md)'
+          marginTop: 'var(--space-sm)'
         }}
       >
-        {scenarios.map((scen) => (
+        {filteredScenarios.map((scen) => (
           <div
             key={scen.id}
             className="dashboard-card"

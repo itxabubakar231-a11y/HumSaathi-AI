@@ -40,7 +40,7 @@ export default function ActivityPage() {
         } else if (act) {
           setActivity(act);
         } else {
-          setFetchError(t('child.activityNotFound') || 'Activity not found');
+          setFetchError(t('child.activityNotFound'));
         }
       })
       .catch((err) => {

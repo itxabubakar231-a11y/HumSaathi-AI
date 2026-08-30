@@ -12,7 +12,7 @@ export default function SensoryPanel({ prefs, onChange, t }) {
   return (
     <section className="sensory-panel preference-section" aria-labelledby="sensory-heading">
       <div className="section-heading">
-        <p className="section-kicker">{t('setup.sensoryKicker') || 'ACCESSIBILITY'}</p>
+        <p className="section-kicker">{t('setup.sensoryKicker')}</p>
         <h2 id="sensory-heading">{t('setup.sensoryTitle')}</h2>
       </div>
 

@@ -96,7 +96,7 @@ TEEN_SKILLS = {
 
 ADULT_SKILLS = {
     'adult_functional_reading', 'functional_reading',
-    'adult_problem_solving', 'workplace_problem_solving', 'everyday_problem_solving',
+    'adult_problem_solving', 'workplace_problem_solving', 'everyday_problem_solving', 'problem_solving',
     'adult_everyday_comm', 'adult_workplace_comm', 'everyday_communication', 'workplace_communication',
     'adult_decision_making', 'independent_decision_making'
 }
@@ -148,6 +148,25 @@ def get_user_progress(db: Session, user_id: str, persona: Optional[str] = None) 
         }
         for p in filtered
     ]
+
+SKILL_TRANSLATIONS = {
+    'reading_vocabulary': {'en': 'Reading & Vocabulary', 'ur': 'مطالعہ اور الفاظ', 'ur_rm': 'Reading & Vocabulary'},
+    'problem_solving': {'en': 'Problem Solving', 'ur': 'مسائل کا حل', 'ur_rm': 'Problem Solving'},
+    'communication': {'en': 'Social Communication', 'ur': 'گفتگو اور سماجی مہارتیں', 'ur_rm': 'Social Communication'},
+    'functional_reading': {'en': 'Functional Reading', 'ur': 'عملی مطالعہ', 'ur_rm': 'Functional Reading'},
+    'everyday_communication': {'en': 'Everyday Communication', 'ur': 'روزمرہ گفتگو', 'ur_rm': 'Everyday Communication'},
+    'workplace_communication': {'en': 'Workplace Communication', 'ur': 'دفتری گفتگو', 'ur_rm': 'Workplace Communication'},
+    'letters': {'en': 'Letters', 'ur': 'حروف', 'ur_rm': 'Huroof'},
+    'numbers': {'en': 'Numbers', 'ur': 'اعداد', 'ur_rm': 'Numbers'},
+    'shapes': {'en': 'Shapes & Colors', 'ur': 'اشکال اور رنگ', 'ur_rm': 'Shapes aur Colors'},
+}
+
+def format_strengths_for_language(skills: List[str], language: str = 'en') -> List[str]:
+    res = []
+    for s in skills:
+        trans = SKILL_TRANSLATIONS.get(s, {})
+        res.append(trans.get(language, trans.get('en', s.replace('_', ' ').title())))
+    return res
 
 def get_dashboard_stats(db: Session, user_id: str, persona: Optional[str] = None) -> Dict[str, Any]:
     user = db.query(User).filter(User.id == user_id).first()

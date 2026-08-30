@@ -5,6 +5,7 @@ from app.models.user import User, Progress, Attempt, Assessment
 from app.models.activity import Activity
 from app.schemas.common import parse_json
 from app.services.scoring_service import clamp_difficulty
+from app.services.progress_service import is_skill_for_persona
 
 TYPE_PRIORITY = {
     'letters': 'letter',
@@ -18,6 +19,15 @@ TYPE_PRIORITY = {
     'vocabulary': 'letter',
     'reading': 'number',
     'problem_solving': 'number',
+    'reading_vocabulary': 'letter',
+    'teen_reading_vocab': 'letter',
+    'teen_problem_solving': 'number',
+    'teen_communication': 'letter',
+    'functional_reading': 'letter',
+    'adult_functional_reading': 'letter',
+    'adult_problem_solving': 'number',
+    'everyday_communication': 'letter',
+    'adult_everyday_comm': 'letter',
 }
 
 def find_matching_activity(
@@ -45,6 +55,8 @@ def find_matching_activity(
     filtered = []
     for a in activities:
         personas = parse_json(a.personas, [])
+        if isinstance(personas, str):
+            personas = [p.strip() for p in personas.split(',')]
         if persona in personas:
             filtered.append(a)
 
@@ -53,7 +65,7 @@ def find_matching_activity(
         if by_topic:
             return by_topic[0]
 
-    return filtered[0] if filtered else (activities[0] if activities else None)
+    return filtered[0] if filtered else None
 
 def recommend_activity_rule_based(db: Session, user_id: str) -> Dict[str, Any]:
     user = db.query(User).filter(User.id == user_id).first()
@@ -68,17 +80,39 @@ def recommend_activity_rule_based(db: Session, user_id: str) -> Dict[str, Any]:
         .first()
     )
 
-    target_skill = 'letters'
+    default_skill = (
+        'letters'
+        if user.persona == 'child'
+        else 'teen_reading_vocab'
+        if user.persona == 'teen'
+        else 'adult_functional_reading'
+    )
+    target_skill = default_skill
     difficulty = 'easy'
     should_retry = False
 
     if latest_attempt:
         score = latest_attempt.score
-        total = latest_attempt.totalCount
+        total = latest_attempt.totalCount or 1
         correct = round(score * total)
-        last_topic = latest_attempt.activity.topic if latest_attempt.activity else 'letters'
 
-        if correct <= 1:
+        last_topic = default_skill
+        try:
+            ans = parse_json(latest_attempt.answers, [])
+            if ans and isinstance(ans, list) and len(ans) > 0 and isinstance(ans[0], dict):
+                mod_id = ans[0].get('moduleId')
+                if mod_id:
+                    last_topic = mod_id
+        except Exception:
+            pass
+
+        if last_topic == default_skill and latest_attempt.activity and is_skill_for_persona(latest_attempt.activity.topic, user.persona):
+            last_topic = latest_attempt.activity.topic
+
+        accuracy_ratio = score if score <= 1.0 else (score / 100.0)
+        is_struggling = accuracy_ratio < 0.6 or (total >= 3 and correct <= 1)
+
+        if is_struggling:
             should_retry = True
             difficulty = clamp_difficulty(latest_attempt.difficultyAtAttempt, -1)
             target_skill = last_topic
@@ -86,12 +120,12 @@ def recommend_activity_rule_based(db: Session, user_id: str) -> Dict[str, Any]:
             should_retry = False
             next_diff = (
                 clamp_difficulty(latest_attempt.difficultyAtAttempt, 1)
-                if correct >= total
+                if accuracy_ratio >= 0.85
                 else latest_attempt.difficultyAtAttempt
             )
 
             if len(progress_list) > 1:
-                other_skills = [p for p in progress_list if p.skill != last_topic]
+                other_skills = [p for p in progress_list if p.skill != last_topic and is_skill_for_persona(p.skill, user.persona)]
                 other_skills.sort(key=lambda p: (p.attempts, p.accuracy))
                 if other_skills:
                     target_skill = other_skills[0].skill
@@ -103,7 +137,9 @@ def recommend_activity_rule_based(db: Session, user_id: str) -> Dict[str, Any]:
                 skill_cycle = (
                     ['letters', 'numbers', 'colors', 'shapes', 'counting', 'animals', 'emotions', 'routines']
                     if user.persona == 'child'
-                    else ['vocabulary', 'reading', 'problem_solving']
+                    else ['teen_reading_vocab', 'teen_problem_solving', 'teen_communication']
+                    if user.persona == 'teen'
+                    else ['adult_functional_reading', 'adult_problem_solving', 'adult_everyday_comm']
                 )
                 try:
                     current_idx = skill_cycle.index(last_topic)
@@ -162,6 +198,10 @@ def recommend_activity_rule_based(db: Session, user_id: str) -> Dict[str, Any]:
     reason_dict = reasons['retry'] if should_retry else reasons['next']
     reason_text = reason_dict.get(user_lang, reason_dict['en'])
 
+    resolved_activity_id = target_skill
+    if user.persona == 'child' and activity:
+        resolved_activity_id = activity.id
+
     return {
         "activityType": activity_type,
         "topic": target_skill,
@@ -169,7 +209,7 @@ def recommend_activity_rule_based(db: Session, user_id: str) -> Dict[str, Any]:
         "questionCount": 5,
         "shouldRetry": should_retry,
         "reason": reason_text,
-        "activityId": activity.id if activity else target_skill,
+        "activityId": resolved_activity_id,
         "source": "rules_fallback",
     }
 

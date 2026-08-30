@@ -28,7 +28,8 @@ export async function findMatchingActivity({ persona, language, activityType, to
 
   const filtered = activities.filter((a) => {
     const personas = parseJson(a.personas, []);
-    return personas.includes(persona);
+    const pArray = Array.isArray(personas) ? personas : String(personas).split(',').map((p) => p.trim());
+    return pArray.includes(persona);
   });
 
   if (topic) {
@@ -36,7 +37,7 @@ export async function findMatchingActivity({ persona, language, activityType, to
     if (byTopic.length) return byTopic[0];
   }
 
-  return filtered[0] || activities[0] || null;
+  return filtered[0] || null;
 }
 
 export async function recommendActivityRuleBased(userId) {
@@ -50,17 +51,40 @@ export async function recommendActivityRuleBased(userId) {
     include: { activity: true },
   });
 
-  let targetSkill = 'letters';
+  const defaultSkill = user.persona === 'child'
+    ? 'letters'
+    : user.persona === 'teen'
+    ? 'teen_reading_vocab'
+    : 'adult_functional_reading';
+
+  let targetSkill = defaultSkill;
   let difficulty = 'easy';
   let shouldRetry = false;
 
   if (latestAttempt) {
     const score = latestAttempt.score;
-    const total = latestAttempt.totalCount;
+    const total = latestAttempt.totalCount || 1;
     const correct = Math.round(score * total);
-    const lastTopic = latestAttempt.activity.topic;
 
-    if (correct <= 1) {
+    let lastTopic = defaultSkill;
+    try {
+      const ans = parseJson(latestAttempt.answers, []);
+      if (ans && Array.isArray(ans) && ans.length > 0 && typeof ans[0] === 'object') {
+        const modId = ans[0]?.moduleId;
+        if (modId) lastTopic = modId;
+      }
+    } catch {
+      // pass
+    }
+
+    if (lastTopic === defaultSkill && latestAttempt.activity?.topic) {
+      lastTopic = latestAttempt.activity.topic;
+    }
+
+    const accuracyRatio = score <= 1.0 ? score : score / 100.0;
+    const isStruggling = accuracyRatio < 0.6 || (total >= 3 && correct <= 1);
+
+    if (isStruggling) {
       // Struggling: retry the same skill with simpler difficulty
       shouldRetry = true;
       difficulty = clampDifficulty(latestAttempt.difficultyAtAttempt, -1);
@@ -68,7 +92,7 @@ export async function recommendActivityRuleBased(userId) {
     } else {
       // Succeeded: find other skills needing practice or rotate to next skill
       shouldRetry = false;
-      const nextDiff = correct >= total
+      const nextDiff = accuracyRatio >= 0.85
         ? clampDifficulty(latestAttempt.difficultyAtAttempt, 1)
         : latestAttempt.difficultyAtAttempt;
 
@@ -85,7 +109,9 @@ export async function recommendActivityRuleBased(userId) {
       } else {
         const skillCycle = user.persona === 'child'
           ? ['letters', 'numbers', 'colors', 'shapes', 'counting', 'animals', 'emotions', 'routines']
-          : ['vocabulary', 'reading', 'problem_solving'];
+          : user.persona === 'teen'
+          ? ['teen_reading_vocab', 'teen_problem_solving', 'teen_communication']
+          : ['adult_functional_reading', 'adult_problem_solving', 'adult_everyday_comm'];
         const currentIdx = skillCycle.indexOf(lastTopic);
         const nextIdx = currentIdx >= 0 ? (currentIdx + 1) % skillCycle.length : 0;
         targetSkill = skillCycle[nextIdx];
@@ -141,6 +167,8 @@ export async function recommendActivityRuleBased(userId) {
     ? (REASONS.retry[userLang] || REASONS.retry.en)
     : (REASONS.next[userLang] || REASONS.next.en);
 
+  const resolvedActivityId = (user.persona === 'child' && activity) ? activity.id : targetSkill;
+
   return {
     activityType,
     topic: targetSkill,
@@ -148,7 +176,7 @@ export async function recommendActivityRuleBased(userId) {
     questionCount: 5,
     shouldRetry,
     reason: reasonText,
-    activityId: activity?.id,
+    activityId: resolvedActivityId,
     source: 'rules_fallback',
   };
 }

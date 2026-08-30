@@ -50,6 +50,12 @@ export const api = {
   getEvaluation: (sessionId) => request(`/api/evaluation/${sessionId}`),
   getUserSessions: (userId) => request(`/api/conversations/sessions/${userId}`),
   getSkillModules: (persona, language) => request(`/api/skills/modules/${persona}${language ? `?language=${language}` : ''}`),
-  getSkillModule: (moduleId, language) => request(`/api/skills/module/${moduleId}${language ? `?language=${language}` : ''}`),
+  getSkillModule: (moduleId, language, difficulty) => {
+    const params = new URLSearchParams();
+    if (language) params.append('language', language);
+    if (difficulty) params.append('difficulty', difficulty);
+    const qs = params.toString();
+    return request(`/api/skills/module/${moduleId}${qs ? `?${qs}` : ''}`);
+  },
   evaluateSkillSolution: (body) => request('/api/skills/evaluate', { method: 'POST', body: JSON.stringify(body) }),
 };

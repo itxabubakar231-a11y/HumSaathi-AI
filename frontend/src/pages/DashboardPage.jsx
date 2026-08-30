@@ -72,11 +72,25 @@ export default function DashboardPage() {
   }
 
   if (user?.persona === 'teen') {
-    return <TeenDashboard user={user} dashboard={dashboard} />;
+    return (
+      <TeenDashboard
+        user={user}
+        dashboard={dashboard}
+        recommendation={recommendation}
+        activities={activities}
+      />
+    );
   }
 
   if (user?.persona === 'adult') {
-    return <AdultDashboard user={user} dashboard={dashboard} />;
+    return (
+      <AdultDashboard
+        user={user}
+        dashboard={dashboard}
+        recommendation={recommendation}
+        activities={activities}
+      />
+    );
   }
 
   return (
