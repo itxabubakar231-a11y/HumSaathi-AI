@@ -52,11 +52,35 @@ def ensure_auth_columns():
     """Ensure email, passwordHash, isActive, and lastActiveAt columns exist on User table, and role is VARCHAR without enum conflicts."""
     try:
         from sqlalchemy import text
-        stmts = [
+        # 1. Try adding 'ADMIN' directly to the UserRole enum in autocommit mode
+        try:
+            with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+                for enum_name in ['"UserRole"', 'userrole', '"userrole"']:
+                    try:
+                        conn.execute(text(f"ALTER TYPE {enum_name} ADD VALUE IF NOT EXISTS 'ADMIN';"))
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+        # 2. Also ensure column can be text/varchar
+        role_migration_stmts = [
+            'ALTER TABLE "User" ALTER COLUMN "role" DROP DEFAULT;',
             'ALTER TABLE "User" ALTER COLUMN "role" TYPE VARCHAR(50) USING "role"::VARCHAR(50);',
-            'ALTER TABLE "User" ALTER COLUMN role TYPE VARCHAR(50) USING role::VARCHAR(50);',
+            'ALTER TABLE "User" ALTER COLUMN "role" SET DEFAULT \'learner\';',
+            'ALTER TABLE "user" ALTER COLUMN "role" DROP DEFAULT;',
             'ALTER TABLE "user" ALTER COLUMN "role" TYPE VARCHAR(50) USING "role"::VARCHAR(50);',
-            'ALTER TABLE "user" ALTER COLUMN role TYPE VARCHAR(50) USING role::VARCHAR(50);',
+            'ALTER TABLE "user" ALTER COLUMN "role" SET DEFAULT \'learner\';',
+        ]
+        for s in role_migration_stmts:
+            try:
+                with engine.begin() as conn:
+                    conn.execute(text(s))
+            except Exception:
+                pass
+
+        # 3. Add other necessary auth and status columns
+        stmts = [
             'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "email" VARCHAR;',
             'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "passwordHash" VARCHAR;',
             'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS email VARCHAR;',
