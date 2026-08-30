@@ -37,6 +37,7 @@ print("\n2. Learner starts practice scenario: 'scenario_teacher_help'")
 req_start = urllib.request.Request(
     f"{BASE_URL}/api/conversations/start",
     data=json.dumps({
+        "userId": learner_id,
         "scenarioId": "scenario_teacher_help",
         "mode": "text"
     }).encode(),
@@ -52,6 +53,7 @@ print("\n3. Learner sends response turn...")
 req_msg = urllib.request.Request(
     f"{BASE_URL}/api/conversations/{session_id}/message",
     data=json.dumps({
+        "userId": learner_id,
         "message": "Excuse me teacher, I am having trouble with question 3 on the worksheet."
     }).encode(),
     headers={"Content-Type": "application/json", "Authorization": f"Bearer {learner_token}"}
@@ -72,7 +74,8 @@ urllib.request.urlopen(req_end)
 req_eval = urllib.request.Request(
     f"{BASE_URL}/api/evaluations/conversation",
     data=json.dumps({
-        "sessionId": session_id
+        "sessionId": session_id,
+        "userId": learner_id
     }).encode(),
     headers={"Content-Type": "application/json", "Authorization": f"Bearer {learner_token}"}
 )
@@ -88,9 +91,9 @@ req_attempt = urllib.request.Request(
     data=json.dumps({
         "activityId": "letters",
         "answers": [
-            {"questionIndex": 0, "selectedOption": 0, "timeMs": 2500, "attemptsUsed": 1},
-            {"questionIndex": 1, "selectedOption": 1, "timeMs": 3000, "attemptsUsed": 1},
-            {"questionIndex": 2, "selectedOption": 0, "timeMs": 2800, "attemptsUsed": 1}
+            {"questionId": "q1", "answer": "A", "attemptsUsed": 1},
+            {"questionId": "q2", "answer": "B", "attemptsUsed": 1},
+            {"questionId": "q3", "answer": "C", "attemptsUsed": 1}
         ],
         "timeMs": 8300
     }).encode(),
