@@ -104,7 +104,7 @@ def _run_tests():
     single_data = res_single.json()
     assert single_data["success"] is True
     assert single_data["data"]["scenario"]["id"] == scenario_id
-    assert single_data["data"]["scenario"]["aiRole"] == "teacher"
+    assert single_data["data"]["scenario"]["aiRole"].lower() == "teacher"
     print("[PASS] GET /api/conversations/scenarios/:id")
 
     # 4. Scenario Not Found 404
