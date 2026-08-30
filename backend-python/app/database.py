@@ -57,20 +57,17 @@ def ensure_auth_columns():
             'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "passwordHash" VARCHAR;',
             'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS email VARCHAR;',
             'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS passwordHash VARCHAR;',
-            'ALTER TABLE "User" ADD COLUMN email VARCHAR;',
-            'ALTER TABLE "User" ADD COLUMN "passwordHash" VARCHAR;',
-            'ALTER TABLE User ADD COLUMN email VARCHAR;',
-            'ALTER TABLE User ADD COLUMN passwordHash VARCHAR;',
             'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "email" VARCHAR;',
             'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "passwordHash" VARCHAR;',
+            'ALTER TABLE User ADD COLUMN email VARCHAR;',
+            'ALTER TABLE User ADD COLUMN passwordHash VARCHAR;',
         ]
-        with engine.connect() as conn:
-            for s in stmts:
-                try:
+        for s in stmts:
+            try:
+                with engine.begin() as conn:
                     conn.execute(text(s))
-                    conn.commit()
-                except Exception:
-                    pass
+            except Exception:
+                pass
     except Exception as e:
         logger.debug(f"Notice during column verification: {e}")
 
