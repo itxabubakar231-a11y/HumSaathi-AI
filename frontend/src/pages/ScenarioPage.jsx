@@ -6,7 +6,7 @@ import { api } from '../services/api';
 
 export default function ScenarioPage() {
   const { user } = useUser();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const navigate = useNavigate();
   const [scenarios, setScenarios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +19,8 @@ export default function ScenarioPage() {
     }
     api.getScenarios({ persona: user.persona, language: user.language })
       .then((data) => {
-        setScenarios(data.scenarios || []);
+        const list = data?.scenarios || (Array.isArray(data) ? data : []);
+        setScenarios(list);
       })
       .catch((err) => {
         setError(err.message || t('common.error'));
@@ -36,8 +37,11 @@ export default function ScenarioPage() {
         scenarioId,
         mode
       });
-      if (res && res.session) {
-        navigate(`/conversation/${res.session.id}`);
+      const sessionId = res?.session?.id || res?.id || res?.sessionId;
+      if (sessionId) {
+        navigate(`/conversation/${sessionId}`);
+      } else {
+        setError(t('common.error') || 'Unable to start conversation session');
       }
     } catch (err) {
       setError(err.message || t('common.error'));
@@ -103,80 +107,100 @@ export default function ScenarioPage() {
         ))}
       </div>
 
-      <div
-        className="activities-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: 'var(--space-md)',
-          marginTop: 'var(--space-sm)'
-        }}
-      >
-        {filteredScenarios.map((scen) => (
-          <div
-            key={scen.id}
-            className="dashboard-card"
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              height: '100%',
-              padding: 'var(--space-md)',
-              borderRadius: 'var(--radius-lg)'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-xs)' }}>
-                <span className="module-icon-wrap" style={{ width: '2.75rem', height: '2.75rem', fontSize: '1.25rem', marginBottom: 0 }}>
-                  💬
-                </span>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: 'var(--radius-full)',
-                    background: 'var(--bg-tertiary)',
-                    color: 'var(--text-secondary)'
-                  }}
+      {filteredScenarios.length === 0 ? (
+        <div
+          className="dashboard-card"
+          style={{
+            padding: 'var(--space-xl) var(--space-md)',
+            textAlign: 'center',
+            borderRadius: 'var(--radius-lg)',
+            marginTop: 'var(--space-md)'
+          }}
+        >
+          <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: 'var(--space-xs)' }}>💬</span>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: 'var(--space-xs)' }}>
+            {language === 'ur' ? 'کوئی منظرنامہ دستیاب نہیں ہے' : language === 'ur_rm' ? 'Koi scenario dastyab nahi hai' : 'No scenarios available'}
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+            {language === 'ur' ? 'براہ کرم تمام منظرنامے منتخب کریں یا بعد میں دوبارہ کوشش کریں۔' : language === 'ur_rm' ? 'Barah-e-karam tamam scenarios select karein.' : 'Try selecting All Scenarios or check back later.'}
+          </p>
+        </div>
+      ) : (
+        <div
+          className="activities-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 'var(--space-md)',
+            marginTop: 'var(--space-sm)'
+          }}
+        >
+          {filteredScenarios.map((scen) => (
+            <div
+              key={scen.id}
+              className="dashboard-card"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                height: '100%',
+                padding: 'var(--space-md)',
+                borderRadius: 'var(--radius-lg)'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-xs)' }}>
+                  <span className="module-icon-wrap" style={{ width: '2.75rem', height: '2.75rem', fontSize: '1.25rem', marginBottom: 0 }}>
+                    💬
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: '700',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: 'var(--radius-full)',
+                      background: 'var(--bg-tertiary)',
+                      color: 'var(--text-secondary)'
+                    }}
+                  >
+                    {scen.difficulty}
+                  </span>
+                </div>
+
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', marginBottom: 'var(--space-xs)', fontWeight: '600' }}>
+                  {scen.title}
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 'var(--space-sm)', lineHeight: '1.5' }}>
+                  {scen.description}
+                </p>
+
+                <div style={{ fontSize: '0.85rem', marginBottom: 'var(--space-sm)', color: 'var(--text-primary)', background: 'var(--bg-primary)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>{t('scenarios.role')}:</span> <strong>{scen.aiRole}</strong>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 'var(--space-xs)', marginTop: 'var(--space-xs)' }}>
+                <button
+                  className="btn-primary"
+                  style={{ flex: 1, padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
+                  onClick={() => handleStart(scen.id, 'text')}
                 >
-                  {scen.difficulty}
-                </span>
-              </div>
-
-              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', marginBottom: 'var(--space-xs)', fontWeight: '600' }}>
-                {scen.title}
-              </h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 'var(--space-sm)', lineHeight: '1.5' }}>
-                {scen.description}
-              </p>
-
-              <div style={{ fontSize: '0.85rem', marginBottom: 'var(--space-sm)', color: 'var(--text-primary)', background: 'var(--bg-primary)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>{t('scenarios.role')}:</span> <strong>{scen.aiRole}</strong>
+                  💬 {t('scenarios.startText')}
+                </button>
+                <button
+                  className="btn-secondary"
+                  style={{ flex: 1, padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
+                  onClick={() => handleStart(scen.id, 'voice')}
+                >
+                  🎙️ {t('scenarios.startVoice')}
+                </button>
               </div>
             </div>
-
-            <div style={{ display: 'flex', gap: 'var(--space-xs)', marginTop: 'var(--space-xs)' }}>
-              <button
-                className="btn-primary"
-                style={{ flex: 1, padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
-                onClick={() => handleStart(scen.id, 'text')}
-              >
-                💬 {t('scenarios.startText')}
-              </button>
-              <button
-                className="btn-secondary"
-                style={{ flex: 1, padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
-                onClick={() => handleStart(scen.id, 'voice')}
-              >
-                🎙️ {t('scenarios.startVoice')}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
