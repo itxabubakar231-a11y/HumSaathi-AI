@@ -13,7 +13,7 @@ export default function ProgressPage() {
 
   useEffect(() => {
     if (!user?.id) {
-      navigate('/setup');
+      navigate('/login');
       return;
     }
     api.getDashboard(user.id)

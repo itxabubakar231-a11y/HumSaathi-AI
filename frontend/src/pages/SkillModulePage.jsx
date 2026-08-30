@@ -50,7 +50,7 @@ export default function SkillModulePage() {
 
   useEffect(() => {
     if (!user?.id) {
-      navigate('/setup');
+      navigate('/login');
       return;
     }
     loadModule(activeDifficulty);

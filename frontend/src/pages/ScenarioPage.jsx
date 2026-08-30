@@ -52,7 +52,7 @@ export default function ScenarioPage() {
 
   useEffect(() => {
     if (!user?.id) {
-      navigate('/setup');
+      navigate('/login');
       return;
     }
     fetchScenarios();

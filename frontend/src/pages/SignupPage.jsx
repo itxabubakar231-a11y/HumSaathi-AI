@@ -2,8 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
-import { LANGUAGES, DEFAULT_SENSORY } from '../utils/preferences';
-import SensoryPanel from '../components/ui/SensoryPanel';
+import { DEFAULT_SENSORY } from '../utils/preferences';
 
 export default function SignupPage() {
   const { signupUser } = useUser();
@@ -15,8 +14,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [language, setLanguage] = useState('en');
-  const [sensoryPrefs, setSensoryPrefs] = useState(DEFAULT_SENSORY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -42,10 +39,6 @@ export default function SignupPage() {
         return { score: 10, label: 'Too Short', color: '#ef4444' };
     }
   }, [password]);
-
-  const handleSensoryChange = (patch) => {
-    setSensoryPrefs((prev) => ({ ...prev, ...patch }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,8 +75,8 @@ export default function SignupPage() {
         email: trimmedEmail,
         password,
         persona: 'child', // default initial, user confirms in persona selection next
-        language,
-        sensoryPrefs,
+        language: 'en',
+        sensoryPrefs: DEFAULT_SENSORY,
       });
       navigate('/persona-selection');
     } catch (err) {
@@ -111,7 +104,7 @@ export default function SignupPage() {
           </h1>
 
           <p className="auth-hero-desc">
-            Create your private account to experience tailored communication practice, adaptive scenarios, and sensory-friendly settings.
+            Create your private account to experience tailored communication practice, adaptive scenarios, and supportive feedback.
           </p>
 
           <div className="auth-hero-features">
@@ -123,17 +116,17 @@ export default function SignupPage() {
               </div>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">🌐</span>
+              <span className="feature-icon">🎭</span>
               <div>
-                <strong>Multilingual Practice</strong>
-                <p>English, Urdu & Roman Urdu support</p>
+                <strong>3 Distinct Portals</strong>
+                <p>Tailored for Child, Teen, and Adult learners</p>
               </div>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">⚙️</span>
+              <span className="feature-icon">🌐</span>
               <div>
-                <strong>Sensory Accessibility</strong>
-                <p>Text scaling, high contrast & calm modes</p>
+                <strong>Multilingual Coaching</strong>
+                <p>English, Urdu & Roman Urdu support</p>
               </div>
             </div>
           </div>
@@ -145,7 +138,7 @@ export default function SignupPage() {
         <div className="auth-card">
           <div className="auth-card-header">
             <h2 className="auth-card-title">Create Your Account</h2>
-            <p className="auth-card-subtitle">Set up your secure credentials and personalized preferences</p>
+            <p className="auth-card-subtitle">Set up your secure credentials to get started</p>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form" noValidate>
@@ -263,37 +256,13 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Preferred Language */}
-            <div className="auth-field-group">
-              <label className="auth-field-label">{t('setup.languageTitle') || 'Preferred Language'}</label>
-              <div className="lang-pills-grid" role="group">
-                {LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.id}
-                    type="button"
-                    className={`lang-pill-btn ${language === lang.id ? 'is-selected' : ''}`}
-                    onClick={() => setLanguage(lang.id)}
-                    aria-pressed={language === lang.id}
-                  >
-                    <span className="lang-flag">{lang.id === 'en' ? '🇬🇧' : '🇵🇰'}</span>
-                    <span className="lang-name">{t(lang.labelKey)}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Sensory Settings */}
-            <div className="auth-sensory-section">
-              <SensoryPanel prefs={sensoryPrefs} onChange={handleSensoryChange} t={t} />
-            </div>
-
             {error && (
               <div className="error-banner" role="alert" style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.9rem' }}>
                 ⚠️ {error}
               </div>
             )}
 
-            {/* Standard Accessible Submit Button (No decorative motion buttons) */}
+            {/* Submit Button */}
             <button
               className="auth-primary-btn"
               type="submit"

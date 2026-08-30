@@ -26,7 +26,7 @@ export default function ActivityPage() {
 
   useEffect(() => {
     if (!user?.id) {
-      navigate('/setup');
+      navigate('/login');
       return;
     }
     const currentLang = user?.language || language || 'en';
