@@ -4,130 +4,255 @@ import { useI18n } from '../context/I18nContext';
 
 export default function LandingPage() {
   const { user } = useUser();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const navigate = useNavigate();
 
+  const isRtl = language === 'ur';
+
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="landing">
+    <div className="landing" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Soft atmospheric background glow */}
       <div className="landing-bg-glow" aria-hidden="true" />
 
-      <div className="landing-content">
-        {/* Welcome Eyebrow */}
-        <p className="eyebrow">{t('landing.eyebrow') || 'AI-POWERED ACCESSIBLE COMMUNICATION'}</p>
+      <div className="landing-content" style={{ maxWidth: '1200px', margin: '0 auto', padding: 'var(--space-md) var(--space-sm)' }}>
+        {/* Hero Split Layout */}
+        <div className="landing-hero-container">
+          {/* Left Column: Headline & Action CTAs */}
+          <div className="landing-hero-text">
+            <p className="eyebrow" style={{ color: 'var(--primary-green)', fontWeight: 800, letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
+              {t('landing.eyebrow') || 'AI-POWERED ACCESSIBLE COMMUNICATION'}
+            </p>
 
-        {/* Large Elegant Headline */}
-        <h1>
-          {t('landing.title')}
-          <br />
-          <span className="title-accent">{t('landing.titleAccent')}</span>
-        </h1>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2.4rem, 4vw, 3.4rem)', lineHeight: '1.18', marginBottom: '1.25rem', color: 'var(--text-primary)' }}>
+              Practice conversations.
+              <br />
+              <span className="title-accent" style={{ background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Build confidence. Navigate the real world.
+              </span>
+            </h1>
 
-        {/* Sub-tagline */}
-        <p className="landing-tagline">SAFE PRACTICE · ADAPTIVE AI · REAL-WORLD CONFIDENCE</p>
+            <p className="intro" style={{ fontSize: '1.1rem', lineHeight: '1.65', color: 'var(--text-secondary)', marginBottom: '1.85rem', maxWidth: '580px' }}>
+              {t('landing.heroSub') || 'HumSaathi AI is an adaptive communication and life-skills coach that helps learners safely practice real-world conversations.'}
+            </p>
 
-        {/* Intro */}
-        <p className="intro">
-          HumSaathi AI helps neurodiverse learners practice real-world communication in a safe, supportive environment. Adapting across Child, Teen, and Adult portals with interactive text, natural voice mode, and personalized feedback.
-        </p>
+            {/* Action CTAs */}
+            <div className="landing-actions" style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '2rem' }}>
+              {user?.id ? (
+                <>
+                  <button className="btn-primary" type="button" onClick={() => navigate('/dashboard')} style={{ padding: '0.85rem 1.85rem', fontSize: '1rem' }}>
+                    {t('landing.startPracticing') || 'Start Practicing'} ➔
+                  </button>
+                  <button className="btn-secondary" type="button" onClick={() => navigate('/persona-selection')} style={{ padding: '0.85rem 1.5rem', fontSize: '0.95rem' }}>
+                    {t('landing.switchPersona') || 'Switch Persona'} 🎭
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link className="btn-primary" to="/signup" style={{ padding: '0.85rem 1.85rem', fontSize: '1rem' }}>
+                    {t('landing.startPracticing') || 'Start Practicing'} ➔
+                  </Link>
+                  <button className="btn-secondary" type="button" onClick={() => scrollToSection('how-it-works')} style={{ padding: '0.85rem 1.5rem', fontSize: '0.95rem' }}>
+                    {t('landing.exploreHow') || 'Explore How It Works'}
+                  </button>
+                  <Link className="text-btn" to="/login" style={{ fontSize: '0.92rem', padding: '0.5rem 0.75rem' }}>
+                    {t('landing.loginProfile') || 'Log In to Profile'} 👤
+                  </Link>
+                </>
+              )}
+            </div>
 
-        {/* Action Buttons */}
-        <div className="landing-actions">
-          {user?.id ? (
-            <>
-              <button className="btn-primary" type="button" onClick={() => navigate('/dashboard')}>
-                {t('landing.continue') || 'Continue Learning'} ➔
-              </button>
-              <button className="btn-secondary" type="button" onClick={() => navigate('/persona-selection')}>
-                Switch Persona 🎭
-              </button>
-            </>
-          ) : (
-            <>
-              <Link className="btn-primary" to="/signup">{t('landing.getStarted')} 🚀</Link>
-              <Link className="btn-secondary" to="/login">Log In to Profile 👤</Link>
-            </>
-          )}
+            {/* Quick Feature Pills */}
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span className="landing-feature-pill" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-full)', color: 'var(--text-secondary)' }}>
+                ⚡ Adaptive AI
+              </span>
+              <span className="landing-feature-pill" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-full)', color: 'var(--text-secondary)' }}>
+                🗣️ Real-time Voice & Text
+              </span>
+              <span className="landing-feature-pill" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-full)', color: 'var(--text-secondary)' }}>
+                🌍 English · اردو · Roman Urdu
+              </span>
+            </div>
+          </div>
+
+          {/* Right Column: Realistic Live AI Conversation Preview Mockup */}
+          <div className="landing-hero-preview">
+            <div className="landing-chat-mockup-card">
+              <div className="mockup-header-bar">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span className="online-pulse-dot" />
+                  <strong style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>AI COACH</strong>
+                  <span style={{ fontSize: '0.75rem', background: 'var(--light-green)', color: 'var(--primary-green)', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                    Online
+                  </span>
+                </div>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                  🎯 Joining a Group Discussion
+                </span>
+              </div>
+
+              <div className="mockup-chat-feed">
+                {/* Learner Bubble */}
+                <div className="mockup-bubble-learner">
+                  <span style={{ fontSize: '0.72rem', display: 'block', opacity: 0.85, marginBottom: '2px', fontWeight: 600 }}>
+                    Learner
+                  </span>
+                  "{t('landing.previewLearner') || 'I don\'t know what to say.'}"
+                </div>
+
+                {/* AI Coach Bubble */}
+                <div className="mockup-bubble-coach">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.85rem' }}>🤖</span>
+                    <strong style={{ fontSize: '0.8rem', color: 'var(--primary-green)' }}>HumSaathi Coach</strong>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: '1.5' }}>
+                    "{t('landing.previewCoach') || 'That’s okay. We can take it one step at a time. Would you like to ask for help or explain what you\'re unsure about?'}"
+                  </p>
+                </div>
+              </div>
+
+              {/* Sub-card AI Context telemetry indicator */}
+              <div className="mockup-badge-footer">
+                <span style={{ color: 'var(--primary-green)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  ✨ {t('landing.aiCoachBadge') || 'AI Coach • Context-aware • Multi-turn'}
+                </span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
+                  Adaptive role-play
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* 3 Distinct Persona Preview Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '1rem',
-            width: '100%',
-            maxWidth: '820px',
-            marginTop: '2rem',
-            marginBottom: '1.5rem',
-            textAlign: 'left',
-          }}
-        >
-          <div
-            style={{
-              padding: '1.2rem',
-              borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-          >
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>🧒</div>
-            <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
-              Child Portal
-            </strong>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4', margin: 0 }}>
-              Guided foundational games, letters, numbers, emotions & star rewards.
-            </p>
+        <section id="how-it-works" style={{ marginTop: '4rem', marginBottom: '2.5rem', width: '100%' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <span className="eyebrow" style={{ color: 'var(--primary-green)', fontSize: '0.82rem', letterSpacing: '0.08em', fontWeight: 800 }}>
+              PERSONA ISOLATION & TAILORED LEARNING
+            </span>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.9rem', color: 'var(--text-primary)', marginTop: '0.35rem' }}>
+              Three Tailored Portals. One Intelligent Companion.
+            </h2>
           </div>
 
           <div
             style={{
-              padding: '1.2rem',
-              borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
-              boxShadow: 'var(--shadow-sm)',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '1.25rem',
+              width: '100%',
             }}
           >
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>🧑‍🎓</div>
-            <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
-              Teen Portal
-            </strong>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4', margin: 0 }}>
-              Peer discussions, school projects & practical problem-solving.
-            </p>
-          </div>
+            {/* Child Portal */}
+            <div
+              style={{
+                padding: '1.5rem',
+                borderRadius: 'var(--radius-lg)',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+                boxShadow: 'var(--shadow-sm)',
+                transition: 'transform 0.2s ease',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '2rem' }}>🧒</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'rgba(245, 158, 11, 0.12)', color: '#d97706' }}>
+                  Ages 4 – 12
+                </span>
+              </div>
+              <strong style={{ display: 'block', fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '0.4rem', fontFamily: 'var(--font-serif)' }}>
+                Child Portal
+              </strong>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '1rem' }}>
+                Guided foundational games: alphabet letters, numbers, emotion recognition, daily routines, and encouraging star rewards.
+              </p>
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>🎮 7 Foundational Games</span>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>⭐ Star Rewards</span>
+              </div>
+            </div>
 
-          <div
-            style={{
-              padding: '1.2rem',
-              borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-          >
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>💼</div>
-            <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
-              Adult Portal
-            </strong>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4', margin: 0 }}>
-              Workplace dialogues, manager task clarification & daily living skills.
-            </p>
-          </div>
-        </div>
+            {/* Teen Portal */}
+            <div
+              style={{
+                padding: '1.5rem',
+                borderRadius: 'var(--radius-lg)',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+                boxShadow: 'var(--shadow-sm)',
+                transition: 'transform 0.2s ease',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '2rem' }}>🧑‍🎓</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'rgba(139, 92, 246, 0.12)', color: '#7c3aed' }}>
+                  Ages 13 – 17
+                </span>
+              </div>
+              <strong style={{ display: 'block', fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '0.4rem', fontFamily: 'var(--font-serif)' }}>
+                Teen Portal
+              </strong>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '1rem' }}>
+                Peer discussions, school projects, Reading & Vocabulary, Problem Solving, and collaborative communication practice.
+              </p>
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>📚 Reading & Vocab</span>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>💬 5 Practice Scenarios</span>
+              </div>
+            </div>
 
-        {/* Feature Pills */}
-        <div className="landing-features">
+            {/* Adult Portal */}
+            <div
+              style={{
+                padding: '1.5rem',
+                borderRadius: 'var(--radius-lg)',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+                boxShadow: 'var(--shadow-sm)',
+                transition: 'transform 0.2s ease',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '2rem' }}>💼</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'rgba(6, 182, 212, 0.12)', color: '#0891b2' }}>
+                  Ages 18+
+                </span>
+              </div>
+              <strong style={{ display: 'block', fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '0.4rem', fontFamily: 'var(--font-serif)' }}>
+                Adult Portal
+              </strong>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '1rem' }}>
+                Workplace dialogues, manager task clarification, functional reading of utility invoices and transit schedules, and independent living.
+              </p>
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>📄 Functional Reading</span>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>💼 5 Workplace Scenarios</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Feature Highlights Grid */}
+        <div className="landing-features" style={{ marginTop: '2rem' }}>
           <div className="landing-feature-pill">🎯 Contextual AI Role-Play</div>
-          <div className="landing-feature-pill">🗣️ Voice & Text Practice</div>
+          <div className="landing-feature-pill">🗣️ Natural Voice & Text Modes</div>
           <div className="landing-feature-pill">📊 Persona-Calibrated Feedback</div>
           <div className="landing-feature-pill">🌍 English, Urdu (اردو) & Roman Urdu</div>
+          <div className="landing-feature-pill">🛡️ Sensory & Calm Accessibility</div>
         </div>
 
         {/* Bottom Disclaimer */}
-        <p className="disclaimer">{t('app.disclaimer')}</p>
+        <p className="disclaimer" style={{ marginTop: '2.5rem', textAlign: 'center' }}>
+          {t('app.disclaimer')}
+        </p>
       </div>
     </div>
   );

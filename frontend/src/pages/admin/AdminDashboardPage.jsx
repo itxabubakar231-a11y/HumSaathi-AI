@@ -47,8 +47,13 @@ export default function AdminDashboardPage() {
       {/* Page Header */}
       <div className="admin-header-row">
         <div>
-          <h1 className="admin-title">System Overview</h1>
-          <p className="admin-subtitle">Real-time aggregate platform performance and learner metrics</p>
+          <span className="admin-eyebrow" style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--primary-green)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            Telemetry & Governance
+          </span>
+          <h1 className="admin-title" style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', marginTop: '0.2rem' }}>
+            HumSaathi Control Center
+          </h1>
+          <p className="admin-subtitle">Live aggregate platform performance, real learner progression, and system telemetry</p>
         </div>
         <div className="admin-header-actions">
           <button className="admin-btn-primary" onClick={() => navigate('/admin/users')}>

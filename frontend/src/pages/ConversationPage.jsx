@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
-
 import { speakWithBestVoice, stopSpeech } from '../utils/ttsVoiceHelper';
 
 function getLocalizedText(val, lang, fallback = '') {
@@ -44,7 +43,6 @@ export default function ConversationPage() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const audioPlayerRef = useRef(null);
-  const activeUtteranceRef = useRef(null);
 
   const isRtl = language === 'ur';
 
@@ -166,7 +164,7 @@ export default function ConversationPage() {
         URL.revokeObjectURL(audioPreviewUrl);
       }
     };
-  }, [sessionId, user, navigate, language, fetchSession]);
+  }, [sessionId, user, navigate, language, fetchSession, t]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
@@ -217,7 +215,6 @@ export default function ConversationPage() {
             const url = URL.createObjectURL(blob);
             setAudioPreviewUrl(url);
           }
-          // Stop stream tracks
           stream.getTracks().forEach((track) => track.stop());
         };
 
@@ -365,6 +362,14 @@ export default function ConversationPage() {
   const scenarioDesc = getLocalizedText(scenarioData.description, language, t('scenarios.intro'));
   const scenarioRole = getRoleLabel(scenarioData.aiRole);
   const scenarioOptions = Array.isArray(scenarioData.options) ? scenarioData.options : [];
+  const objectives = Array.isArray(scenarioData.objectives) ? scenarioData.objectives : [];
+  const primaryGoal = objectives.length > 0
+    ? getLocalizedText(objectives[0], language, objectives[0])
+    : (t('conversation.goalDefault') || 'Join • Contribute • Communicate');
+
+  // Determine current learning loop active stage
+  const turnCount = messages.length;
+  const loopStep = turnCount === 0 ? 'practice' : turnCount <= 2 ? 'converse' : turnCount <= 4 ? 'adapt' : turnCount <= 6 ? 'reflect' : 'grow';
 
   if (loading) {
     return (
@@ -388,7 +393,7 @@ export default function ConversationPage() {
 
   return (
     <div className="web-practice-workspace" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Left Sidebar: Scenario Information & Goals */}
+      {/* Left Sidebar: Scenario Information, AI Context & Learning Loop */}
       <aside className="practice-info-sidebar">
         <div className="practice-info-header">
           <span className="practice-badge-kicker">
@@ -398,25 +403,80 @@ export default function ConversationPage() {
           <p className="practice-scenario-desc">{scenarioDesc}</p>
         </div>
 
+        {/* Visual Learning Loop Stepper */}
+        <div className="learning-loop-bar" aria-label="Learning progression loop">
+          <span className={`learning-loop-node ${loopStep === 'practice' ? 'is-active' : ''}`}>
+            {t('conversation.loopPractice') || 'PRACTICE'}
+          </span>
+          <span className="learning-loop-arrow">→</span>
+          <span className={`learning-loop-node ${loopStep === 'converse' ? 'is-active' : ''}`}>
+            {t('conversation.loopConverse') || 'CONVERSE'}
+          </span>
+          <span className="learning-loop-arrow">→</span>
+          <span className={`learning-loop-node ${loopStep === 'adapt' ? 'is-active' : ''}`}>
+            {t('conversation.loopAdapt') || 'ADAPT'}
+          </span>
+          <span className="learning-loop-arrow">→</span>
+          <span className={`learning-loop-node ${loopStep === 'reflect' ? 'is-active' : ''}`}>
+            {t('conversation.loopReflect') || 'REFLECT'}
+          </span>
+          <span className="learning-loop-arrow">→</span>
+          <span className={`learning-loop-node ${loopStep === 'grow' ? 'is-active' : ''}`}>
+            {t('conversation.loopGrow') || 'GROW'}
+          </span>
+        </div>
+
+        {/* AI Context Panel: "HUMSAATHI UNDERSTANDS" */}
+        <div className="ai-context-panel">
+          <div className="ai-context-panel-title">
+            <span className="ai-context-kicker">
+              ✨ {t('conversation.humsaathiUnderstands') || 'HUMSAATHI UNDERSTANDS'}
+            </span>
+          </div>
+          <div className="ai-context-chips-row">
+            <span className="ai-context-chip">
+              {user?.persona ? `${user.persona.charAt(0).toUpperCase() + user.persona.slice(1)} learner` : 'Learner'} <span className="ai-context-chip-check">✓</span>
+            </span>
+            <span className="ai-context-chip">
+              {scenarioRole} <span className="ai-context-chip-check">✓</span>
+            </span>
+            <span className="ai-context-chip">
+              {language === 'ur' ? 'اردو' : language === 'ur_rm' ? 'Roman Urdu' : 'English'} <span className="ai-context-chip-check">✓</span>
+            </span>
+            <span className="ai-context-chip">
+              {primaryGoal.length > 28 ? primaryGoal.slice(0, 26) + '...' : primaryGoal} <span className="ai-context-chip-check">✓</span>
+            </span>
+          </div>
+          <div className="ai-adaptive-status">
+            <span>⚡ {t('conversation.adaptiveGenerated') || 'Adaptive response generated'}</span>
+          </div>
+        </div>
+
+        {/* Metadata Card */}
         <div className="practice-meta-card">
           <div className="meta-row">
-            <span className="meta-label">🤖 {t('conversation.aiRole')}</span>
+            <span className="meta-label">🤖 {t('conversation.roleLabel') || 'Role'}:</span>
             <strong className="meta-val">{scenarioRole}</strong>
           </div>
           <div className="meta-row">
-            <span className="meta-label">🌐 {t('conversation.language')}</span>
+            <span className="meta-label">🎯 {t('conversation.goalLabel') || 'Goal'}:</span>
+            <strong className="meta-val" style={{ fontSize: '0.85rem' }}>{primaryGoal}</strong>
+          </div>
+          <div className="meta-row">
+            <span className="meta-label">🌐 {t('conversation.language') || 'Language:'}</span>
             <strong className="meta-val">
               {language === 'ur' ? 'اردو (Urdu)' : language === 'ur_rm' ? 'Roman Urdu' : 'English'}
             </strong>
           </div>
           <div className="meta-row">
-            <span className="meta-label">⚡ {t('conversation.difficulty')}</span>
+            <span className="meta-label">⚡ {t('conversation.difficulty') || 'Difficulty:'}</span>
             <strong className="meta-val" style={{ textTransform: 'capitalize' }}>
               {getDifficultyLabel(scenarioData.difficulty)}
             </strong>
           </div>
         </div>
 
+        {/* Tips Card */}
         <div className="practice-tips-card">
           <h4>💡 {t('conversation.tipsTitle')}</h4>
           <ul>
@@ -435,14 +495,21 @@ export default function ConversationPage() {
 
       {/* Right Column: Interactive Chat Conversation Room */}
       <section className="practice-chat-container">
-        {/* Top Chat Bar with Mode Switcher */}
+        {/* Top Chat Bar with AI COACH status & Mode Switcher */}
         <div className="chat-top-header">
           <div className="chat-partner-status">
-            <span className="online-indicator-dot" />
-            <div>
-              <span className="partner-name">{scenarioRole} ({t('conversation.aiCoach')})</span>
-              <span className="partner-sub">{t('conversation.safeSimulation')}</span>
+            <div className="online-pulse-indicator">
+              <span className="online-pulse-dot" />
+              <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', letterSpacing: '0.04em' }}>
+                {t('conversation.aiCoachHeader') || 'AI COACH'}
+              </strong>
+              <span style={{ fontSize: '0.75rem', background: 'var(--light-green)', color: 'var(--primary-green)', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                {t('conversation.online') || 'Online'}
+              </span>
             </div>
+            <span className="partner-sub" style={{ marginInlineStart: '0.5rem' }}>
+              · {scenarioRole} ({t('conversation.safeSimulation')})
+            </span>
           </div>
 
           <div className="mode-toggle-group">
@@ -529,13 +596,15 @@ export default function ConversationPage() {
             </div>
           ))}
 
+          {/* AI Thinking Animation */}
           {sending && (
             <div className="chat-bubble-row ai-row">
               <div className="bubble-avatar-ai">🤖</div>
-              <div className="typing-indicator" aria-label="AI is typing">
-                <span className="typing-dot" />
-                <span className="typing-dot" />
-                <span className="typing-dot" />
+              <div className="ai-thinking-pill" aria-label="AI is generating response">
+                <span className="online-pulse-dot" />
+                <span style={{ fontSize: '0.85rem', fontStyle: 'italic' }}>
+                  {t('conversation.thinking') || 'HumSaathi is thinking…'}
+                </span>
               </div>
             </div>
           )}
@@ -544,12 +613,12 @@ export default function ConversationPage() {
 
         {error && <p className="error-text" style={{ padding: '0 1.5rem', fontSize: '0.85rem' }}>{error}</p>}
 
-        {/* Quick Suggested Response Option Chips (4 structured options) */}
+        {/* Quick Suggested Response Option Chips */}
         {scenarioOptions.length > 0 && !sending && (
           <div
             className="suggested-options-container"
             style={{
-              padding: '0.6rem 1.25rem',
+              padding: '0.65rem 1.25rem',
               background: 'var(--bg-secondary)',
               borderTop: '1px solid var(--border-color)',
             }}
@@ -557,19 +626,20 @@ export default function ConversationPage() {
             <span
               style={{
                 fontSize: '0.78rem',
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
+                fontWeight: 700,
+                color: 'var(--primary-green)',
                 display: 'block',
-                marginBottom: '0.4rem',
+                marginBottom: '0.45rem',
+                letterSpacing: '0.03em',
               }}
             >
-              💡 {t('conversation.suggestedOptions')}
+              💡 {t('conversation.suggestedResponses') || 'Suggested responses'}
             </span>
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: '0.4rem',
+                gap: '0.45rem',
               }}
             >
               {scenarioOptions.slice(0, 4).map((opt, i) => {
@@ -581,20 +651,20 @@ export default function ConversationPage() {
                     className="suggested-option-chip"
                     style={{
                       textAlign: isRtl ? 'right' : 'left',
-                      padding: '0.5rem 0.75rem',
-                      fontSize: '0.85rem',
+                      padding: '0.55rem 0.85rem',
+                      fontSize: '0.86rem',
                       borderRadius: 'var(--radius-md)',
                       border: '1px solid var(--border-color)',
                       background: 'var(--bg-primary)',
                       color: 'var(--text-primary)',
                       cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      lineHeight: '1.35',
+                      lineHeight: '1.4',
                     }}
                     onClick={() => handleSendMessage(optText)}
                     disabled={sending}
                   >
-                    💬 {optText}
+                    <span>💬</span>
+                    <span>{optText}</span>
                   </button>
                 );
               })}
@@ -602,12 +672,12 @@ export default function ConversationPage() {
           </div>
         )}
 
-        {/* Floating Input Area */}
+        {/* Input Area (Voice vs Text) */}
         {mode === 'voice' ? (
           <div className="chat-input-area voice-input-area" style={{ padding: '1rem 1.25rem' }}>
             {speechSupported ? (
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {/* Status & Live transcript preview */}
+                {/* Status & Live waveform preview */}
                 {(isRecording || recordedTranscript || interimTranscript) && (
                   <div
                     className="voice-preview-box"
@@ -625,16 +695,26 @@ export default function ConversationPage() {
                     }}
                   >
                     {isRecording ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', width: '100%' }}>
-                        <span className="recording-pulse-dot" />
-                        <span style={{ fontStyle: 'italic' }}>
-                          "{recordedTranscript ? `${recordedTranscript} ` : ''}{interimTranscript || t('voice.recording')}"
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', width: '100%' }}>
+                        <div className="voice-live-waveform" aria-hidden="true">
+                          <span className="waveform-bar" />
+                          <span className="waveform-bar" />
+                          <span className="waveform-bar" />
+                          <span className="waveform-bar" />
+                          <span className="waveform-bar" />
+                          <span className="waveform-bar" />
+                        </div>
+                        <span style={{ fontWeight: 600, color: '#ef4444' }}>
+                          ● {t('voice.listening') || 'Listening…'}
+                        </span>
+                        <span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>
+                          "{recordedTranscript ? `${recordedTranscript} ` : ''}{interimTranscript || ''}"
                         </span>
                       </div>
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
                         <span style={{ fontSize: '0.85rem', color: 'var(--primary-green)', fontWeight: 700, flexShrink: 0 }}>
-                          🎤 {t('voice.transcript') || 'Transcript'}:
+                          ✓ {t('voice.voiceCaptured') || 'Voice captured'}:
                         </span>
                         <input
                           type="text"
@@ -649,7 +729,7 @@ export default function ConversationPage() {
                             color: 'var(--text-primary)',
                             fontFamily: 'inherit',
                           }}
-                          placeholder="Your spoken transcript..."
+                          placeholder="Spoken transcript..."
                         />
                       </div>
                     )}
@@ -679,8 +759,8 @@ export default function ConversationPage() {
                       style={{
                         padding: '0.65rem 1.25rem',
                         fontSize: '0.95rem',
-                        background: '#e53e3e',
-                        borderColor: '#e53e3e',
+                        background: '#ef4444',
+                        borderColor: '#ef4444',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
@@ -706,7 +786,15 @@ export default function ConversationPage() {
                       <button
                         className="btn-secondary"
                         type="button"
-                        style={{ padding: '0.6rem 1rem', fontSize: '0.9rem', color: '#e53e3e' }}
+                        style={{ padding: '0.6rem 1rem', fontSize: '0.9rem' }}
+                        onClick={startRecording}
+                      >
+                        ↻ {t('voice.recordAgain') || 'Record Again'}
+                      </button>
+                      <button
+                        className="btn-secondary"
+                        type="button"
+                        style={{ padding: '0.6rem 1rem', fontSize: '0.9rem', color: '#ef4444' }}
                         onClick={deleteRecording}
                       >
                         🗑️ {t('voice.deleteRecording')}
@@ -718,7 +806,7 @@ export default function ConversationPage() {
                         onClick={() => handleSendMessage(recordedTranscript)}
                         disabled={sending}
                       >
-                        🚀 {sending ? t('conversation.sending') : t('voice.sendVoiceMessage')}
+                        🚀 {sending ? (t('voice.processingVoice') || 'Processing your voice…') : t('voice.sendVoiceMessage')}
                       </button>
                     </>
                   )}
@@ -778,3 +866,4 @@ export default function ConversationPage() {
     </div>
   );
 }
+

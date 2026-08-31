@@ -133,6 +133,20 @@ app.include_router(attempts.router, prefix="/api")
 app.include_router(assessment.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 
+# Also mount routers without /api prefix for flexible serverless rewrites
+app.include_router(health.router)
+app.include_router(users.router)
+app.include_router(activities.router)
+app.include_router(progress.router)
+app.include_router(dashboard.router)
+app.include_router(conversations.router)
+app.include_router(evaluations.router, prefix="/evaluation")
+app.include_router(evaluations.router, prefix="/evaluations")
+app.include_router(skills.router)
+app.include_router(attempts.router)
+app.include_router(assessment.router)
+app.include_router(admin.router)
+
 @app.get("/")
 def root_status():
     return {
@@ -140,3 +154,4 @@ def root_status():
         "status": "online",
         "docs": "/docs",
     }
+
