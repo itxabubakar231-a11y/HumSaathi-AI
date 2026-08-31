@@ -57,7 +57,7 @@ export default function ConversationPage() {
     if (!text) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
-    if (lang === 'ur') {
+    if (lang === 'ur' || lang === 'ur_rm') {
       utterance.lang = 'ur-PK';
     } else {
       utterance.lang = 'en-US';
@@ -127,7 +127,7 @@ export default function ConversationPage() {
       const rec = new SpeechRecognition();
       rec.continuous = true;
       rec.interimResults = true;
-      rec.lang = language === 'ur' ? 'ur-PK' : 'en-US';
+      rec.lang = (language === 'ur' || language === 'ur_rm') ? 'ur-PK' : 'en-US';
 
       rec.onstart = () => {
         setIsRecording(true);
@@ -586,17 +586,41 @@ export default function ConversationPage() {
                       background: 'var(--bg-tertiary)',
                       border: '1px solid var(--border-color)',
                       fontSize: '0.95rem',
-                      fontStyle: 'italic',
                       color: 'var(--text-primary)',
                       lineHeight: '1.4',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
                     }}
                   >
-                    {recordedTranscript || interimTranscript ? (
-                      <span>"{recordedTranscript} {interimTranscript}"</span>
+                    {isRecording ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', width: '100%' }}>
+                        <span className="recording-pulse-dot" />
+                        <span style={{ fontStyle: 'italic' }}>
+                          "{recordedTranscript ? `${recordedTranscript} ` : ''}{interimTranscript || t('voice.recording')}"
+                        </span>
+                      </div>
                     ) : (
-                      <span style={{ color: 'var(--text-secondary)' }}>
-                        🎙️ {t('voice.recording')}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--primary-green)', fontWeight: 700, flexShrink: 0 }}>
+                          🎤 {t('voice.transcript') || 'Transcript'}:
+                        </span>
+                        <input
+                          type="text"
+                          value={recordedTranscript}
+                          onChange={(e) => setRecordedTranscript(e.target.value)}
+                          style={{
+                            flex: 1,
+                            background: 'transparent',
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: '0.95rem',
+                            color: 'var(--text-primary)',
+                            fontFamily: 'inherit',
+                          }}
+                          placeholder="Your spoken transcript..."
+                        />
+                      </div>
                     )}
                   </div>
                 )}

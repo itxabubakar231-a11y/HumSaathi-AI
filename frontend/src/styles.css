@@ -1965,8 +1965,43 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
 }
+
+.recording-pulse-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e53e3e;
+  box-shadow: 0 0 0 rgba(229, 62, 62, 0.4);
+  animation: voicePulse 1.4s infinite;
+  display: inline-block;
+}
+
+@keyframes voicePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.7);
+    transform: scale(0.95);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(229, 62, 62, 0);
+    transform: scale(1.1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0);
+    transform: scale(0.95);
+  }
+}
+
+.voice-preview-box {
+  transition: all 0.2s ease;
+}
+
+.voice-preview-box:focus-within {
+  border-color: var(--primary-green) !important;
+  box-shadow: 0 0 0 3px rgba(11, 107, 58, 0.12);
+}
+
 
 .voice-preview-text {
   font-size: 0.95rem;
