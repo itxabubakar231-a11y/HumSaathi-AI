@@ -750,10 +750,12 @@ def validate_ai_response(response_text: str, language: str, role_str: str) -> bo
     clean = response_text.lower().strip()
     forbidden = [
         "as an ai", "i am an ai", "i am a language model",
-        "great job! your communication is excellent",
-        "that is the correct answer",
-        "keep practicing!", "here is your response:",
-        "objectives achieved:", "scenario objectives:"
+        "great job", "good job", "keep practicing",
+        "let's improve your communication skills", "let's improve",
+        "that's correct", "that is the correct answer",
+        "that's a great response", "excellent communication", "good communication",
+        "here is your response:", "objectives achieved:", "scenario objectives:",
+        "keep trying your best", "you're doing great"
     ]
     for f in forbidden:
         if f in clean:
@@ -871,30 +873,52 @@ def generate_contextual_fallback(
 
     # 3. Adult Scenario: Asking Manager for Task Clarification (scenario_manager_clarification)
     elif scenario_id in ["scenario_manager_clarification", "Asking Manager for Task Clarification"]:
-        if any(w in msg for w in ["more time", "need more time", "extra time", "data analysis", "data", "timeline"]):
+        # Turn 5: Worry / mistake concern
+        if any(w in msg for w in ["worried", "make a mistake", "nervous", "afraid of mistake", "fear", "anxious"]):
             if language == "ur":
-                return ("یہ بالکل مناسب ہے۔ ہم تفصیلی ڈیٹا کے لیے جمعرات دوپہر تک کا وقت مقرر کر لیتے ہیں۔ کیا یہ شیڈول آپ کے لیے ٹھیک ہے؟", is_completed)
+                return ("یہ قابل فہم بات ہے۔ کام کو حتمی شکل دینے سے پہلے مجھے ابتدائی مسودہ بھیج دیں، میں آپ کے ساتھ مل کر اہم اعداد و شمار کا جائزہ لے لوں گا۔", is_completed)
             elif language == "ur_rm":
-                return ("Yeh bilkul reasonable hai. Data analysis ke liye Thursday 12 PM ka deadline finalize kar lete hain. Kya yeh timeline suitable hai?", is_completed)
+                return ("Yeh understandable hai. Finalize karne se pehle draft mujhe bhej dein, main key numbers aap ke sath review kar loonga.", is_completed)
             else:
-                return ("That sounds completely reasonable. Let's aim for the complete data breakdown by Thursday at noon. Does that timeline work for you?", is_completed)
+                return ("That's understandable. Send me the draft before you finalize it, and I'll review the key figures with you.", is_completed)
 
-        if any(w in msg for w in ["finish the report today", "finish today", "finish the report", "report today", "prioritize", "priority", "chart", "financial", "executive", "brief"]):
+        # Turn 4: Summary today, data tomorrow compromise
+        if any(w in msg for w in ["summary today", "data may take until tomorrow", "data until tomorrow", "data tomorrow", "finish the summary today"]):
             if language == "ur":
-                return ("براہ کرم پہلے ایگزیکٹو کلائنٹ سمری کو ترجیح دیں۔ مالیاتی چارٹس کا کام کل صبح مکمل کیا جا سکتا ہے۔ کیا یہ واضح ہے؟", is_completed)
+                return ("یہ بالکل ٹھیک رہے گا۔ مکمل شدہ سمری مجھے آج بھیج دیں، اور باقی ڈیٹا کا جائزہ ہم کل صبح لے لیں گے۔", is_completed)
             elif language == "ur_rm":
-                return ("Please pehle executive client summary complete karein. Financial charts kal morning mein follow kar sakte hain. Kya yeh clear hai?", is_completed)
+                return ("That works. Completed summary mujhe aaj send kar dein, aur remaining data hum kal morning review kar sakte hain.", is_completed)
             else:
-                return ("Please prioritize the executive client summary first today. The financial charts can follow tomorrow morning. Does that give you enough clarity to proceed?", is_completed)
+                return ("That works. Send me the completed summary today, and we can review the remaining data tomorrow morning.", is_completed)
 
-        if any(w in msg for w in ["not completely sure", "not sure what you need", "what you need me to do", "clarify", "guidance", "not sure what to do"]):
+        # Turn 3: Need more time for data
+        if any(w in msg for w in ["more time", "need more time", "extra time", "data analysis", "data", "timeline", "take longer"]):
             if language == "ur":
-                return ("صبح بخیر! کلائنٹ کی سہ ماہی رپورٹ کے لیے ہمیں اہم نتائج کا خلاصہ اور مالیاتی چارٹس تیار کرنے ہیں۔ آپ کس حصے پر پہلے بات کرنا چاہیں گے؟", is_completed)
+                return ("سمجھ گیا۔ ڈیٹا کے لیے آپ کو مزید کتنا وقت درکار ہوگا؟ ہم ابھی سمری کو ترجیح دے سکتے ہیں اور باقی رپورٹ کا شیڈول ضرورت کے مطابق تبدیل کر سکتے ہیں۔", is_completed)
             elif language == "ur_rm":
-                return ("Good morning! Client deliverable ke liye humein Q3 metrics ki summary aur financial charts chahiye. Aap pehle kis part par discuss karna chahenge?", is_completed)
+                return ("Understood. Data ke liye kitna additional time chahiye? Hum abhi summary prioritize kar sakte hain aur baqi report ka schedule adjust kar sakte hain.", is_completed)
             else:
-                return ("Good morning! For the quarterly client deliverable, we need a concise summary of the Q3 metrics followed by the financial charts. Which part would you like to review first?", is_completed)
+                return ("Understood. How much additional time do you need for the data? We can prioritize the summary now and adjust the rest of the report if necessary.", is_completed)
 
+        # Turn 2: Deadline question
+        if any(w in msg for w in ["finish the report today", "finish today", "report today", "finish the report", "today", "deadline"]):
+            if language == "ur":
+                return ("جی ہاں، اگر ممکن ہو تو مجھے آج دن کے اختتام تک رپورٹ چاہیے ہوگی۔ پہلے کلائنٹ سمری اور نتائج پر توجہ دیں۔ اگر وقت کم لگے تو مجھے مطلع کریں۔", is_completed)
+            elif language == "ur_rm":
+                return ("Yes, agar possible ho to report aaj end of day tak chahiye. Pehle summary aur client findings par focus karein. Agar timeline tight lagay to batayein.", is_completed)
+            else:
+                return ("Yes, I'd like the report by the end of today if possible. Focus on the summary and client findings first. Let me know if you think the timeline is too tight.", is_completed)
+
+        # Turn 1: Uncertainty / Clarification request
+        if any(w in msg for w in ["not completely sure", "not sure what you need", "what you need me to do", "clarify", "guidance", "not sure what to do", "what to work on"]):
+            if language == "ur":
+                return ("ضرور۔ مجھے کلائنٹ رپورٹ کو مکمل کرنے اور اہم نتائج کا خلاصہ تیار کرنے میں آپ کی ضرورت ہے۔ اصل ترجیح سمری سیکشن ہے۔ آپ کس حصے پر وضاحت چاہتے ہیں؟", is_completed)
+            elif language == "ur_rm":
+                return ("Sure. Mujhe client report complete karne aur key findings summarize karne mein aap ki help chahiye. Main priority summary section hai. Kis part par clarification chahiye?", is_completed)
+            else:
+                return ("Sure. I need you to finish the client report and summarize the key findings. The main priority is the summary section. Which part would you like me to clarify?", is_completed)
+
+        # Conclusion / Thanks
         if any(w in msg for w in ["thank you", "thanks", "understood", "will send by 5", "sounds good", "perfect"]):
             if language == "ur":
                 return ("بہترین۔ اگر مزید کوئی سوال ہو تو بلا جھجھک رابطہ کریں۔ آپ کا دن اچھا گزرے!", is_completed)
@@ -903,23 +927,109 @@ def generate_contextual_fallback(
             else:
                 return ("Excellent. Feel free to reach out if anything else comes up. Have a productive day!", is_completed)
 
-    # 4. Meeting Someone New (scenario_new_person)
-    elif scenario_id in ["scenario_new_person", "Meeting someone new"]:
-        if any(w in msg for w in ["sam", "alex", "name is", "i am", "nice to meet", "i'm"]):
+    # 4. Adult Scenario: Customer Support Billing Discrepancy (scenario_adult_customer_support)
+    elif scenario_id in ["scenario_adult_customer_support", "Calling Customer Support About Billing Discrepancy"]:
+        if any(w in msg for w in ["charged twice", "double charge", "1500", "fn-8821", "extra charge", "unrequested", "invoice", "discrepancy", "bill"]):
             if language == "ur":
-                return ("آپ سے مل کر بہت خوشی ہوئی! آپ کو فارغ وقت میں کون سے کھیل یا مشاغل پسند ہیں؟", is_completed)
+                return ("ہیلو! میں بالکل اس میں آپ کی مدد کر سکتی ہوں۔ میں اکاؤنٹ FN-8821 چیک کر رہی ہوں، مجھے 1500 روپے کا غیر مطلوبہ چارج نظر آ رہا ہے، اور میں فوری طور پر کریڈٹ ایڈجسٹمنٹ پروسیس کر رہی ہوں۔", is_completed)
             elif language == "ur_rm":
-                return ("Nice to meet you! Aap ko free time mein kaun se games ya hobbies pasand hain?", is_completed)
+                return ("Hello! Main zaroor help kar sakti hoon. Account FN-8821 check kar rahi hoon, Rs. 1,500 ka extra charge remove kar ke credit adjustment submit kar rahi hoon.", is_completed)
             else:
-                return ("Nice to meet you! What kind of games, sports, or hobbies do you enjoy the most in your free time?", is_completed)
+                return ("Hello! I can certainly help you with that. Let me look up account FN-8821. I see the unrequested Rs. 1,500 add-on charge on this month's invoice, and I will submit an immediate credit adjustment for you.", is_completed)
 
-        if any(w in msg for w in ["game", "sport", "football", "cricket", "draw", "art", "music", "reading", "video game"]):
+        if any(w in msg for w in ["reference", "confirmation", "credit", "adjusted", "sr-9402", "ticket"]):
             if language == "ur":
-                return ("یہ تو بہت ہی عمدہ ہے! مجھے بھی یہ پسند ہے۔ کیا ہم اگلی کلاس کی طرف ایک ساتھ چلیں؟", is_completed)
+                return ("1500 روپے کی کریڈٹ ایڈجسٹمنٹ لاگو کر دی گئی ہے۔ آپ کا تصدیقی ریفرنس نمبر SR-9402 ہے۔ کیا میں آپ کے اکاؤنٹ پر کسی اور چیز میں مدد کر سکتی ہوں؟", is_completed)
             elif language == "ur_rm":
-                return ("Yeh to bohot cool hai! Mujhe bhi yeh pasand hai. Kya hum class ki taraf ek sath chalein?", is_completed)
+                return ("Rs. 1,500 ki credit adjustment apply ho chuki hai. Aap ka reference confirmation number SR-9402 hai. Kya account par koi aur assistance chahiye?", is_completed)
             else:
-                return ("That sounds really cool! I enjoy that too. Shall we walk over to the group together?", is_completed)
+                return ("The credit adjustment of Rs. 1,500 has been applied. Your reference confirmation number is SR-9402. Is there anything else on your account I can assist you with today?", is_completed)
+
+        if any(w in msg for w in ["thank", "thanks", "perfect", "all set"]):
+            if language == "ur":
+                return ("آپ کا بہت شکریہ! فاسٹ نیٹ سپورٹ پر کال کرنے کا شکریہ، آپ کا دن اچھا گزرے۔", is_completed)
+            elif language == "ur_rm":
+                return ("You're welcome! FastNet Support contact karne ka shukriya. Have a great day!", is_completed)
+            else:
+                return ("You're very welcome! Thank you for contacting FastNet Support. Have a great day!", is_completed)
+
+    # 5. Adult Scenario: Requesting a Shift Swap (scenario_adult_colleague_shift)
+    elif scenario_id in ["scenario_adult_colleague_shift", "Requesting a Shift Swap with a Coworker"]:
+        if any(w in msg for w in ["thursday", "friday", "swap", "exchange", "medical appointment", "appointment", "family", "shift"]):
+            if language == "ur":
+                return ("ارے! میں سمجھ سکتا ہوں، میڈیکل اپوائنٹمنٹس اہم ہوتی ہیں۔ میں جمعہ کی آپ کی شفٹ لے لوں گا اگر آپ بدلے میں میری جمعرات کی شام کی شفٹ کر سکیں۔ کیا ہم مل کر سپروائزر کو بتا دیں؟", is_completed)
+            elif language == "ur_rm":
+                return ("Hey! I understand, appointments zaroori hoti hain. Main Friday shift cover kar loonga agar aap Thursday evening shift swap kar sakein. Supervisor ko inform karein?", is_completed)
+            else:
+                return ("Hey! I understand, medical appointments are important. I can definitely take your Friday shift if you can cover my Thursday evening shift in return. Should we let our supervisor know together?", is_completed)
+
+        if any(w in msg for w in ["supervisor", "sheet", "manager", "inform", "let them know", "confirm"]):
+            if language == "ur":
+                return ("بالکل درست! میں شفٹ سویپ شیٹ پر ہم دونوں کے نام لکھ کر مینیجر کو مطلع کر دیتا ہوں۔ میرے ساتھ ایڈجسٹ کرنے کا شکریہ۔", is_completed)
+            elif language == "ur_rm":
+                return ("Sounds like a plan! Main swap request sheet par names note kar ke manager ko bata deta hoon. Thanks for coordinating!", is_completed)
+            else:
+                return ("Sounds like a plan! I will put our names on the shift swap request sheet and mention it to the shift manager. Thanks for working it out with me.", is_completed)
+
+        if any(w in msg for w in ["thank", "thanks", "appreciate"]):
+            if language == "ur":
+                return ("کوئی بات نہیں! جمعہ کو آپ کے چیک اپ کے لیے نیک خواہشات۔", is_completed)
+            elif language == "ur_rm":
+                return ("Anytime! Friday appointment ke liye best of luck.", is_completed)
+            else:
+                return ("Anytime! Good luck with your appointment on Friday.", is_completed)
+
+    # 6. Adult Scenario: Booking & Rescheduling Medical Appointment (scenario_adult_doctor_appointment)
+    elif scenario_id in ["scenario_adult_doctor_appointment", "Booking & Rescheduling a Medical Appointment"]:
+        if any(w in msg for w in ["move", "reschedule", "next week", "change"]):
+            if language == "ur":
+                return ("یقیناً، میں آپ کی اپوائنٹمنٹ اگلے ہفتے پر منتقل کر سکتی ہوں۔ ہمارے پاس منگل کو دوپہر 2 بجے یا جمعرات کو صبح 10:30 بجے کا وقت دستیاب ہے۔ آپ کو کون سا وقت مناسب لگے گا؟", is_completed)
+            elif language == "ur_rm":
+                return ("Certainly, appointment next week move kar sakte hain. Tuesday 2:00 PM ya Thursday 10:30 AM available hain. Konsa slot behtar hai?", is_completed)
+            else:
+                return ("Certainly, I can move your appointment to next week. We have Tuesday at 2:00 PM or Thursday at 10:30 AM available. Which one do you prefer?", is_completed)
+
+        if any(w in msg for w in ["dr. malik", "dr malik", "thursday morning", "appointment", "checkup", "book"]):
+            if language == "ur":
+                return ("دوپہر بخیر! جی ہاں، ڈاکٹر ملک کے پاس اگلے جمعرات صبح 10:30 بجے روم نمبر 4 میں وقت دستیاب ہے۔ کیا یہ وقت آپ کے لیے مناسب ہے؟", is_completed)
+            elif language == "ur_rm":
+                return ("Good afternoon! Yes, Dr. Malik ke paas next Thursday 10:30 AM Consultation Room 4 mein slot available hai. Kya yeh time theek hai?", is_completed)
+            else:
+                return ("Good afternoon! Yes, Dr. Malik has an opening next Thursday at 10:30 AM in Consultation Room 4. Would that time work for you?", is_completed)
+
+        if any(w in msg for w in ["confirm", "thursday at 10:30", "that works", "perfect", "thank"]):
+            if language == "ur":
+                return ("بہترین، میں نے جمعرات صبح 10:30 بجے ڈاکٹر ملک کے ساتھ آپ کا وقت بک کر دیا ہے۔ آپ کو تصدیقی ایس ایم ایس مل جائے گا۔ براہ کرم 10 منٹ پہلے تشریف لائیں۔", is_completed)
+            elif language == "ur_rm":
+                return ("Perfect, Thursday 10:30 AM Dr. Malik ke paas appointment confirm ho gayi hai. SMS confirmation mil jayegi. Please 10 mins pehle arrive karein.", is_completed)
+            else:
+                return ("Perfect, I have booked your appointment with Dr. Malik for Thursday at 10:30 AM. You will receive an SMS confirmation. Please arrive 10 minutes early.", is_completed)
+
+    # 7. Adult Scenario: Speaking to a Pharmacist About Medication (scenario_adult_pharmacy)
+    elif scenario_id in ["scenario_adult_pharmacy", "Speaking to a Pharmacist About Medication"]:
+        if any(w in msg for w in ["before or after", "meals", "timing", "how to take", "dosage", "food", "tablets"]):
+            if language == "ur":
+                return ("سلام! اس دوا کی ایک گولی دن میں دو بار کھانے کے بعد ایک گلاس پانی کے ساتھ لیں۔ کھانے کے بعد لینے سے معدے میں جلن نہیں ہوتی۔", is_completed)
+            elif language == "ur_rm":
+                return ("Hello! Is medicine ki 1 tablet din mein 2 baar khane ke baad paani ke sath lein. Food ke baad lene se stomach upset nahi hota.", is_completed)
+            else:
+                return ("Hello! For this medication, please take one tablet twice daily after meals with a full glass of water. Taking it after food helps prevent any stomach upset.", is_completed)
+
+        if any(w in msg for w in ["side effect", "drowsy", "missed", "miss", "drowsiness"]):
+            if language == "ur":
+                return ("عام سائیڈ ایفیکٹ ہلکی نیند یا اونگھ ہے، اس لیے دوا لینے کے فورا بعد ڈرائیونگ سے پرہیز کریں۔ اگر خوراک چھوٹ جائے تو یاد آنے پر لے لیں، لیکن کبھی دو گولیاں ایک ساتھ نہ لیں۔", is_completed)
+            elif language == "ur_rm":
+                return ("Common side effect mild drowsiness hai, is liye driving avoid karein. Agar dose miss ho jaye to yaad aane par lein, double dose na lein.", is_completed)
+            else:
+                return ("Common side effects are mild drowsiness, so avoid driving right after taking it. If you miss a dose, take it as soon as you remember, but never double up.", is_completed)
+
+        if any(w in msg for w in ["thank", "thanks", "understood", "clear"]):
+            if language == "ur":
+                return ("آپ کا بہت شکریہ! تجویز کردہ پورا کورس مکمل کریں، اور اگر کوئی اور سوال ہو تو بلا جھجھک رابطہ کریں۔ اپنا خیال رکھیں!", is_completed)
+            elif language == "ur_rm":
+                return ("You're welcome! Prescribed course poora karein aur koi query ho to call karein. Take care!", is_completed)
+            else:
+                return ("You're very welcome! Please finish the full prescribed course, and feel free to call us if you have any other questions. Take care!", is_completed)
 
     # Standard fallback script fallback
     sc_id = scenario_id or ''
@@ -1097,10 +1207,14 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
             f"7. PERSONA-APPROPRIATE LANGUAGE:\n"
             f"   - child: Simple vocabulary, short engaging sentences.\n"
             f"   - teen: Natural high-school / peer conversational tone.\n"
-            f"   - adult: Respectful, professional, everyday/workplace appropriate.\n"
+            f"   - adult: Respectful, professional, everyday/workplace appropriate. Strictly avoid teacher praise or condescending tone.\n"
             f"8. CONCISE LENGTH: Exactly 1 to 3 conversational sentences maximum. No long essays.\n"
             f"9. LANGUAGE CONSISTENCY: Output strictly in {lang_name} ({language}). Avoid unnecessary language mixing.\n"
-            f"10. NO SCORING REVEALS: Never reveal internal scoring, rubrics, or hidden evaluation criteria.\n\n"
+            f"10. NO SCORING REVEALS: Never reveal internal scoring, rubrics, or hidden evaluation criteria.\n"
+            f"11. REAL-WORLD ADULT WORKPLACE & EVERYDAY REALISM (FOR ADULT PERSONA):\n"
+            f"    - Act strictly as a real-life human professional in this scenario (e.g., Manager, Supervisor, Colleague, Support Agent, Clinic Receptionist, Pharmacist).\n"
+            f"    - Address the learner's exact practical situation: deadlines, reports, summaries, data constraints, mistake concerns, shift swaps, billing adjustments, or prescription dosages.\n"
+            f"    - Offer actionable, realistic next steps without educational filler praise.\n\n"
             f"Return JSON format only:\n"
             f'{{\n  "response": "<your contextual in-character response>",\n  "objectivesAchieved": true|false\n}}'
         )

@@ -14,44 +14,128 @@ from app.services.ai.ai_service import call_ai_chat, is_ai_available
 logger = logging.getLogger("humsaathi-evaluation")
 
 FALLBACK_FEEDBACKS = {
-    'en': {
-        'feedback': "You did a wonderful job talking to the teacher/person! You expressed yourself clearly and politely. Remember, speaking up is a great way to learn and grow.",
-        'strengths': [
-            "Polite and respectful greeting",
-            "Answered the questions directly",
-            "Followed the flow of the conversation",
-        ],
-        'improvements': [
-            "Try adding a bit more detail when explaining what you need",
-            "Practice using clear and simple words",
-        ],
-        'betterResponse': "Excuse me, teacher. Could you please show me how to solve the first math problem on the worksheet?",
+    'adult': {
+        'en': {
+            'feedback': "You demonstrated clear, professional communication throughout this workplace interaction. You maintained constructive dialogue, asked relevant questions, and clarified practical next steps effectively.",
+            'strengths': [
+                "Maintained professional workplace tone",
+                "Directly addressed key priorities and deadlines",
+                "Constructive problem-solving approach",
+            ],
+            'improvements': [
+                "Continue practicing proactive timeline adjustments",
+                "Confirm final action items clearly before concluding",
+            ],
+            'betterResponse': "Good morning. I've drafted the client summary. Could you clarify whether I should prioritize the financial charts or executive brief first?",
+        },
+        'ur': {
+            'feedback': "آپ نے اس گفتگو کے دوران واضح اور پیشہ ورانہ انداز اپنایا۔ آپ نے اہم معاملات پر بات کی اور اگلے عملی اقدامات کی موثر انداز میں تصدیق کی۔",
+            'strengths': [
+                "پیشہ ورانہ اور شائستہ دفتری انداز",
+                "ترجیحات اور ڈیڈ لائنز کا واضح جائزہ",
+                "مسئلہ حل کرنے کا مثبت طریقہ کار",
+            ],
+            'improvements': [
+                "وقت کے شیڈول پر پیشگی بات چیت کی مشق جاری رکھیں",
+                "گفتگو ختم کرنے سے پہلے حتمی لائحہ عمل واضح کریں",
+            ],
+            'betterResponse': "صبح بخیر! میں نے کلائنٹ سمری کا مسودہ تیار کر لیا ہے۔ کیا آپ واضح کر سکتے ہیں کہ پہلے مالیاتی چارٹس پر کام کروں یا ایگزیکٹو بریف پر؟",
+        },
+        'ur_rm': {
+            'feedback': "Aap ne clear aur professional communication ka muzahira kiya. Important points discuss kiye aur practical next steps efficiently confirm kiye.",
+            'strengths': [
+                "Professional workplace tone maintain kiya",
+                "Priorities aur deadlines ko clearly address kiya",
+                "Constructive problem-solving approach",
+            ],
+            'improvements': [
+                "Proactive timeline adjustment ki practice jari rakhein",
+                "Final action items conclude karne se pehle confirm karein",
+            ],
+            'betterResponse': "Good morning! Main ne client summary draft kar li hai. Kya aap clarify kar sakte hain ke pehle financial charts complete karoon ya executive brief?",
+        },
     },
-    'ur': {
-        'feedback': "آپ نے استاد/دوسرے شخص سے بات کرنے کا بہترین کام کیا! آپ نے اپنے خیالات کا اظہار واضح اور شائستگی سے کیا۔ یاد رکھیں، بولنا سیکھنے اور آگے بڑھنے کا ایک بہترین طریقہ ہے۔",
-        'strengths': [
-            "شائستہ اور احترام والا سلام",
-            "سوالات کا براہ راست جواب دیا",
-            "بات چیت کے بہاؤ پر عمل کیا",
-        ],
-        'improvements': [
-            "جب آپ کو ضرورت ہو تو وضاحت کرتے ہوئے تھوڑی مزید تفصیل شامل کرنے کی کوشش کریں",
-            "واضح اور آسان الفاظ استعمال کرنے کی مشق کریں",
-        ],
-        'betterResponse': "معاف کیجئے گا، ٹیچر۔ کیا آپ براہ کرم مجھے ورک شیٹ پر پہلا ریاضی کا سوال حل کرنے کا طریقہ دکھا سکتے ہیں؟",
+    'teen': {
+        'en': {
+            'feedback': "Great job communicating with your peer! You joined the discussion smoothly, shared your ideas, and kept the conversation positive and collaborative.",
+            'strengths': [
+                "Friendly and approachable peer tone",
+                "Shared relevant ideas and experience",
+                "Kept the conversation active and engaging",
+            ],
+            'improvements': [
+                "Ask follow-up questions to invite other classmates' opinions",
+                "Propose specific tasks you'd like to help with",
+            ],
+            'betterResponse': "Thanks! I'd love to join. Which topic or chapter are you guys focusing on first?",
+        },
+        'ur': {
+            'feedback': "اپنے ساتھی کے ساتھ بات چیت کا شاندار مظاہرہ! آپ گفتگو میں آسانی سے شامل ہوئے، اپنے خیالات پیش کیے اور مثبت ماحول برقرار رکھا۔",
+            'strengths': [
+                "دوستانہ اور خوشگوار انداز",
+                "موضوع کے مطابق خیالات کا اظہار",
+                "بات چیت کو فعال اور دلچسپ رکھا",
+            ],
+            'improvements': [
+                "دوسرے ساتھیوں کی رائے جاننے کے لیے مزید سوالات پوچھیں",
+                "مخصوص ذمہ داری سنبھالنے کی پیشکش کریں",
+            ],
+            'betterResponse': "شکریہ! مجھے آپ کے گروپ میں شامل ہو کر خوشی ہوگی۔ آپ سب پہلے کس موضوع پر کام کر رہے ہیں؟",
+        },
+        'ur_rm': {
+            'feedback': "Classmate ke sath bohot achi conversation rahi! Aap ne smooth entry li, ideas share kiye aur collaborative discussion maintain ki.",
+            'strengths': [
+                "Friendly aur natural peer tone",
+                "Relevant points aur experience share kiya",
+                "Engaging group participation",
+            ],
+            'improvements': [
+                "Classmates ki opinion lene ke liye follow-up questions poochein",
+                "Specific task offer karne ki practice karein",
+            ],
+            'betterResponse': "Thanks! Main zaroor join karna chahoonga. Aap log pehle kis topic par focus kar rahe hain?",
+        },
     },
-    'ur_rm': {
-        'feedback': "Aap ne teacher/person se baat karne ka behtareen kaam kiya! Aap ne apne aap ko wazih aur polite tariqe se express kiya. Yaad rakhein, bolna seekhne aur grow karne ka behtareen zariya hai.",
-        'strengths': [
-            "Polite aur respectful greeting",
-            "Sawal ka direct jawab diya",
-            "Conversation flow ko maintain kiya",
-        ],
-        'improvements': [
-            "Jab aap ko madad chahiye ho to thori mazeed detail add karne ki koshish karein",
-            "Wazih aur simple words use karne ki practice karein",
-        ],
-        'betterResponse': "Excuse me, teacher. Kya aap please mujhe worksheet par pehla math problem solve karne ka tarika dikha sakte hain?",
+    'child': {
+        'en': {
+            'feedback': "You did a wonderful job talking and asking for help! You expressed yourself clearly and politely. Remember, speaking up is a great way to learn and grow.",
+            'strengths': [
+                "Polite and respectful greeting",
+                "Answered the questions directly",
+                "Followed the flow of the conversation",
+            ],
+            'improvements': [
+                "Try adding a bit more detail when explaining what you need",
+                "Practice using clear and simple words",
+            ],
+            'betterResponse': "Excuse me, Teacher. Could you please show me how to solve question number 3?",
+        },
+        'ur': {
+            'feedback': "آپ نے استاد سے بات کرنے کا بہترین کام کیا! آپ نے اپنے خیالات کا اظہار واضح اور شائستگی سے کیا۔ یاد رکھیں، بولنا سیکھنے اور آگے بڑھنے کا ایک بہترین طریقہ ہے۔",
+            'strengths': [
+                "شائستہ اور احترام والا سلام",
+                "سوالات کا براہ راست جواب دیا",
+                "بات چیت کے بہاؤ پر عمل کیا",
+            ],
+            'improvements': [
+                "جب آپ کو ضرورت ہو تو وضاحت کرتے ہوئے تھوڑی مزید تفصیل شامل کرنے کی کوشش کریں",
+                "واضح اور آسان الفاظ استعمال کرنے کی مشق کریں",
+            ],
+            'betterResponse': "معاف کیجئے گا، ٹیچر۔ کیا آپ براہ کرم مجھے سوال نمبر 3 حل کرنے کا طریقہ دکھا سکتے ہیں؟",
+        },
+        'ur_rm': {
+            'feedback': "Aap ne teacher se baat karne ka behtareen kaam kiya! Aap ne apne aap ko wazih aur polite tariqe se express kiya. Yaad rakhein, bolna seekhne aur grow karne ka behtareen zariya hai.",
+            'strengths': [
+                "Polite aur respectful greeting",
+                "Sawal ka direct jawab diya",
+                "Conversation flow ko maintain kiya",
+            ],
+            'improvements': [
+                "Jab aap ko madad chahiye ho to thori mazeed detail add karne ki koshish karein",
+                "Wazih aur simple words use karne ki practice karein",
+            ],
+            'betterResponse': "Excuse me, Teacher. Kya aap please mujhe question number 3 solve karne ka tarika dikha sakte hain?",
+        },
     },
 }
 
@@ -205,7 +289,8 @@ async def evaluate_session(db: Session, session_id: str, user_id: str) -> Dict[s
             overall_score = round((clarity + relevance + appropriateness + communication + conversation_flow) / 5)
 
     if not feedback_text:
-        template = FALLBACK_FEEDBACKS.get(language) or FALLBACK_FEEDBACKS['en']
+        persona_key = user.persona if user and user.persona in FALLBACK_FEEDBACKS else 'adult'
+        template = FALLBACK_FEEDBACKS.get(persona_key, {}).get(language) or FALLBACK_FEEDBACKS.get(persona_key, {}).get('en') or FALLBACK_FEEDBACKS['adult']['en']
         feedback_text = template['feedback']
         strengths = template['strengths']
         improvements = template['improvements']
