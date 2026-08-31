@@ -466,9 +466,32 @@ export default function ConversationPage() {
               className={`chat-bubble-row ${msg.role === 'user' ? 'user-row' : 'ai-row'}`}
             >
               {msg.role !== 'user' && (
-                <div className="bubble-avatar-ai">🤖</div>
+                <div className="bubble-avatar-ai" title={scenarioRole}>
+                  {(() => {
+                    const r = String(scenarioRole || '').toLowerCase();
+                    if (r.includes('manager') || r.includes('supervisor')) return '👔';
+                    if (r.includes('teacher')) return '👩‍🏫';
+                    if (r.includes('classmate') || r.includes('friend') || r.includes('student')) return '🧑‍🎓';
+                    if (r.includes('support') || r.includes('agent')) return '🎧';
+                    if (r.includes('pharmacist') || r.includes('doctor') || r.includes('receptionist')) return '💊';
+                    return '🎭';
+                  })()}
+                </div>
               )}
               <div className="bubble-content-wrap">
+                {msg.role !== 'user' && (
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      color: 'var(--text-secondary)',
+                      display: 'block',
+                      marginBottom: '0.2rem',
+                    }}
+                  >
+                    {scenarioRole}
+                  </span>
+                )}
                 <div className={`chat-bubble ${msg.role === 'user' ? 'user' : 'ai'}`}>
                   {msg.content}
                 </div>
@@ -491,7 +514,7 @@ export default function ConversationPage() {
                 )}
               </div>
               {msg.role === 'user' && (
-                <div className="bubble-avatar-user">
+                <div className="bubble-avatar-user" title={user?.name || 'You'}>
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </div>
               )}
