@@ -4,6 +4,8 @@ import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 
+import { speakWithBestVoice, stopSpeech } from '../utils/ttsVoiceHelper';
+
 function getLocalizedText(val, lang, fallback = '') {
   if (!val) return fallback;
   if (typeof val === 'string') return val;
@@ -42,6 +44,7 @@ export default function ConversationPage() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const audioPlayerRef = useRef(null);
+  const activeUtteranceRef = useRef(null);
 
   const isRtl = language === 'ur';
 
@@ -50,99 +53,28 @@ export default function ConversationPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Dynamic voice selection helper prioritizing female voices by language
-  const getBestFemaleVoice = useCallback((langCode) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return null;
-    const voices = window.speechSynthesis.getVoices() || [];
-    if (!voices.length) return null;
-
-    const femaleKeywords = [
-      'female', 'woman', 'girl', 'zira', 'samantha', 'karen', 'victoria',
-      'moira', 'fiona', 'veena', 'uzma', 'gul', 'amira', 'fatima', 'hira',
-      'ayesha', 'saba', 'mary', 'jenny', 'aria', 'sonia', 'natural', 'eva',
-      'stephanie', 'sarah', 'salli', 'joanna', 'kendra', 'kimberly', 'ivy'
-    ];
-
-    const isFemale = (v) => {
-      const name = (v.name || '').toLowerCase();
-      return femaleKeywords.some((kw) => name.includes(kw));
-    };
-
-    const targetLang = (langCode || 'en').toLowerCase();
-
-    let targetTags = [];
-    if (targetLang === 'ur') {
-      targetTags = ['ur-pk', 'ur-in', 'ur'];
-    } else if (targetLang === 'ur_rm') {
-      targetTags = ['ur-pk', 'ur-in', 'ur', 'hi-in', 'en-in', 'en-pk', 'en-us', 'en-gb', 'en'];
-    } else {
-      targetTags = ['en-us', 'en-gb', 'en-au', 'en-ca', 'en-in', 'en'];
-    }
-
-    // Priority 1: Female voice matching exact primary target tag
-    for (const tag of targetTags) {
-      const match = voices.find(
-        (v) => (v.lang || '').toLowerCase().replace('_', '-').startsWith(tag) && isFemale(v)
-      );
-      if (match) return match;
-    }
-
-    // Priority 2: Any voice matching exact primary target tag
-    for (const tag of targetTags) {
-      const match = voices.find(
-        (v) => (v.lang || '').toLowerCase().replace('_', '-').startsWith(tag)
-      );
-      if (match) return match;
-    }
-
-    // Priority 3: Any female voice in available list
-    const anyFemale = voices.find(isFemale);
-    if (anyFemale) return anyFemale;
-
-    // Priority 4: Browser default or first voice
-    return voices.find((v) => v.default) || voices[0] || null;
-  }, []);
-
   const speakText = useCallback((text, lang, idx = null) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-
     if (!text) return;
+    const targetLang = lang || language || 'en';
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    const selectedVoice = getBestFemaleVoice(lang);
-
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-      utterance.lang = selectedVoice.lang;
-    } else if (lang === 'ur' || lang === 'ur_rm') {
-      utterance.lang = 'ur-PK';
-    } else {
-      utterance.lang = 'en-US';
-    }
-
-    utterance.rate = 0.95; // slightly calm pace for accessibility
-
-    utterance.onstart = () => {
-      if (idx !== null) setSpeakingIdx(idx);
-    };
-
-    utterance.onend = () => {
-      setSpeakingIdx(null);
-    };
-
-    utterance.onerror = () => {
-      setSpeakingIdx(null);
-    };
-
-    window.speechSynthesis.speak(utterance);
-  }, [getBestFemaleVoice]);
+    speakWithBestVoice({
+      text,
+      language: targetLang,
+      onStart: () => {
+        if (idx !== null) setSpeakingIdx(idx);
+      },
+      onEnd: () => {
+        setSpeakingIdx(null);
+      },
+      onError: () => {
+        setSpeakingIdx(null);
+      }
+    });
+  }, [language]);
 
   const stopSpeaking = () => {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-      setSpeakingIdx(null);
-    }
+    stopSpeech();
+    setSpeakingIdx(null);
   };
 
   // Fetch session details
