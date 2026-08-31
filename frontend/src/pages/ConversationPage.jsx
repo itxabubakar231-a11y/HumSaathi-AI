@@ -50,6 +50,59 @@ export default function ConversationPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Dynamic voice selection helper prioritizing female voices by language
+  const getBestFemaleVoice = useCallback((langCode) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return null;
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (!voices.length) return null;
+
+    const femaleKeywords = [
+      'female', 'woman', 'girl', 'zira', 'samantha', 'karen', 'victoria',
+      'moira', 'fiona', 'veena', 'uzma', 'gul', 'amira', 'fatima', 'hira',
+      'ayesha', 'saba', 'mary', 'jenny', 'aria', 'sonia', 'natural', 'eva',
+      'stephanie', 'sarah', 'salli', 'joanna', 'kendra', 'kimberly', 'ivy'
+    ];
+
+    const isFemale = (v) => {
+      const name = (v.name || '').toLowerCase();
+      return femaleKeywords.some((kw) => name.includes(kw));
+    };
+
+    const targetLang = (langCode || 'en').toLowerCase();
+
+    let targetTags = [];
+    if (targetLang === 'ur') {
+      targetTags = ['ur-pk', 'ur-in', 'ur'];
+    } else if (targetLang === 'ur_rm') {
+      targetTags = ['ur-pk', 'ur-in', 'ur', 'hi-in', 'en-in', 'en-pk', 'en-us', 'en-gb', 'en'];
+    } else {
+      targetTags = ['en-us', 'en-gb', 'en-au', 'en-ca', 'en-in', 'en'];
+    }
+
+    // Priority 1: Female voice matching exact primary target tag
+    for (const tag of targetTags) {
+      const match = voices.find(
+        (v) => (v.lang || '').toLowerCase().replace('_', '-').startsWith(tag) && isFemale(v)
+      );
+      if (match) return match;
+    }
+
+    // Priority 2: Any voice matching exact primary target tag
+    for (const tag of targetTags) {
+      const match = voices.find(
+        (v) => (v.lang || '').toLowerCase().replace('_', '-').startsWith(tag)
+      );
+      if (match) return match;
+    }
+
+    // Priority 3: Any female voice in available list
+    const anyFemale = voices.find(isFemale);
+    if (anyFemale) return anyFemale;
+
+    // Priority 4: Browser default or first voice
+    return voices.find((v) => v.default) || voices[0] || null;
+  }, []);
+
   const speakText = useCallback((text, lang, idx = null) => {
     if (typeof window === 'undefined' || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
@@ -57,11 +110,18 @@ export default function ConversationPage() {
     if (!text) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
-    if (lang === 'ur' || lang === 'ur_rm') {
+    const selectedVoice = getBestFemaleVoice(lang);
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
+    } else if (lang === 'ur' || lang === 'ur_rm') {
       utterance.lang = 'ur-PK';
     } else {
       utterance.lang = 'en-US';
     }
+
+    utterance.rate = 0.95; // slightly calm pace for accessibility
 
     utterance.onstart = () => {
       if (idx !== null) setSpeakingIdx(idx);
@@ -76,7 +136,7 @@ export default function ConversationPage() {
     };
 
     window.speechSynthesis.speak(utterance);
-  }, []);
+  }, [getBestFemaleVoice]);
 
   const stopSpeaking = () => {
     if (window.speechSynthesis) {
@@ -175,6 +235,21 @@ export default function ConversationPage() {
       }
     };
   }, [sessionId, user, navigate, language, fetchSession]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const handleVoicesChanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+      window.speechSynthesis.onvoiceschanged = handleVoicesChanged;
+      handleVoicesChanged();
+      return () => {
+        if (window.speechSynthesis) {
+          window.speechSynthesis.onvoiceschanged = null;
+        }
+      };
+    }
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -296,6 +371,7 @@ export default function ConversationPage() {
       const res = await api.sendMessage(sessionId, {
         userId: user.id,
         message: trimmed,
+        language: language,
       });
 
       if (res && res.session) {

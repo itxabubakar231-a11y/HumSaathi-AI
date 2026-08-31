@@ -149,7 +149,7 @@ def start_conversation(
 ):
     target_user_id = current_user.id if current_user else payload.userId
     try:
-        res = start_session(db, target_user_id, payload.scenarioId, payload.mode or "text")
+        res = start_session(db, target_user_id, payload.scenarioId, payload.mode or "text", language=payload.language)
         return res
     except ValueError as e:
         raise HTTPException(
@@ -172,7 +172,7 @@ async def send_conversation_message(
 
     target_user_id = current_user.id if current_user else payload.userId
     try:
-        res = await send_message(db, session_id, target_user_id, payload.message)
+        res = await send_message(db, session_id, target_user_id, payload.message, language=payload.language)
         return res
     except ValueError as e:
         raise HTTPException(

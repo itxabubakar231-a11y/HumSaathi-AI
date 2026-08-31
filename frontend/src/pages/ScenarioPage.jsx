@@ -60,10 +60,12 @@ export default function ScenarioPage() {
 
   const handleStart = async (scenarioId, mode) => {
     try {
+      const activeLang = user?.language || language || 'en';
       const res = await api.startConversation({
         userId: user?.id,
         scenarioId,
         mode,
+        language: activeLang,
       });
       const sessionId = res?.session?.id || res?.id || res?.sessionId;
       if (sessionId) {

@@ -760,11 +760,24 @@ def validate_ai_response(response_text: str, language: str, role_str: str) -> bo
     for f in forbidden:
         if f in clean:
             return False
-    # If Urdu script is requested, ensure presence of Urdu unicode range
+
+    has_ur = any('\u0600' <= c <= '\u06FF' for c in response_text)
+
+    # 1. Urdu Script Enforcement: Must contain Urdu characters
     if language == "ur":
-        has_ur = any('\u0600' <= c <= '\u06FF' for c in response_text)
-        if not has_ur and len(response_text.strip()) > 8:
+        if not has_ur:
             return False
+
+    # 2. Roman Urdu Enforcement: Must be Latin script, NOT Urdu script
+    elif language == "ur_rm":
+        if has_ur:
+            return False
+
+    # 3. English Enforcement: Must NOT contain Urdu script
+    elif language == "en":
+        if has_ur:
+            return False
+
     return True
 
 def generate_contextual_fallback(
@@ -1049,7 +1062,7 @@ def generate_contextual_fallback(
 
     return (resp_text, is_completed)
 
-def start_session(db: Session, user_id: str, scenario_id: str, mode: str = "text") -> Dict[str, Any]:
+def start_session(db: Session, user_id: str, scenario_id: str, mode: str = "text", language: Optional[str] = None) -> Dict[str, Any]:
     user = db.query(User).filter(User.id == user_id).first()
     scenario = db.query(CommunicationScenario).filter(CommunicationScenario.id == scenario_id).first()
 
@@ -1086,10 +1099,13 @@ def start_session(db: Session, user_id: str, scenario_id: str, mode: str = "text
     if not scenario and not def_s:
         raise ValueError("Scenario not found")
 
-    language = user.language or "en"
+    session_lang = language if language in ["en", "ur", "ur_rm"] else (user.language or "en")
+    user.language = session_lang
+    user.lastActiveAt = datetime.utcnow()
+
     init_prompt = def_s["initialPrompt"] if def_s else parse_json(scenario.initialPrompt, {})
     if isinstance(init_prompt, dict):
-        initial_msg_text = init_prompt.get(language) or init_prompt.get("en") or "Hello!"
+        initial_msg_text = init_prompt.get(session_lang) or init_prompt.get("en") or "Hello!"
     else:
         initial_msg_text = str(init_prompt) if init_prompt else "Hello!"
 
@@ -1101,20 +1117,19 @@ def start_session(db: Session, user_id: str, scenario_id: str, mode: str = "text
         userId=user.id,
         scenarioId=scenario.id if scenario else scenario_id,
         mode=mode,
-        language=language,
+        language=session_lang,
         transcript=stringify_json(initial_transcript),
         turnCount=0,
         completed=False,
         createdAt=datetime.utcnow(),
     )
-    user.lastActiveAt = datetime.utcnow()
     db.add(session)
     db.commit()
     db.refresh(session)
 
     # Format scenario for session return
     from app.routers.conversations import format_scenario
-    formatted_sc = format_scenario(def_s or scenario, language=language)
+    formatted_sc = format_scenario(def_s or scenario, language=session_lang)
 
     return {
         "session": {
@@ -1132,7 +1147,7 @@ def start_session(db: Session, user_id: str, scenario_id: str, mode: str = "text
         "scenario": formatted_sc,
     }
 
-async def send_message(db: Session, session_id: str, user_id: str, user_message: str) -> Dict[str, Any]:
+async def send_message(db: Session, session_id: str, user_id: str, user_message: str, language: Optional[str] = None) -> Dict[str, Any]:
     session = db.query(ConversationSession).filter(ConversationSession.id == session_id).first()
     if not session:
         raise ValueError("Session not found")
@@ -1157,7 +1172,14 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
     is_session_completed = False
 
     user = db.query(User).filter(User.id == user_id).first()
-    language = session.language or (user.language if user else "en")
+
+    # Dynamic mid-session language update if provided
+    if language and language in ["en", "ur", "ur_rm"]:
+        session.language = language
+        if user:
+            user.language = language
+
+    active_language = session.language or (user.language if user else "en")
     user_persona = user.persona if user else "teen"
     sensory_info = user.sensoryPrefs if (user and user.sensoryPrefs) else "{}"
 
@@ -1166,14 +1188,14 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
         is_session_completed = True
 
     context_str = def_s["context"] if def_s else (scenario.context if scenario else "")
-    role_str = def_s["aiRole"].get(language, def_s["aiRole"].get("en", "Coach")) if (def_s and isinstance(def_s.get("aiRole"), dict)) else (scenario.aiRole if scenario else "Coach")
-    objectives_val = def_s["objectives"].get(language, def_s["objectives"].get("en", [])) if (def_s and isinstance(def_s.get("objectives"), dict)) else (parse_json(scenario.objectives, []) if scenario else [])
-    title_str = def_s["title"].get(language, def_s["title"].get("en", "")) if (def_s and isinstance(def_s.get("title"), dict)) else (scenario.title if scenario else "")
-    desc_str = def_s["description"].get(language, def_s["description"].get("en", "")) if (def_s and isinstance(def_s.get("description"), dict)) else (scenario.description if scenario else "")
+    role_str = def_s["aiRole"].get(active_language, def_s["aiRole"].get("en", "Coach")) if (def_s and isinstance(def_s.get("aiRole"), dict)) else (scenario.aiRole if scenario else "Coach")
+    objectives_val = def_s["objectives"].get(active_language, def_s["objectives"].get("en", [])) if (def_s and isinstance(def_s.get("objectives"), dict)) else (parse_json(scenario.objectives, []) if scenario else [])
+    title_str = def_s["title"].get(active_language, def_s["title"].get("en", "")) if (def_s and isinstance(def_s.get("title"), dict)) else (scenario.title if scenario else "")
+    desc_str = def_s["description"].get(active_language, def_s["description"].get("en", "")) if (def_s and isinstance(def_s.get("description"), dict)) else (scenario.description if scenario else "")
     skills_practiced = get_scenario_communication_skills(session.scenarioId, def_s.get("difficulty", "easy") if def_s else "easy")
 
     # Detect selected option
-    selected_option = detect_selected_option(def_s, user_message, language)
+    selected_option = detect_selected_option(def_s, user_message, active_language)
     selected_option_context = ""
     if selected_option:
         selected_option_context = (
@@ -1182,7 +1204,29 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
         )
 
     if is_ai_available() and (scenario or def_s):
-        lang_name = "English" if language == "en" else "Urdu (اردو script)" if language == "ur" else "Roman Urdu"
+        if active_language == "ur":
+            lang_name = "Urdu (اردو script)"
+            lang_rule = (
+                "CRITICAL MANDATORY LANGUAGE DIRECTIVE: The learner has selected URDU (اردو).\n"
+                "- You MUST output your response ONLY in natural Urdu script (اردو رسم الخط).\n"
+                "- NEVER output English or Latin-script Roman Urdu.\n"
+                "- Even if the learner message contains English loanwords (e.g., 'report', 'slide', 'data', 'question'), your entire response MUST be in pure Urdu script."
+            )
+        elif active_language == "ur_rm":
+            lang_name = "Roman Urdu (Latin script)"
+            lang_rule = (
+                "CRITICAL MANDATORY LANGUAGE DIRECTIVE: The learner has selected ROMAN URDU.\n"
+                "- You MUST output your response ONLY in natural conversational Roman Urdu using Latin alphabet (e.g., 'Aap ko kis part mein help chahiye?').\n"
+                "- DO NOT use Urdu Unicode script (\u0600-\u06ff).\n"
+                "- DO NOT output plain English monologues."
+            )
+        else:
+            lang_name = "English"
+            lang_rule = (
+                "CRITICAL MANDATORY LANGUAGE DIRECTIVE: The learner has selected ENGLISH.\n"
+                "- You MUST output your response ONLY in natural English."
+            )
+
         system_prompt = (
             f"You are role-playing as the character defined by the selected communication scenario: {role_str}.\n"
             f"Scenario ID: {session.scenarioId}\n"
@@ -1194,6 +1238,7 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
             f"Communication Skills Being Practiced: {', '.join(skills_practiced)}\n"
             f"Current Conversation Turn: {next_turn_count} of 10\n"
             f"{selected_option_context}\n"
+            f"{lang_rule}\n\n"
             f"CRITICAL ROLE-PLAY & INTERACTION INSTRUCTIONS:\n"
             f"1. STRICT IN-CHARACTER ROLE-PLAY: Stay strictly in character as {role_str} at all times. Never act as a generic AI tutor or assistant. Never say 'As an AI' or break character.\n"
             f"2. NO GENERIC FILLER PRAISE: Never say 'Great job!', 'That's correct!', 'Keep practicing!', or 'Excellent communication!' unless it is something {role_str} would genuinely say in this real-life moment.\n"
@@ -1209,14 +1254,14 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
             f"   - teen: Natural high-school / peer conversational tone.\n"
             f"   - adult: Respectful, professional, everyday/workplace appropriate. Strictly avoid teacher praise or condescending tone.\n"
             f"8. CONCISE LENGTH: Exactly 1 to 3 conversational sentences maximum. No long essays.\n"
-            f"9. LANGUAGE CONSISTENCY: Output strictly in {lang_name} ({language}). Avoid unnecessary language mixing.\n"
+            f"9. LANGUAGE CONSISTENCY: Output strictly in {lang_name} ({active_language}). Do not switch languages unless requested.\n"
             f"10. NO SCORING REVEALS: Never reveal internal scoring, rubrics, or hidden evaluation criteria.\n"
             f"11. REAL-WORLD ADULT WORKPLACE & EVERYDAY REALISM (FOR ADULT PERSONA):\n"
             f"    - Act strictly as a real-life human professional in this scenario (e.g., Manager, Supervisor, Colleague, Support Agent, Clinic Receptionist, Pharmacist).\n"
             f"    - Address the learner's exact practical situation: deadlines, reports, summaries, data constraints, mistake concerns, shift swaps, billing adjustments, or prescription dosages.\n"
             f"    - Offer actionable, realistic next steps without educational filler praise.\n\n"
             f"Return JSON format only:\n"
-            f'{{\n  "response": "<your contextual in-character response>",\n  "objectivesAchieved": true|false\n}}'
+            f'{{\n  "response": "<your contextual in-character response in {lang_name}>",\n  "objectivesAchieved": true|false\n}}'
         )
 
         chat_history = [
@@ -1232,7 +1277,7 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
         ai_result = await call_ai_chat(messages, temperature=0.6)
         if ai_result and isinstance(ai_result, dict) and ai_result.get("response"):
             candidate = str(ai_result["response"]).strip()
-            if validate_ai_response(candidate, language, role_str):
+            if validate_ai_response(candidate, active_language, role_str):
                 response_text = candidate
                 if ai_result.get("objectivesAchieved") is True:
                     is_session_completed = True
@@ -1241,12 +1286,12 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
                 retry_messages = list(messages)
                 retry_messages.append({
                     "role": "system",
-                    "content": f"Your previous response violated role-play or language guidelines. Please output a strictly in-character, 1-2 sentence response as {role_str} reacting directly to '{user_message}' in {lang_name} without any generic praise."
+                    "content": f"Your previous response violated language or role-play guidelines. You MUST output a strictly in-character, 1-2 sentence response as {role_str} reacting directly to '{user_message}' STRICTLY in {lang_name} ({active_language}) without any generic praise."
                 })
-                retry_result = await call_ai_chat(retry_messages, temperature=0.4)
+                retry_result = await call_ai_chat(retry_messages, temperature=0.3)
                 if retry_result and isinstance(retry_result, dict) and retry_result.get("response"):
                     retry_candidate = str(retry_result["response"]).strip()
-                    if validate_ai_response(retry_candidate, language, role_str):
+                    if validate_ai_response(retry_candidate, active_language, role_str):
                         response_text = retry_candidate
                         if retry_result.get("objectivesAchieved") is True:
                             is_session_completed = True
@@ -1257,7 +1302,7 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
             scenario_id=session.scenarioId or (scenario.id if scenario else ""),
             user_message=user_message,
             turn_count=next_turn_count,
-            language=language,
+            language=active_language,
             history=history,
             def_s=def_s,
             role_str=role_str,
