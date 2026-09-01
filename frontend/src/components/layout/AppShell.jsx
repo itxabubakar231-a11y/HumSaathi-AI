@@ -2,22 +2,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useI18n } from '../../context/I18nContext';
 import { useUser } from '../../context/UserContext';
 import { useState } from 'react';
-import {
-  HomeIcon,
-  ActivitiesIcon,
-  ProgressIcon,
-  ShieldIcon,
-  SettingsIcon,
-  MenuIcon,
-  CloseIcon,
-} from '../ui/Icons';
 
 const navItems = [
-  { path: '/dashboard', labelKey: 'nav.dashboard', Icon: HomeIcon, fallbackLabel: 'Home' },
-  { path: '/scenarios', labelKey: 'nav.scenarios', Icon: ActivitiesIcon, fallbackLabel: 'Activities & Practice' },
-  { path: '/progress', labelKey: 'nav.progress', Icon: ProgressIcon, fallbackLabel: 'Progress Report' },
-  { path: '/parent', labelKey: 'nav.parent', Icon: ShieldIcon, fallbackLabel: 'Parent & Caregiver' },
-  { path: '/settings', labelKey: 'nav.settings', Icon: SettingsIcon, fallbackLabel: 'Settings' },
+  { path: '/dashboard', labelKey: 'nav.dashboard', icon: '🏠', fallbackLabel: 'Home' },
+  { path: '/scenarios', labelKey: 'nav.scenarios', icon: '🧩', fallbackLabel: 'Activities & Practice' },
+  { path: '/progress', labelKey: 'nav.progress', icon: '📈', fallbackLabel: 'Progress Report' },
+  { path: '/parent', labelKey: 'nav.parent', icon: '🛡️', fallbackLabel: 'Parent & Caregiver' },
+  { path: '/settings', labelKey: 'nav.settings', icon: '⚙️', fallbackLabel: 'Settings & Sensory' },
 ];
 
 export default function AppShell({ children }) {
@@ -29,10 +20,19 @@ export default function AppShell({ children }) {
 
   const getPersonaBadgeColor = (persona) => {
     switch (persona) {
-      case 'child': return '#0B6B3A';
-      case 'teen': return '#7C3AED';
-      case 'adult': return '#0284C7';
-      default: return '#0B6B3A';
+      case 'child': return '#F59E0B';
+      case 'teen': return '#8B5CF6';
+      case 'adult': return '#0EA5E9';
+      default: return '#10B981';
+    }
+  };
+
+  const getPersonaIcon = (persona) => {
+    switch (persona) {
+      case 'child': return '🧒';
+      case 'teen': return '🧑‍🎓';
+      case 'adult': return '💼';
+      default: return '🎭';
     }
   };
 
@@ -50,12 +50,12 @@ export default function AppShell({ children }) {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
           >
-            {mobileMenuOpen ? '✕' : '☰'}
+            ☰
           </button>
-
+          
           <Link className="brand" to="/" aria-label="HumSaathi AI Home">
             <span className="brand-mark" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="white"/>
               </svg>
             </span>
@@ -64,7 +64,7 @@ export default function AppShell({ children }) {
                 HumSaathi <span className="brand-ai-badge">AI</span>
               </span>
               <span className="brand-subtext">
-                {language === 'ur' ? 'آٹزم سپورٹ پلیٹ فارم' : 'Autism Support Platform'}
+                {language === 'ur' ? 'آٹزم سپورٹ پلیٹ فارم' : language === 'ur_rm' ? 'Autism Support Platform' : 'Autism Support Platform'}
               </span>
             </div>
           </Link>
@@ -98,14 +98,16 @@ export default function AppShell({ children }) {
             <button
               className="portal-badge-btn"
               onClick={() => navigate('/persona-selection')}
-              title="Click to switch portal (Child, Teen, Adult)"
+              title="Click to switch persona portal (Child, Teen, Adult)"
             >
+              <span className="portal-badge-icon">{getPersonaIcon(user.persona)}</span>
               <span className="portal-badge-text">
                 <span className="portal-label-dim">{language === 'ur' ? 'پورٹل:' : 'Portal:'}</span>{' '}
                 <strong style={{ color: getPersonaBadgeColor(user.persona) }}>
                   {user.persona.toUpperCase()}
                 </strong>
               </span>
+              <span className="portal-badge-switch">⚡</span>
             </button>
           )}
 
@@ -115,9 +117,22 @@ export default function AppShell({ children }) {
               className="admin-badge-btn"
               onClick={() => navigate('/admin/dashboard')}
               title="Open Administrator Control Center"
+              style={{
+                background: 'linear-gradient(135deg, #1e293b, #0f172a)',
+                border: '1px solid #3b82f6',
+                color: '#60a5fa',
+                padding: '0.4rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+              }}
             >
-              <ShieldIcon size={14} />
-              <span className="admin-btn-label">Admin</span>
+              <span>🛡️</span>
+              <span>Admin Panel</span>
             </button>
           )}
 
@@ -138,7 +153,21 @@ export default function AppShell({ children }) {
                 navigate('/login');
               }}
               title="Log Out"
+              style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                color: '#ef4444',
+                padding: '0.4rem 0.8rem',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+              }}
             >
+              <span>🚪</span>
               <span>{language === 'ur' ? 'لاگ آؤٹ' : 'Logout'}</span>
             </button>
           )}
@@ -164,15 +193,21 @@ export default function AppShell({ children }) {
                     navigate('/admin/dashboard');
                     setMobileMenuOpen(false);
                   }}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(30, 41, 59, 0.4))',
+                    border: '1px solid rgba(59, 130, 246, 0.4)',
+                    color: '#60a5fa',
+                    fontWeight: 600,
+                    marginBottom: '0.75rem',
+                  }}
                 >
-                  <span className="nav-icon" aria-hidden="true"><ShieldIcon size={18} /></span>
-                  <span className="nav-text">Admin Panel</span>
+                  <span className="nav-icon" aria-hidden="true">🛡️</span>
+                  <span className="nav-text">Admin Panel ➔</span>
                 </button>
               )}
               <p className="sidebar-label">{language === 'ur' ? 'رہنمائی' : 'Main Menu'}</p>
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
-                const IconComponent = item.Icon;
                 return (
                   <button
                     className={`nav-item ${isActive ? 'is-active' : ''}`}
@@ -184,9 +219,7 @@ export default function AppShell({ children }) {
                     }}
                     aria-current={isActive ? 'page' : undefined}
                   >
-                    <span className="nav-icon" aria-hidden="true">
-                      <IconComponent size={18} />
-                    </span>
+                    <span className="nav-icon" aria-hidden="true">{item.icon}</span>
                     <span className="nav-text">{t(item.labelKey) || item.fallbackLabel}</span>
                     {isActive && <span className="nav-active-pill" />}
                   </button>
@@ -200,14 +233,15 @@ export default function AppShell({ children }) {
             <div className="sidebar-footer">
               <div className="sidebar-user-card" onClick={() => navigate('/persona-selection')} role="button" title="Switch Portal">
                 <div className="sidebar-user-avatar" style={{ borderColor: getPersonaBadgeColor(user?.persona) }}>
-                  {user.name.charAt(0).toUpperCase()}
+                  {getPersonaIcon(user?.persona)}
                 </div>
                 <div className="sidebar-user-info">
                   <span className="sidebar-user-name">{user.name}</span>
                   <span className="sidebar-user-role" style={{ color: getPersonaBadgeColor(user?.persona) }}>
-                    {user.persona ? `${user.persona.toUpperCase()} PORTAL` : 'LEARNER'}
+                    {user.persona ? `${user.persona.toUpperCase()} MODE` : 'LEARNER'}
                   </span>
                 </div>
+                <span className="sidebar-switch-icon">⇄</span>
               </div>
             </div>
           )}
@@ -223,16 +257,13 @@ export default function AppShell({ children }) {
       <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
-          const IconComponent = item.Icon;
           return (
             <button
               key={item.path}
               className={`mobile-nav-btn ${isActive ? 'is-active' : ''}`}
               onClick={() => navigate(item.path)}
             >
-              <span className="mobile-nav-icon">
-                <IconComponent size={20} />
-              </span>
+              <span className="mobile-nav-icon">{item.icon}</span>
               <span className="mobile-nav-label">{t(item.labelKey) || item.fallbackLabel}</span>
             </button>
           );

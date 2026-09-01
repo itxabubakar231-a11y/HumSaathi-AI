@@ -4,20 +4,6 @@ import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 import { speakWithBestVoice, stopSpeech } from '../utils/ttsVoiceHelper';
-import {
-  MessageIcon,
-  MicIcon,
-  PlayIcon,
-  StopIcon,
-  TrashIcon,
-  RefreshIcon,
-  SendIcon,
-  VolumeIcon,
-  SparklesIcon,
-  CheckIcon,
-  ArrowRightIcon,
-  AiIcon,
-} from '../components/ui/Icons';
 
 function getLocalizedText(val, lang, fallback = '') {
   if (!val) return fallback;
@@ -80,7 +66,7 @@ export default function ConversationPage() {
       },
       onError: () => {
         setSpeakingIdx(null);
-      },
+      }
     });
   }, [language]);
 
@@ -172,14 +158,28 @@ export default function ConversationPage() {
     return () => {
       window.speechSynthesis?.cancel();
       if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch {
-          // ignore
-        }
+        recognitionRef.current.abort();
+      }
+      if (audioPreviewUrl) {
+        URL.revokeObjectURL(audioPreviewUrl);
       }
     };
-  }, [fetchSession, language, navigate, t, user?.id]);
+  }, [sessionId, user, navigate, language, fetchSession, t]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const handleVoicesChanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+      window.speechSynthesis.onvoiceschanged = handleVoicesChanged;
+      handleVoicesChanged();
+      return () => {
+        if (window.speechSynthesis) {
+          window.speechSynthesis.onvoiceschanged = null;
+        }
+      };
+    }
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -190,72 +190,81 @@ export default function ConversationPage() {
     setSpeechError('');
     setRecordedTranscript('');
     setInterimTranscript('');
-    setAudioPreviewUrl(null);
+    if (audioPreviewUrl) {
+      URL.revokeObjectURL(audioPreviewUrl);
+      setAudioPreviewUrl(null);
+    }
     audioChunksRef.current = [];
 
-    // 1. Start Speech Recognition
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.start();
-      } catch (err) {
-        console.warn('Recognition start retry:', err);
-      }
-    }
-
-    // 2. Start MediaRecorder for audio playback
+    // Start Audio recording via MediaRecorder if supported
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
 
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            audioChunksRef.current.push(event.data);
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            audioChunksRef.current.push(e.data);
           }
         };
 
         mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          const url = URL.createObjectURL(audioBlob);
-          setAudioPreviewUrl(url);
-          // Stop stream tracks
+          if (audioChunksRef.current.length > 0) {
+            const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+            const url = URL.createObjectURL(blob);
+            setAudioPreviewUrl(url);
+          }
           stream.getTracks().forEach((track) => track.stop());
         };
 
         mediaRecorder.start();
       } catch (err) {
-        console.warn('MediaRecorder error:', err);
+        console.warn('MediaRecorder error or mic denied:', err);
       }
     }
+
+    // Start speech recognition
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.start();
+      } catch (e) {
+        console.warn('Speech recognition restart notice:', e);
+      }
+    }
+    setIsRecording(true);
   };
 
   const stopRecording = () => {
+    setIsRecording(false);
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
-      } catch {
+      } catch (e) {
         // ignore
       }
     }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       try {
         mediaRecorderRef.current.stop();
-      } catch {
+      } catch (e) {
         // ignore
       }
     }
-    setIsRecording(false);
   };
 
   const deleteRecording = () => {
-    stopRecording();
+    if (audioPreviewUrl) {
+      URL.revokeObjectURL(audioPreviewUrl);
+      setAudioPreviewUrl(null);
+    }
+    audioChunksRef.current = [];
     setRecordedTranscript('');
     setInterimTranscript('');
-    setAudioPreviewUrl(null);
-    setIsPlayingAudio(false);
+    setSpeechError('');
     if (audioPlayerRef.current) {
       audioPlayerRef.current.pause();
+      setIsPlayingAudio(false);
     }
   };
 
@@ -264,7 +273,10 @@ export default function ConversationPage() {
     if (!audioPlayerRef.current) {
       audioPlayerRef.current = new Audio(audioPreviewUrl);
       audioPlayerRef.current.onended = () => setIsPlayingAudio(false);
+    } else {
+      audioPlayerRef.current.src = audioPreviewUrl;
     }
+
     if (isPlayingAudio) {
       audioPlayerRef.current.pause();
       setIsPlayingAudio(false);
@@ -274,68 +286,64 @@ export default function ConversationPage() {
     }
   };
 
-  // Send message handler
-  const handleSendMessage = async (textToSend) => {
-    const text = (textToSend || inputText).trim();
-    if (!text || sending) return;
-
-    setInputText('');
-    setRecordedTranscript('');
-    setInterimTranscript('');
-    setAudioPreviewUrl(null);
+  const handleSendMessage = async (text) => {
+    const trimmed = (text || '').trim();
+    if (sending || !trimmed) return;
     setSending(true);
     setError('');
 
-    // Append user message optimistically
-    const nextUserMsg = { role: 'user', content: text, timestamp: new Date().toISOString() };
-    setMessages((prev) => [...prev, nextUserMsg]);
+    const newUserMessage = { role: 'user', content: trimmed, timestamp: new Date().toISOString() };
+    setMessages((prev) => [...prev, newUserMessage]);
+    deleteRecording();
 
     try {
-      const activeLang = session?.language || language || 'en';
       const res = await api.sendMessage(sessionId, {
-        userId: user?.id,
-        message: text,
-        language: activeLang,
+        userId: user.id,
+        message: trimmed,
+        language: language,
       });
 
       if (res && res.session) {
-        const transcriptList = Array.isArray(res.session.transcript) ? res.session.transcript : [];
-        setMessages(transcriptList);
+        const updatedTranscript = res.session.transcript || [];
+        setMessages(updatedTranscript);
 
-        // If in voice mode, speak AI response
-        if (mode === 'voice' && transcriptList.length > 0) {
-          const lastIdx = transcriptList.length - 1;
-          const lastMsg = transcriptList[lastIdx];
-          if (lastMsg && lastMsg.role !== 'user') {
-            speakText(lastMsg.content, res.session.language || activeLang, lastIdx);
-          }
+        if (res.response) {
+          speakText(res.response, res.session.language || language, updatedTranscript.length - 1);
+        }
+
+        if (res.completed) {
+          setTimeout(() => {
+            navigate(`/feedback/${sessionId}`);
+          }, 1800);
         }
       }
     } catch (err) {
       setError(err.message || t('common.error'));
+      setMessages((prev) => prev.slice(0, -1));
     } finally {
       setSending(false);
+      setInputText('');
     }
   };
 
   const handleSendClick = (e) => {
-    e?.preventDefault();
+    e.preventDefault();
+    if (!inputText.trim()) return;
     handleSendMessage(inputText);
   };
 
   const handleFinish = async () => {
-    stopSpeaking();
-    stopRecording();
+    setSending(true);
     try {
       await api.endConversation(sessionId);
-    } catch {
-      // ignore
+      navigate(`/feedback/${sessionId}`);
+    } catch (err) {
+      navigate(`/feedback/${sessionId}`);
     }
-    navigate(`/feedback/${sessionId}`);
   };
 
   const getRoleLabel = (roleStr) => {
-    if (!roleStr) return 'AI Coach';
+    if (!roleStr) return t('conversation.aiCoach');
     const key = `role.${String(roleStr).toLowerCase().replace(/\s+/g, '_')}`;
     const translated = t(key);
     if (translated && translated !== key) return translated;
@@ -385,11 +393,11 @@ export default function ConversationPage() {
 
   return (
     <div className="web-practice-workspace" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Left Sidebar: Scenario Information (Desktop) */}
+      {/* Left Sidebar: Scenario Information, AI Context & Learning Loop */}
       <aside className="practice-info-sidebar">
         <div className="practice-info-header">
           <span className="practice-badge-kicker">
-            {t('conversation.interactivePractice')}
+            🎯 {t('conversation.interactivePractice')}
           </span>
           <h2 className="practice-scenario-title">{scenarioTitle}</h2>
           <p className="practice-scenario-desc">{scenarioDesc}</p>
@@ -422,7 +430,7 @@ export default function ConversationPage() {
         <div className="ai-context-panel">
           <div className="ai-context-panel-title">
             <span className="ai-context-kicker">
-              <SparklesIcon size={14} /> {t('conversation.humsaathiUnderstands') || 'HUMSAATHI UNDERSTANDS'}
+              ✨ {t('conversation.humsaathiUnderstands') || 'HUMSAATHI UNDERSTANDS'}
             </span>
           </div>
           <div className="ai-context-chips-row">
@@ -440,28 +448,28 @@ export default function ConversationPage() {
             </span>
           </div>
           <div className="ai-adaptive-status">
-            <span>{t('conversation.adaptiveGenerated') || 'Adaptive response active'}</span>
+            <span>⚡ {t('conversation.adaptiveGenerated') || 'Adaptive response generated'}</span>
           </div>
         </div>
 
         {/* Metadata Card */}
         <div className="practice-meta-card">
           <div className="meta-row">
-            <span className="meta-label">{t('conversation.roleLabel') || 'Role'}:</span>
+            <span className="meta-label">🤖 {t('conversation.roleLabel') || 'Role'}:</span>
             <strong className="meta-val">{scenarioRole}</strong>
           </div>
           <div className="meta-row">
-            <span className="meta-label">{t('conversation.goalLabel') || 'Goal'}:</span>
+            <span className="meta-label">🎯 {t('conversation.goalLabel') || 'Goal'}:</span>
             <strong className="meta-val" style={{ fontSize: '0.85rem' }}>{primaryGoal}</strong>
           </div>
           <div className="meta-row">
-            <span className="meta-label">{t('conversation.language') || 'Language:'}</span>
+            <span className="meta-label">🌐 {t('conversation.language') || 'Language:'}</span>
             <strong className="meta-val">
               {language === 'ur' ? 'اردو (Urdu)' : language === 'ur_rm' ? 'Roman Urdu' : 'English'}
             </strong>
           </div>
           <div className="meta-row">
-            <span className="meta-label">{t('conversation.difficulty') || 'Difficulty:'}</span>
+            <span className="meta-label">⚡ {t('conversation.difficulty') || 'Difficulty:'}</span>
             <strong className="meta-val" style={{ textTransform: 'capitalize' }}>
               {getDifficultyLabel(scenarioData.difficulty)}
             </strong>
@@ -470,7 +478,7 @@ export default function ConversationPage() {
 
         {/* Tips Card */}
         <div className="practice-tips-card">
-          <h4>{t('conversation.tipsTitle')}</h4>
+          <h4>💡 {t('conversation.tipsTitle')}</h4>
           <ul>
             <li>{t('conversation.tip1')}</li>
             <li>{t('conversation.tip2')}</li>
@@ -480,14 +488,14 @@ export default function ConversationPage() {
 
         <div className="practice-sidebar-actions">
           <button className="btn-secondary end-session-btn" onClick={handleFinish}>
-            {t('conversation.endBtn')}
+            🏁 {t('conversation.endBtn')}
           </button>
         </div>
       </aside>
 
-      {/* Main Column: Interactive Chat Conversation Room */}
+      {/* Right Column: Interactive Chat Conversation Room */}
       <section className="practice-chat-container">
-        {/* 1. Header: AI COACH status & Mode Switcher */}
+        {/* Top Chat Bar with AI COACH status & Mode Switcher */}
         <div className="chat-top-header">
           <div className="chat-partner-status">
             <div className="online-pulse-indicator">
@@ -504,55 +512,28 @@ export default function ConversationPage() {
             </span>
           </div>
 
-          <div className="chat-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div className="mode-toggle-group">
-              <button
-                type="button"
-                className={`mode-toggle-btn ${mode === 'text' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setMode('text');
-                  stopSpeaking();
-                }}
-                aria-label="Switch to Text Mode"
-              >
-                <MessageIcon size={14} />
-                <span>{t('conversation.modeText')}</span>
-              </button>
-              <button
-                type="button"
-                className={`mode-toggle-btn ${mode === 'voice' ? 'is-active' : ''}`}
-                onClick={() => setMode('voice')}
-                aria-label="Switch to Voice Mode"
-              >
-                <MicIcon size={14} />
-                <span>{t('conversation.modeVoice')}</span>
-              </button>
-            </div>
-
+          <div className="mode-toggle-group">
             <button
-              className="mobile-end-session-btn"
               type="button"
-              onClick={handleFinish}
-              title="Finish Session"
+              className={`mode-toggle-btn ${mode === 'text' ? 'is-active' : ''}`}
+              onClick={() => {
+                setMode('text');
+                stopSpeaking();
+              }}
             >
-              {t('conversation.endBtn')}
+              💬 {t('conversation.modeText')}
+            </button>
+            <button
+              type="button"
+              className={`mode-toggle-btn ${mode === 'voice' ? 'is-active' : ''}`}
+              onClick={() => setMode('voice')}
+            >
+              🎙️ {t('conversation.modeVoice')}
             </button>
           </div>
         </div>
 
-        {/* 2. Mobile Scenario Summary Banner (Visible on mobile/tablets) */}
-        <div className="mobile-scenario-banner">
-          <div className="mobile-scenario-info">
-            <strong className="mobile-scenario-title">{scenarioTitle}</strong>
-            <div className="mobile-scenario-meta">
-              <span><strong>Role:</strong> {scenarioRole}</span>
-              <span>·</span>
-              <span><strong>Goal:</strong> {primaryGoal}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Chat Feed */}
+        {/* Chat Feed */}
         <div className="chat-messages">
           {messages.map((msg, idx) => (
             <div
@@ -561,7 +542,15 @@ export default function ConversationPage() {
             >
               {msg.role !== 'user' && (
                 <div className="bubble-avatar-ai" title={scenarioRole}>
-                  <AiIcon size={18} />
+                  {(() => {
+                    const r = String(scenarioRole || '').toLowerCase();
+                    if (r.includes('manager') || r.includes('supervisor')) return '👔';
+                    if (r.includes('teacher')) return '👩‍🏫';
+                    if (r.includes('classmate') || r.includes('friend') || r.includes('student')) return '🧑‍🎓';
+                    if (r.includes('support') || r.includes('agent')) return '🎧';
+                    if (r.includes('pharmacist') || r.includes('doctor') || r.includes('receptionist')) return '💊';
+                    return '🎭';
+                  })()}
                 </div>
               )}
               <div className="bubble-content-wrap">
@@ -595,15 +584,7 @@ export default function ConversationPage() {
                     title="Play voice audio"
                     aria-label="Listen to message audio"
                   >
-                    {speakingIdx === idx ? (
-                      <>
-                        <StopIcon size={13} /> <span>{t('conversation.stop')}</span>
-                      </>
-                    ) : (
-                      <>
-                        <VolumeIcon size={13} /> <span>{t('conversation.listen')}</span>
-                      </>
-                    )}
+                    {speakingIdx === idx ? `⏹️ ${t('conversation.stop')}` : `🔊 ${t('conversation.listen')}`}
                   </button>
                 )}
               </div>
@@ -618,9 +599,7 @@ export default function ConversationPage() {
           {/* AI Thinking Animation */}
           {sending && (
             <div className="chat-bubble-row ai-row">
-              <div className="bubble-avatar-ai">
-                <AiIcon size={18} />
-              </div>
+              <div className="bubble-avatar-ai">🤖</div>
               <div className="ai-thinking-pill" aria-label="AI is generating response">
                 <span className="online-pulse-dot" />
                 <span style={{ fontSize: '0.85rem', fontStyle: 'italic' }}>
@@ -634,14 +613,35 @@ export default function ConversationPage() {
 
         {error && <p className="error-text" style={{ padding: '0 1.5rem', fontSize: '0.85rem' }}>{error}</p>}
 
-        {/* 4. Quick Suggested Response Option Chips */}
+        {/* Quick Suggested Response Option Chips */}
         {scenarioOptions.length > 0 && !sending && (
-          <div className="suggested-options-container">
-            <span className="suggested-options-kicker">
-              <SparklesIcon size={13} />
-              <span>{t('conversation.suggestedResponses') || 'Suggested responses'}</span>
+          <div
+            className="suggested-options-container"
+            style={{
+              padding: '0.65rem 1.25rem',
+              background: 'var(--bg-secondary)',
+              borderTop: '1px solid var(--border-color)',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                color: 'var(--primary-green)',
+                display: 'block',
+                marginBottom: '0.45rem',
+                letterSpacing: '0.03em',
+              }}
+            >
+              💡 {t('conversation.suggestedResponses') || 'Suggested responses'}
             </span>
-            <div className="suggested-options-grid">
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: '0.45rem',
+              }}
+            >
               {scenarioOptions.slice(0, 4).map((opt, i) => {
                 const optText = getLocalizedText(opt.text, language, opt.text);
                 return (
@@ -649,9 +649,21 @@ export default function ConversationPage() {
                     key={opt.id || i}
                     type="button"
                     className="suggested-option-chip"
+                    style={{
+                      textAlign: isRtl ? 'right' : 'left',
+                      padding: '0.55rem 0.85rem',
+                      fontSize: '0.86rem',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      lineHeight: '1.4',
+                    }}
                     onClick={() => handleSendMessage(optText)}
                     disabled={sending}
                   >
+                    <span>💬</span>
                     <span>{optText}</span>
                   </button>
                 );
@@ -660,14 +672,28 @@ export default function ConversationPage() {
           </div>
         )}
 
-        {/* 5. Input Area / Composer (Voice vs Text) */}
+        {/* Input Area (Voice vs Text) */}
         {mode === 'voice' ? (
-          <div className="chat-input-area voice-input-area">
+          <div className="chat-input-area voice-input-area" style={{ padding: '1rem 1.25rem' }}>
             {speechSupported ? (
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {/* Status & Live waveform preview */}
                 {(isRecording || recordedTranscript || interimTranscript) && (
-                  <div className="voice-preview-box">
+                  <div
+                    className="voice-preview-box"
+                    style={{
+                      padding: '0.75rem 1rem',
+                      borderRadius: 'var(--radius-md)',
+                      background: 'var(--bg-tertiary)',
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.95rem',
+                      color: 'var(--text-primary)',
+                      lineHeight: '1.4',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                    }}
+                  >
                     {isRecording ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', width: '100%' }}>
                         <div className="voice-live-waveform" aria-hidden="true">
@@ -679,7 +705,7 @@ export default function ConversationPage() {
                           <span className="waveform-bar" />
                         </div>
                         <span style={{ fontWeight: 600, color: '#ef4444' }}>
-                          {t('voice.listening') || 'Listening…'}
+                          ● {t('voice.listening') || 'Listening…'}
                         </span>
                         <span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>
                           "{recordedTranscript ? `${recordedTranscript} ` : ''}{interimTranscript || ''}"
@@ -688,13 +714,21 @@ export default function ConversationPage() {
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
                         <span style={{ fontSize: '0.85rem', color: 'var(--primary-green)', fontWeight: 700, flexShrink: 0 }}>
-                          ✓ {t('voice.voiceCaptured') || 'Captured'}:
+                          ✓ {t('voice.voiceCaptured') || 'Voice captured'}:
                         </span>
                         <input
                           type="text"
                           value={recordedTranscript}
                           onChange={(e) => setRecordedTranscript(e.target.value)}
-                          className="voice-transcript-input"
+                          style={{
+                            flex: 1,
+                            background: 'transparent',
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: '0.95rem',
+                            color: 'var(--text-primary)',
+                            fontFamily: 'inherit',
+                          }}
                           placeholder="Spoken transcript..."
                         />
                       </div>
@@ -705,27 +739,35 @@ export default function ConversationPage() {
                 {speechError && <p className="error-text" style={{ fontSize: '0.85rem', margin: 0 }}>{speechError}</p>}
 
                 {/* Primary Voice Controls */}
-                <div className="voice-controls-row">
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                   {!isRecording && !recordedTranscript && (
                     <button
                       className="btn-primary"
                       type="button"
+                      style={{ padding: '0.65rem 1.25rem', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                       onClick={startRecording}
                       disabled={sending}
                     >
-                      <MicIcon size={16} />
-                      <span>{t('voice.tapToSpeak')}</span>
+                      🎙️ {t('voice.tapToSpeak')}
                     </button>
                   )}
 
                   {isRecording && (
                     <button
-                      className="btn-primary btn-stop-recording"
+                      className="btn-primary"
                       type="button"
+                      style={{
+                        padding: '0.65rem 1.25rem',
+                        fontSize: '0.95rem',
+                        background: '#ef4444',
+                        borderColor: '#ef4444',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                      }}
                       onClick={stopRecording}
                     >
-                      <StopIcon size={16} />
-                      <span>{t('conversation.stop')}</span>
+                      ⏹️ {t('conversation.stop')}
                     </button>
                   )}
 
@@ -735,47 +777,47 @@ export default function ConversationPage() {
                         <button
                           className="btn-secondary"
                           type="button"
+                          style={{ padding: '0.6rem 1rem', fontSize: '0.9rem' }}
                           onClick={togglePlayAudio}
                         >
-                          {isPlayingAudio ? <StopIcon size={15} /> : <PlayIcon size={15} />}
-                          <span>{isPlayingAudio ? 'Stop' : t('voice.playPreview')}</span>
+                          {isPlayingAudio ? '⏸️ Stop' : `▶️ ${t('voice.playPreview')}`}
                         </button>
                       )}
                       <button
                         className="btn-secondary"
                         type="button"
+                        style={{ padding: '0.6rem 1rem', fontSize: '0.9rem' }}
                         onClick={startRecording}
                       >
-                        <RefreshIcon size={15} />
-                        <span>{t('voice.recordAgain') || 'Record Again'}</span>
+                        ↻ {t('voice.recordAgain') || 'Record Again'}
                       </button>
                       <button
-                        className="btn-secondary btn-delete-recording"
+                        className="btn-secondary"
                         type="button"
+                        style={{ padding: '0.6rem 1rem', fontSize: '0.9rem', color: '#ef4444' }}
                         onClick={deleteRecording}
                       >
-                        <TrashIcon size={15} />
-                        <span>{t('voice.deleteRecording')}</span>
+                        🗑️ {t('voice.deleteRecording')}
                       </button>
                       <button
                         className="btn-primary"
                         type="button"
+                        style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem' }}
                         onClick={() => handleSendMessage(recordedTranscript)}
                         disabled={sending}
                       >
-                        <SendIcon size={15} />
-                        <span>{sending ? (t('voice.processingVoice') || 'Processing…') : t('voice.sendVoiceMessage')}</span>
+                        🚀 {sending ? (t('voice.processingVoice') || 'Processing your voice…') : t('voice.sendVoiceMessage')}
                       </button>
                     </>
                   )}
 
                   <button
-                    className="btn-secondary switch-mode-btn"
+                    className="btn-secondary"
                     type="button"
+                    style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', marginInlineStart: 'auto' }}
                     onClick={() => setMode('text')}
                   >
-                    <MessageIcon size={15} />
-                    <span>{t('voice.switchToText')}</span>
+                    💬 {t('voice.switchToText')}
                   </button>
                 </div>
               </div>
@@ -785,8 +827,7 @@ export default function ConversationPage() {
                   {t('voice.micError')}
                 </p>
                 <button className="btn-primary" type="button" onClick={() => setMode('text')}>
-                  <MessageIcon size={15} />
-                  <span>{t('voice.switchToText')}</span>
+                  💬 {t('voice.switchToText')}
                 </button>
               </div>
             )}
@@ -800,16 +841,14 @@ export default function ConversationPage() {
               onChange={(e) => setInputText(e.target.value)}
               placeholder={t('conversation.placeholder')}
               disabled={sending}
-              aria-label="Message input"
             />
             <button
               className="chat-send-btn"
               type="submit"
               disabled={sending || !inputText.trim()}
               title={t('conversation.send')}
-              aria-label="Send message"
             >
-              {sending ? <span className="send-spinner" /> : <SendIcon size={16} />}
+              {sending ? '...' : (isRtl ? '➔' : '➔')}
             </button>
             {speechSupported && (
               <button
@@ -817,9 +856,8 @@ export default function ConversationPage() {
                 type="button"
                 onClick={() => setMode('voice')}
                 title={t('scenarios.startVoice')}
-                aria-label="Switch to voice recording"
               >
-                <MicIcon size={18} />
+                🎙️
               </button>
             )}
           </form>
@@ -828,3 +866,4 @@ export default function ConversationPage() {
     </div>
   );
 }
+

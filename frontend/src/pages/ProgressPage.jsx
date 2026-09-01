@@ -3,14 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
-import {
-  CheckIcon,
-  ProgressIcon,
-  SparklesIcon,
-  ArrowRightIcon,
-  ActivitiesIcon,
-  AnalyticsIcon,
-} from '../components/ui/Icons';
 
 export default function ProgressPage() {
   const { user } = useUser();
@@ -64,7 +56,7 @@ export default function ProgressPage() {
           </p>
         </div>
         <div className="progress-header-badge">
-          {language === 'ur' ? 'اس ہفتے' : language === 'ur_rm' ? 'Is hafte' : 'This Week'}
+          📅 {language === 'ur' ? 'اس ہفتے' : language === 'ur_rm' ? 'Is hafte' : 'This Week'}
         </div>
       </div>
 
@@ -72,34 +64,34 @@ export default function ProgressPage() {
       <div className="stats-grid web-stats-grid">
         <div className="stat-card">
           <div className="stat-card-icon-wrap" style={{ background: '#E8F7F0', color: '#0B6B3A' }}>
-            <CheckIcon size={20} />
+            ✅
           </div>
           <div className="stat-card-content">
             <span className="stat-label">{language === 'ur' ? 'مکمل سرگرمیاں' : t('progress.completed')}</span>
             <span className="stat-value">{dashboard.completedCount}</span>
-            <span className="stat-hint">{language === 'ur' ? 'ہفتہ وار ہدف جاری ہے' : language === 'ur_rm' ? 'Hadaf jari hai' : 'Target on track'}</span>
+            <span className="stat-hint">🎯 {language === 'ur' ? 'ہفتہ وار ہدف جاری ہے' : language === 'ur_rm' ? 'Hadaf jari hai' : 'Target on track'}</span>
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-card-icon-wrap" style={{ background: '#EBF5FF', color: '#0284C7' }}>
-            <ProgressIcon size={20} />
+            🎯
           </div>
           <div className="stat-card-content">
             <span className="stat-label">{language === 'ur' ? 'اوسط درستگی' : t('progress.accuracy')}</span>
             <span className="stat-value">{Math.round(dashboard.avgAccuracy)}%</span>
-            <span className="stat-hint">{language === 'ur' ? 'پچھلے ہفتے سے بہتر' : language === 'ur_rm' ? 'Pichlay hafte se behtar' : 'Mastery average'}</span>
+            <span className="stat-hint">📈 +5% {language === 'ur' ? 'پچھلے ہفتے سے بہتر' : language === 'ur_rm' ? 'Pichlay hafte se behtar' : 'vs last week'}</span>
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-card-icon-wrap" style={{ background: '#FEF3C7', color: '#D97706' }}>
-            <SparklesIcon size={20} />
+            🔥
           </div>
           <div className="stat-card-content">
-            <span className="stat-label">{language === 'ur' ? 'مسلسل سلسلہ' : 'Active Streak'}</span>
-            <span className="stat-value">7 {language === 'ur' ? 'دن' : 'Days'}</span>
-            <span className="stat-hint">Level: <strong style={{ textTransform: 'capitalize' }}>{dashboard.currentLevel}</strong></span>
+            <span className="stat-label">{language === 'ur' ? 'مسلسل سلسلہ' : language === 'ur_rm' ? 'Active Streak' : 'Active Streak'}</span>
+            <span className="stat-value">7 {language === 'ur' ? 'دن' : language === 'ur_rm' ? 'Din' : 'Days'}</span>
+            <span className="stat-hint">⚡ Level: <strong style={{ textTransform: 'capitalize' }}>{dashboard.currentLevel}</strong></span>
           </div>
         </div>
       </div>
@@ -109,7 +101,7 @@ export default function ProgressPage() {
         <div className="dashboard-grid-split" style={{ marginBottom: 'var(--space-md)' }}>
           <section className="dashboard-card strength-highlight-card">
             <div className="card-header-flex">
-              <span className="badge-highlight-pill green-pill">{t('progress.strongest')}</span>
+              <span className="badge-highlight-pill green-pill">🌟 {t('progress.strongest')}</span>
             </div>
             <h3 className="highlight-skill-title">
               {dashboard.strongest.skill.replace('_', ' ').toUpperCase()}
@@ -128,7 +120,7 @@ export default function ProgressPage() {
 
           <section className="dashboard-card practice-highlight-card">
             <div className="card-header-flex">
-              <span className="badge-highlight-pill amber-pill">{t('progress.needsPractice')}</span>
+              <span className="badge-highlight-pill amber-pill">🎯 {t('progress.needsPractice')}</span>
             </div>
             <h3 className="highlight-skill-title">
               {dashboard.needsPractice ? dashboard.needsPractice.skill.replace('_', ' ').toUpperCase() : 'Skill Practice'}
@@ -140,9 +132,8 @@ export default function ProgressPage() {
                 ? 'Mazeed mashq ke zariye is skill mein confidence barhayein.'
                 : 'Recommended for your next practice session to boost confidence.'}
             </p>
-            <button className="btn-primary btn-sm" onClick={() => navigate(user?.persona === 'child' ? '/dashboard' : '/scenarios')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span>{language === 'ur' ? 'ابھی مشق شروع کریں' : language === 'ur_rm' ? 'Abhi mashq karein' : 'Practice Now'}</span>
-              <ArrowRightIcon size={14} />
+            <button className="btn-primary btn-sm" onClick={() => navigate(user?.persona === 'child' ? '/dashboard' : '/scenarios')}>
+              🚀 {language === 'ur' ? 'ابھی مشق شروع کریں' : language === 'ur_rm' ? 'Abhi mashq karein' : 'Practice Now'}
             </button>
           </section>
         </div>
@@ -151,67 +142,61 @@ export default function ProgressPage() {
       {/* Row 3: Detailed Skill Progression Meters */}
       <section className="dashboard-card skill-breakdown-card" style={{ marginBottom: 'var(--space-md)' }}>
         <div className="card-header-line">
-          <h3 className="card-heading-title">{language === 'ur' ? 'مہارتوں کا تفصیلی جائزہ' : language === 'ur_rm' ? 'Skills Ka Tafseeli Jaiza' : 'Detailed Skills Mastery Breakdown'}</h3>
+          <h3 className="card-heading-title">📊 {language === 'ur' ? 'مہارتوں کا تفصیلی جائزہ' : language === 'ur_rm' ? 'Skills Ka Tafseeli Jaiza' : 'Detailed Skills Mastery Breakdown'}</h3>
           <span className="card-meta-note">
             {language === 'ur' ? 'خودکار AI تجزیہ' : language === 'ur_rm' ? 'AI Jaiza' : 'AI-Evaluated Performance'}
           </span>
         </div>
 
-        <div className="skills-meter-list">
-          {dashboard.progress && dashboard.progress.length > 0 ? (
-            dashboard.progress.map((item, idx) => (
-              <div key={idx} className="skill-meter-row">
-                <div className="skill-meter-info">
-                  <span className="skill-name">{item.skill.replace('_', ' ').toUpperCase()}</span>
-                  <span className="skill-pct">{Math.round(item.accuracy)}%</span>
+        <div className="skills-meter-grid">
+          {dashboard?.progress?.length ? (
+            dashboard.progress.map((prog) => (
+              <div key={prog.skill} className="skill-meter-row">
+                <div className="meter-info">
+                  <span className="meter-name">{prog.skill.replace('_', ' ').toUpperCase()}</span>
+                  <span className="meter-val">{Math.round(prog.accuracy)}%</span>
                 </div>
-                <div className="skill-progress-track">
+                <div className="meter-track">
                   <div
-                    className="skill-progress-fill"
-                    style={{
-                      width: `${Math.max(6, Math.min(100, item.accuracy))}%`,
-                      background: item.accuracy >= 70 ? 'var(--gradient-primary)' : item.accuracy >= 45 ? '#F59E0B' : '#8B5CF6',
-                    }}
+                    className="meter-fill"
+                    style={{ width: `${Math.max(8, Math.min(100, prog.accuracy))}%` }}
                   />
                 </div>
               </div>
             ))
           ) : (
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', padding: '1rem 0' }}>
-              No practice attempts recorded yet. Start practicing to generate skill breakdown!
+            <p className="empty-notice" style={{ padding: '1rem 0' }}>
+              {t('progress.none')}
             </p>
           )}
         </div>
       </section>
 
-      {/* Row 4: Activity Attempt History */}
-      <section className="dashboard-card history-card">
-        <h3 className="card-heading-title" style={{ marginBottom: '1rem' }}>
-          {language === 'ur' ? 'حالیہ سرگرمیوں کا ریکارڈ' : language === 'ur_rm' ? 'Recent History' : 'Recent Activity History'}
+      {/* Row 4: Recent Activity Log */}
+      <section className="dashboard-card recent-log-card">
+        <h3 className="card-heading-title" style={{ marginBottom: 'var(--space-sm)' }}>
+          ⏱️ {t('progress.recent') || 'Recent Practice Sessions'}
         </h3>
-        <div className="recent-history-list">
-          {dashboard.recentAttempts && dashboard.recentAttempts.length > 0 ? (
-            dashboard.recentAttempts.map((att, idx) => (
-              <div key={idx} className="history-item-row">
-                <div className="history-item-left">
-                  <span className="history-activity-name">
-                    {att.activityId ? att.activityId.replace('_', ' ').toUpperCase() : `Activity #${att.id.slice(-4)}`}
-                  </span>
-                  <span className="history-date">
-                    {att.createdAt ? new Date(att.createdAt).toLocaleDateString() : 'Recent'}
+
+        {dashboard.recentAttempts?.length ? (
+          <div className="attempts-table-wrap">
+            {dashboard.recentAttempts.map((a) => (
+              <div key={a.id} className="attempt-row-item">
+                <div className="attempt-info">
+                  <strong className="attempt-title">{a.title}</strong>
+                  <span className="attempt-diff-badge">
+                    Difficulty: <span style={{ textTransform: 'capitalize' }}>{a.difficulty}</span>
                   </span>
                 </div>
-                <div className="history-item-right">
-                  <span className="history-score-badge" style={{ color: att.score >= 0.7 ? '#0B6B3A' : '#D97706' }}>
-                    {Math.round((att.score || 0) * 100)}%
-                  </span>
+                <div className="attempt-score-wrap">
+                  <span className="attempt-score-val">{a.score}%</span>
                 </div>
               </div>
-            ))
-          ) : (
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>No recent attempts.</p>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="empty-notice">{t('progress.none') || 'No practice sessions recorded yet.'}</p>
+        )}
       </section>
     </div>
   );

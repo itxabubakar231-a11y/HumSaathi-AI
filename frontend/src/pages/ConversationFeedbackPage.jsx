@@ -3,15 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
-import {
-  CheckIcon,
-  SparklesIcon,
-  ArrowRightIcon,
-  RefreshIcon,
-  MessageIcon,
-  HomeIcon,
-  ActivitiesIcon,
-} from '../components/ui/Icons';
 
 function getLocalizedText(val, lang, fallback = '') {
   if (!val) return fallback;
@@ -151,9 +142,9 @@ export default function FeedbackPage() {
         <div className="score-circle" style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'var(--gradient-primary)', color: '#fff', fontSize: '2rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(11, 107, 58, 0.25)', marginBottom: '1rem' }}>
           {evaluation?.overallScore || 0}%
         </div>
-        <h2 style={{ fontSize: '1.35rem', color: 'var(--text-primary)', fontWeight: '700', marginBottom: '0.5rem' }}>
+        <h3 style={{ fontSize: '1.35rem', color: 'var(--text-primary)', fontWeight: '700', marginBottom: '0.5rem' }}>
           {t('evaluation.overallScore') || 'Overall Score'}
-        </h2>
+        </h3>
         <p style={{ color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '560px', lineHeight: '1.65', fontSize: '1rem', margin: 0 }}>
           {evaluation?.feedback || 'Great effort in completing this conversation scenario! Continue practicing to build confidence and natural conversational flow.'}
         </p>
@@ -162,7 +153,7 @@ export default function FeedbackPage() {
       {/* Real Metrics Breakdown */}
       <section className="dashboard-card" style={{ marginBottom: '1.5rem', padding: '1.75rem', borderRadius: 'var(--radius-lg)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
         <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.3rem', marginBottom: '1.25rem', fontWeight: '700', color: 'var(--text-primary)' }}>
-          {t('evaluation.breakdownTitle')}
+          📊 {t('evaluation.breakdownTitle')}
         </h3>
         <div className="metric-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
           {scores.map((s, idx) => (
@@ -180,12 +171,11 @@ export default function FeedbackPage() {
       </section>
 
       {/* Strengths & Improvements */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
         {evaluation?.strengths && evaluation.strengths.length > 0 && (
-          <section className="dashboard-card" style={{ padding: '1.5rem', borderInlineStart: '4px solid var(--primary-green)', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+          <section className="dashboard-card" style={{ padding: '1.5rem', borderInlineStart: '4px solid var(--primary-green)', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderInlineStartWidth: '4px' }}>
             <h3 style={{ color: 'var(--primary-green)', fontSize: '1.15rem', marginBottom: '0.75rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <CheckIcon size={18} />
-              <span>{t('evaluation.whatYouDidWell') || 'What you did well'}</span>
+              ✅ {t('evaluation.whatYouDidWell') || 'What you did well'}
             </h3>
             <ul style={{ paddingInlineStart: '1.2rem', fontSize: '0.95rem', color: 'var(--text-primary)', lineHeight: '1.6' }}>
               {evaluation.strengths.map((str, idx) => (
@@ -196,10 +186,9 @@ export default function FeedbackPage() {
         )}
 
         {evaluation?.improvements && evaluation.improvements.length > 0 && (
-          <section className="dashboard-card" style={{ padding: '1.5rem', borderInlineStart: '4px solid #7c3aed', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+          <section className="dashboard-card" style={{ padding: '1.5rem', borderInlineStart: '4px solid #8b5cf6', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderInlineStartWidth: '4px' }}>
             <h3 style={{ color: '#7c3aed', fontSize: '1.15rem', marginBottom: '0.75rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <SparklesIcon size={18} />
-              <span>{t('evaluation.nextOpportunity') || 'Your next opportunity'}</span>
+              🎯 {t('evaluation.nextOpportunity') || 'Your next opportunity'}
             </h3>
             <ul style={{ paddingInlineStart: '1.2rem', fontSize: '0.95rem', color: 'var(--text-primary)', lineHeight: '1.6' }}>
               {evaluation.improvements.map((imp, idx) => (
@@ -214,8 +203,7 @@ export default function FeedbackPage() {
       {evaluation?.betterResponse && (
         <section className="dashboard-card" style={{ marginBottom: '1.5rem', padding: '1.5rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
           <h4 style={{ fontSize: '0.95rem', color: 'var(--primary-green)', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <SparklesIcon size={16} />
-            <span>{t('evaluation.betterResponse')}</span>
+            💡 {t('evaluation.betterResponse')}
           </h4>
           <blockquote style={{ fontStyle: 'italic', color: 'var(--text-primary)', margin: 0, paddingInlineStart: '1rem', borderInlineStart: '3px solid var(--primary-green)', fontSize: '1.05rem', lineHeight: '1.55' }}>
             "{evaluation.betterResponse}"
@@ -227,7 +215,7 @@ export default function FeedbackPage() {
       {recommendation && (
         <section className="dashboard-card" style={{ marginBottom: '1.5rem', padding: '1.5rem', borderRadius: 'var(--radius-lg)', background: 'var(--light-green-surface)', border: '1px solid rgba(11, 107, 58, 0.2)' }}>
           <span className="eyebrow" style={{ color: 'var(--primary-green)', fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.06em' }}>
-            {t('evaluation.recommendedPractice') || 'Recommended practice'}
+            🚀 {t('evaluation.recommendedPractice') || 'Recommended practice'}
           </span>
           <h4 style={{ fontSize: '1.25rem', marginTop: '0.35rem', marginBottom: '0.35rem', fontWeight: '700', color: 'var(--text-primary)', fontFamily: 'var(--font-serif)' }}>
             {getLocalizedText(recommendation.title, language, recommendation.title)}
@@ -235,26 +223,22 @@ export default function FeedbackPage() {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '1rem', lineHeight: '1.5' }}>
             {recommendation.reason}
           </p>
-          <button className="btn-primary" onClick={handleStartRecommendation} style={{ fontSize: '0.95rem', padding: '0.65rem 1.35rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span>{t('evaluation.nextScenario')}</span>
-            <ArrowRightIcon size={15} />
+          <button className="btn-primary" onClick={handleStartRecommendation} style={{ fontSize: '0.95rem', padding: '0.65rem 1.35rem' }}>
+            {t('evaluation.nextScenario')} ➔
           </button>
         </section>
       )}
 
       {/* Action Buttons */}
       <div style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center', marginTop: '2rem', flexWrap: 'wrap' }}>
-        <button className="btn-primary" onClick={handlePracticeAgain} disabled={practicingAgain} style={{ padding: '0.75rem 1.6rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-          <RefreshIcon size={16} />
-          <span>{t('evaluation.practiceAgain')}</span>
+        <button className="btn-primary" onClick={handlePracticeAgain} disabled={practicingAgain} style={{ padding: '0.75rem 1.6rem', fontSize: '0.95rem' }}>
+          🔄 {t('evaluation.practiceAgain')}
         </button>
-        <button className="btn-secondary" onClick={() => navigate('/scenarios')} style={{ padding: '0.75rem 1.4rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-          <MessageIcon size={16} />
-          <span>{t('nav.scenarios')}</span>
+        <button className="btn-secondary" onClick={() => navigate('/scenarios')} style={{ padding: '0.75rem 1.4rem', fontSize: '0.95rem' }}>
+          💬 {t('nav.scenarios')}
         </button>
-        <button className="btn-secondary" onClick={() => navigate('/dashboard')} style={{ padding: '0.75rem 1.4rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-          <HomeIcon size={16} />
-          <span>{t('evaluation.backDashboard')}</span>
+        <button className="btn-secondary" onClick={() => navigate('/dashboard')} style={{ padding: '0.75rem 1.4rem', fontSize: '0.95rem' }}>
+          📊 {t('evaluation.backDashboard')}
         </button>
       </div>
     </div>
