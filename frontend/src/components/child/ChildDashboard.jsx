@@ -40,42 +40,42 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
     switch (topic) {
       case 'letters':
       case 'letter':
-        return '🔤';
+        return '';
       case 'numbers':
       case 'number':
-        return '🔢';
+        return '';
       case 'colors':
       case 'shapes':
       case 'shape_color_match':
-        return '🎨';
+        return '';
       case 'counting':
-        return '🍎';
+        return '';
       case 'animals':
       case 'animal_matching':
-        return '🐾';
+        return '';
       case 'emotions':
       case 'emotion_learning':
-        return '💛';
+        return '';
       case 'routines':
       case 'routine_sequencing':
-        return '⏰';
+        return '';
       default:
-        return '✨';
+        return '';
     }
   };
 
   // Grouped games for child-friendly navigation
   const foundationGames = [
-    { type: 'letter', topic: 'letters', icon: '🔤', titleKey: 'child.game.letter', desc: 'Alphabet letters & sounds' },
-    { type: 'number', topic: 'numbers', icon: '🔢', titleKey: 'child.game.number', desc: 'Number recognition & order' },
-    { type: 'shape_color_match', topic: 'colors', icon: '🎨', titleKey: 'child.game.shape_color_match', desc: 'Colors, shapes & matching' },
-    { type: 'counting', topic: 'counting', icon: '🍎', titleKey: 'child.game.counting', desc: 'Count friendly objects' },
+    { type: 'letter', topic: 'letters', icon: '', titleKey: 'child.game.letter', desc: 'Alphabet letters & sounds' },
+    { type: 'number', topic: 'numbers', icon: '', titleKey: 'child.game.number', desc: 'Number recognition & order' },
+    { type: 'shape_color_match', topic: 'colors', icon: '', titleKey: 'child.game.shape_color_match', desc: 'Colors, shapes & matching' },
+    { type: 'counting', topic: 'counting', icon: '', titleKey: 'child.game.counting', desc: 'Count friendly objects' },
   ];
 
   const worldGames = [
-    { type: 'animal_matching', topic: 'animals', icon: '🐾', titleKey: 'child.game.animal_matching', desc: 'Friendly animals & habitats' },
-    { type: 'emotion_learning', topic: 'emotions', icon: '💛', titleKey: 'child.game.emotion_learning', desc: 'Recognize feelings & expressions' },
-    { type: 'routine_sequencing', topic: 'routines', icon: '⏰', titleKey: 'child.game.routine_sequencing', desc: 'Morning to evening daily steps' },
+    { type: 'animal_matching', topic: 'animals', icon: '', titleKey: 'child.game.animal_matching', desc: 'Friendly animals & habitats' },
+    { type: 'emotion_learning', topic: 'emotions', icon: '', titleKey: 'child.game.emotion_learning', desc: 'Recognize feelings & expressions' },
+    { type: 'routine_sequencing', topic: 'routines', icon: '', titleKey: 'child.game.routine_sequencing', desc: 'Morning to evening daily steps' },
   ];
 
   // Learning journey structured steps
@@ -84,25 +84,25 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
       stepNumber: '01',
       title: 'Initial Learning Check',
       subtitle: hasAssessment ? `Level: ${getChildLevelLabel(dashboard.assessmentSummary?.level)} (${dashboard.assessmentSummary?.score}%)` : 'Find your starting pace',
-      icon: '🎯',
+      icon: '',
       state: hasAssessment ? 'completed' : 'recommended',
-      actionLabel: hasAssessment ? 'Revisit' : 'Start Assessment 🚀',
+      actionLabel: hasAssessment ? 'Revisit' : 'Start Assessment ',
       onClick: () => navigate('/assessment'),
     },
     {
       stepNumber: '02',
       title: 'Foundations',
       subtitle: 'Letters, Numbers, Colors & Counting',
-      icon: '🧩',
+      icon: '',
       state: hasAssessment ? (completedCount >= 2 ? 'completed' : 'current') : 'locked',
-      actionLabel: hasAssessment ? (completedCount >= 2 ? 'Practice More ➔' : 'Start Learning ▶') : 'Complete Assessment',
+      actionLabel: hasAssessment ? (completedCount >= 2 ? 'Practice More ➔' : 'Start Learning ') : 'Complete Assessment',
       onClick: () => (hasAssessment ? startActivityByTopicOrType('letters') : navigate('/assessment')),
     },
     {
       stepNumber: '03',
       title: 'Communication Coach',
       subtitle: 'Real-world practice with AI Friend & Teacher',
-      icon: '💬',
+      icon: '',
       state: hasAssessment ? 'available' : 'locked',
       actionLabel: hasAssessment ? 'Open Scenarios ➔' : 'Complete Assessment',
       onClick: () => navigate('/scenarios'),
@@ -111,7 +111,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
       stepNumber: '04',
       title: 'World & Life Skills',
       subtitle: 'Animals, Emotions & Daily Routines',
-      icon: '🌍',
+      icon: '',
       state: hasAssessment ? (completedCount >= 4 ? 'completed' : 'available') : 'locked',
       actionLabel: hasAssessment ? 'Explore Games ➔' : 'Complete Assessment',
       onClick: () => (hasAssessment ? startActivityByTopicOrType('animals') : navigate('/assessment')),
@@ -120,9 +120,9 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
       stepNumber: '05',
       title: 'Daily Recommendation',
       subtitle: recommendation?.topic ? `Personalized task: ${recommendation.topic}` : 'Daily adaptive activities',
-      icon: '⭐',
+      icon: '',
       state: hasAssessment && recommendation ? 'recommended' : (hasAssessment ? 'available' : 'locked'),
-      actionLabel: hasAssessment ? 'Play Now 🚀' : 'Complete Assessment',
+      actionLabel: hasAssessment ? 'Play Now ' : 'Complete Assessment',
       onClick: () => (hasAssessment ? startRecommended() : navigate('/assessment')),
     },
   ];
@@ -133,7 +133,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
       <header className="child-header">
         <div className="child-header-main">
           <div className="child-avatar-wrap">
-            <span className="child-avatar-icon" aria-hidden="true">🌱</span>
+            <span className="child-avatar-icon" aria-hidden="true"></span>
           </div>
           <div className="child-welcome">
             <p className="child-greeting-kicker">{t('child.greeting')},</p>
@@ -144,7 +144,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
 
         {/* Big Star Bank */}
         <div className="child-star-bank" aria-label={`${rewards.totalStars || 0} ${t('child.stars')}`}>
-          <span className="star-bank-icon" aria-hidden="true">⭐</span>
+          <span className="star-bank-icon" aria-hidden="true"></span>
           <div className="star-bank-info">
             <span className="star-bank-count">{rewards.totalStars || 0}</span>
             <span className="star-bank-label">{t('child.stars')}</span>
@@ -157,7 +157,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         <section className="child-milestone-card" aria-label="Learning Goal">
           <div className="milestone-content">
             <div className="milestone-text">
-              <p className="milestone-kicker">🎯 {t('child.nextMilestone')}</p>
+              <p className="milestone-kicker"> {t('child.nextMilestone')}</p>
               <h3 className="milestone-title">
                 {rewards.nextMilestone.icon} {t(rewards.nextMilestone.labelKey)}
               </h3>
@@ -183,7 +183,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
       {!hasAssessment && (
         <section className="child-hero-card">
           <div className="child-hero-content">
-            <span className="child-hero-icon" aria-hidden="true">🌟</span>
+            <span className="child-hero-icon" aria-hidden="true"></span>
             <h2>{t('assessment.title')}</h2>
             <p className="child-hero-desc">{t('assessment.intro')}</p>
             <button
@@ -191,7 +191,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
               type="button"
               onClick={() => navigate('/assessment')}
             >
-              {t('dashboard.goAssessment')} 🚀
+              {t('dashboard.goAssessment')}
             </button>
           </div>
         </section>
@@ -215,20 +215,20 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
               type="button"
               onClick={startRecommended}
             >
-              {dashboard.completedCount > 0 ? t('child.continuePlay') : t('child.startAdventure')} 🚀
+              {dashboard.completedCount > 0 ? t('child.continuePlay') : t('child.startAdventure')}
             </button>
           </div>
         </section>
       )}
 
-      {/* 🚀 PRACTICE SCENARIOS / AI COACH FEATURE (PROMINENT) */}
+      {/*  PRACTICE SCENARIOS / AI COACH FEATURE (PROMINENT) */}
       <section className="child-section child-ai-coach-banner">
         <div className="ai-coach-card-content">
           <div className="ai-coach-text">
-            <span className="ai-coach-badge">🤖 AI Practice Companion</span>
+            <span className="ai-coach-badge"> AI Practice Companion</span>
             <h2>{language === 'ur' ? 'اے آئی دوست کے ساتھ بات چیت کریں' : 'Talk with your AI Coach & Friends!'}</h2>
             <p>
-              {language === 'ur' 
+              {language === 'ur'
                 ? 'استاد سے مدد مانگیں، نئے دوست بنائیں یا روزمرہ کی گفتگو بول کر یا لکھ کر مشق کریں۔'
                 : 'Practice talking to a helpful teacher, making friends, or asking for directions using voice or text.'}
             </p>
@@ -239,19 +239,19 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
               type="button"
               onClick={() => navigate('/scenarios')}
             >
-              🗣️ {language === 'ur' ? 'بات چیت شروع کریں' : 'Start Practice Scenarios'} ➔
+               {language === 'ur' ? 'بات چیت شروع کریں' : 'Start Practice Scenarios'} ➔
             </button>
           </div>
         </div>
       </section>
 
-      {/* 🗺️ MY LEARNING JOURNEY (STRUCTURED PROGRESSION TIMELINE) */}
+      {/*  MY LEARNING JOURNEY (STRUCTURED PROGRESSION TIMELINE) */}
       <section className="child-section child-journey-section">
         <div className="child-section-header">
           <div>
             <span className="child-section-kicker">STEP BY STEP PROGRESSION</span>
             <h2 className="child-section-title">
-              <span aria-hidden="true">🗺️</span> {t('child.myJourney')}
+              <span aria-hidden="true"></span> {t('child.myJourney')}
             </h2>
           </div>
         </div>
@@ -276,9 +276,9 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
                 {/* Node Status Badge */}
                 <div className="journey-node-badge">
                   {isCompleted && <span className="node-icon-completed">✓</span>}
-                  {isCurrent && <span className="node-icon-current">▶</span>}
-                  {isRecommended && <span className="node-icon-recommended">⭐</span>}
-                  {isLocked && <span className="node-icon-locked">🔒</span>}
+                  {isCurrent && <span className="node-icon-current"></span>}
+                  {isRecommended && <span className="node-icon-recommended"></span>}
+                  {isLocked && <span className="node-icon-locked"></span>}
                   {!isCompleted && !isCurrent && !isRecommended && !isLocked && (
                     <span className="node-icon-available">{step.stepNumber}</span>
                   )}
@@ -299,9 +299,9 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
                         <span className="journey-step-tag">STEP {step.stepNumber}</span>
                         <span className={`journey-state-pill pill-${step.state}`}>
                           {isCompleted && '✓ Completed'}
-                          {isCurrent && '▶ Current Task'}
-                          {isRecommended && '⭐ Suggested Next'}
-                          {isLocked && '🔒 Complete Previous'}
+                          {isCurrent && ' Current Task'}
+                          {isRecommended && ' Suggested Next'}
+                          {isLocked && ' Complete Previous'}
                           {step.state === 'available' && 'Available'}
                         </span>
                       </div>
@@ -330,14 +330,14 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </div>
       </section>
 
-      {/* 🧩 CHOOSE AN ADVENTURE - FOUNDATIONS */}
+      {/*  CHOOSE AN ADVENTURE - FOUNDATIONS */}
       {hasAssessment && (
         <section className="child-section">
           <div className="child-section-header">
             <div>
               <span className="child-section-kicker">CORE SKILLS</span>
               <h2 className="child-section-title">
-                <span aria-hidden="true">🧩</span> {t('child.category.foundations')}
+                <span aria-hidden="true"></span> {t('child.category.foundations')}
               </h2>
             </div>
           </div>
@@ -361,14 +361,14 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* 🌍 CHOOSE AN ADVENTURE - WORLD & LIFE SKILLS */}
+      {/*  CHOOSE AN ADVENTURE - WORLD & LIFE SKILLS */}
       {hasAssessment && (
         <section className="child-section">
           <div className="child-section-header">
             <div>
               <span className="child-section-kicker">EVERYDAY UNDERSTANDING</span>
               <h2 className="child-section-title">
-                <span aria-hidden="true">🌍</span> {t('child.category.world')}
+                <span aria-hidden="true"></span> {t('child.category.world')}
               </h2>
             </div>
           </div>
@@ -392,7 +392,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* 🌟 MY STRENGTHS & SUPERPOWERS */}
+      {/*  MY STRENGTHS & SUPERPOWERS */}
       {dashboard?.strengths?.length > 0 && (
         <section className="child-section child-strengths-section">
           <div className="child-section-header">
@@ -401,7 +401,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
                 {language === 'ur' ? 'میری طاقت' : language === 'ur_rm' ? 'MERI MAZBOOT SKILLS' : 'SUPERPOWERS'}
               </span>
               <h2 className="child-section-title">
-                <span aria-hidden="true">🌟</span> {t('parent.strengths') || (language === 'ur' ? 'میری بہترین مہارتیں' : 'My Strengths')}
+                <span aria-hidden="true"></span> {t('parent.strengths') || (language === 'ur' ? 'میری بہترین مہارتیں' : 'My Strengths')}
               </h2>
             </div>
           </div>
@@ -421,7 +421,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
                   {t(`child.game.${str.skill}`) || t(`child.game.${str.skill.replace(/s$/, '')}`) || str.skill.replace('_', ' ').toUpperCase()}
                 </h4>
                 <p className="strength-card-meta">
-                  🎯 {str.attempts} {language === 'ur' ? 'کامیاب مشقیں' : language === 'ur_rm' ? 'mukammal mashqein' : 'completed practices'}
+                   {str.attempts} {language === 'ur' ? 'کامیاب مشقیں' : language === 'ur_rm' ? 'mukammal mashqein' : 'completed practices'}
                 </p>
               </div>
             ))}
@@ -429,14 +429,14 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* ⏱️ RECENT ACTIVITY / RECENT ADVENTURES */}
+      {/*  RECENT ACTIVITY / RECENT ADVENTURES */}
       {dashboard?.recentAttempts?.length > 0 && (
         <section className="child-section child-recent-section">
           <div className="child-section-header">
             <div>
               <span className="child-section-kicker">{language === 'ur' ? 'حالیہ سرگرمیاں' : 'PRACTICE HISTORY'}</span>
               <h2 className="child-section-title">
-                <span aria-hidden="true">⏱️</span> {t('progress.recent') || 'Recent Activity'}
+                <span aria-hidden="true"></span> {t('progress.recent') || 'Recent Activity'}
               </h2>
             </div>
             <button className="text-btn" type="button" onClick={() => navigate('/progress')}>
@@ -455,14 +455,14 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
                     <h4 className="recent-card-title">{attempt.title || 'Learning Activity'}</h4>
                     <div className="recent-card-meta">
                       <span className="recent-diff-badge">{getChildLevelLabel(attempt.difficulty)}</span>
-                      <span className="recent-score-badge">🎯 {attempt.score}%</span>
+                      <span className="recent-score-badge"> {attempt.score}%</span>
                     </div>
                   </div>
                 </div>
                 <div className="recent-card-right">
                   <div className="recent-stars-awarded" aria-label={`${attempt.starsAwarded || 1} stars`}>
                     {Array.from({ length: Math.max(1, Math.min(3, attempt.starsAwarded || 1)) }).map((_, sIdx) => (
-                      <span key={sIdx} className="recent-star-icon" aria-hidden="true">⭐</span>
+                      <span key={sIdx} className="recent-star-icon" aria-hidden="true"></span>
                     ))}
                   </div>
                   <button
@@ -470,7 +470,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
                     type="button"
                     onClick={() => startActivityByTopicOrType(attempt.topic || 'letters')}
                   >
-                    🔄 {language === 'ur' ? 'دوبارہ کھیلیں' : 'Play Again'}
+                     {language === 'ur' ? 'دوبارہ کھیلیں' : 'Play Again'}
                   </button>
                 </div>
               </div>
@@ -479,14 +479,14 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
         </section>
       )}
 
-      {/* 🏆 MY BADGES GALLERY */}
+      {/*  MY BADGES GALLERY */}
       {rewards.badges?.length > 0 && (
         <section className="child-section">
           <div className="child-section-header">
             <div>
               <span className="child-section-kicker">ACHIEVEMENTS</span>
               <h2 className="child-section-title">
-                <span aria-hidden="true">🏆</span> {t('child.myBadges')}
+                <span aria-hidden="true"></span> {t('child.myBadges')}
               </h2>
             </div>
           </div>
@@ -499,7 +499,7 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
                 <span className="child-badge-icon" aria-hidden="true">{badge.icon}</span>
                 <div className="child-badge-text">
                   <h4>{t(badge.titleKey)}</h4>
-                  <p>{badge.isUnlocked ? t(badge.descKey) : '🔒 Complete activities to unlock'}</p>
+                  <p>{badge.isUnlocked ? t(badge.descKey) : ' Complete activities to unlock'}</p>
                 </div>
               </div>
             ))}
@@ -514,28 +514,28 @@ export default function ChildDashboard({ user, dashboard, recommendation, activi
           type="button"
           onClick={() => navigate('/scenarios')}
         >
-          <span>💬</span> Practice Scenarios
+          <span></span> Practice Scenarios
         </button>
         <button
           className="child-nav-btn"
           type="button"
           onClick={() => navigate('/progress')}
         >
-          <span>📊</span> {t('nav.progress')}
+          <span></span> {t('nav.progress')}
         </button>
         <button
           className="child-nav-btn"
           type="button"
           onClick={() => navigate('/settings')}
         >
-          <span>⚙️</span> {t('nav.settings')}
+          <span></span> {t('nav.settings')}
         </button>
         <button
           className="child-nav-btn child-parent-btn"
           type="button"
           onClick={() => navigate('/parent')}
         >
-          <span>🔒</span> {t('child.parentGate')}
+          <span></span> {t('child.parentGate')}
         </button>
       </footer>
     </div>

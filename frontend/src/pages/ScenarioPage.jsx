@@ -116,7 +116,7 @@ export default function ScenarioPage() {
         <p className="error-text">{error}</p>
         <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
           <button className="btn-primary" onClick={fetchScenarios}>
-            🔄 {t('common.playAgain') || t('common.continue') || 'Retry'}
+             {t('common.playAgain') || t('common.continue') || 'Retry'}
           </button>
           <button className="btn-secondary" onClick={() => navigate('/dashboard')}>
             ← {t('nav.dashboard')}
@@ -142,7 +142,7 @@ export default function ScenarioPage() {
       {/* Difficulty Filter Chips */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-md)', flexWrap: 'wrap', alignItems: 'center' }}>
         <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-          ⚡ {t('scenarios.filterDifficulty')}
+           {t('scenarios.filterDifficulty')}
         </span>
         {[
           { id: 'all', label: t('scenarios.all') },
@@ -175,7 +175,7 @@ export default function ScenarioPage() {
             border: '1.5px dashed var(--border-color)',
           }}
         >
-          <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: 'var(--space-xs)' }}>💬</span>
+          <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: 'var(--space-xs)' }}></span>
           <h3 style={{ fontSize: '1.25rem', marginBottom: 'var(--space-xs)', color: 'var(--text-primary)' }}>
             {t('scenarios.noAvailable')}
           </h3>
@@ -219,7 +219,7 @@ export default function ScenarioPage() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-xs)' }}>
                   <span className="module-icon-wrap" style={{ width: '2.75rem', height: '2.75rem', fontSize: '1.25rem', marginBottom: 0 }}>
-                    💬
+
                   </span>
                   <span
                     style={{
@@ -271,14 +271,14 @@ export default function ScenarioPage() {
                   style={{ flex: 1, padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
                   onClick={() => handleStart(scen.id, 'text')}
                 >
-                  💬 {t('scenarios.startText')}
+                   {t('scenarios.startText')}
                 </button>
                 <button
                   className="btn-secondary"
                   style={{ flex: 1, padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
                   onClick={() => handleStart(scen.id, 'voice')}
                 >
-                  🎙️ {t('scenarios.startVoice')}
+                   {t('scenarios.startVoice')}
                 </button>
               </div>
             </div>

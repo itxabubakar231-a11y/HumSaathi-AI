@@ -26,7 +26,7 @@ export default function AdminScenariosPage() {
         if (res.warnings) setWarnings(res.warnings);
       })
       .catch((err) => {
-        setFeedbackMsg(`⚠️ Error: ${err.message}`);
+        setFeedbackMsg(` Error: ${err.message}`);
       })
       .finally(() => setLoading(false));
   }, [personaFilter, difficultyFilter, search]);
@@ -39,10 +39,10 @@ export default function AdminScenariosPage() {
     const nextState = !scen.isActive;
     try {
       await api.adminUpdateScenario(scen.id, { isActive: nextState });
-      setFeedbackMsg(`✅ Scenario "${scen.title}" status updated.`);
+      setFeedbackMsg(` Scenario "${scen.title}" status updated.`);
       fetchScenarios();
     } catch (err) {
-      setFeedbackMsg(`⚠️ Failed to update scenario: ${err.message}`);
+      setFeedbackMsg(` Failed to update scenario: ${err.message}`);
     }
   };
 
@@ -58,11 +58,11 @@ export default function AdminScenariosPage() {
         difficulty: editScenario.difficulty,
         isActive: editScenario.isActive,
       });
-      setFeedbackMsg(`✅ Scenario "${editScenario.title}" saved successfully.`);
+      setFeedbackMsg(` Scenario "${editScenario.title}" saved successfully.`);
       setEditScenario(null);
       fetchScenarios();
     } catch (err) {
-      setFeedbackMsg(`⚠️ Failed to save scenario: ${err.message}`);
+      setFeedbackMsg(` Failed to save scenario: ${err.message}`);
     } finally {
       setSaving(false);
     }
@@ -80,37 +80,37 @@ export default function AdminScenariosPage() {
       {/* Required Demo Counts & Safeguard Badges */}
       <div className="admin-safeguard-cards">
         <div className={`safeguard-card ${counts.child.active === 6 ? 'is-valid' : 'is-warning'}`}>
-          <span className="sg-icon">🧒</span>
+          <span className="sg-icon"></span>
           <div>
             <strong className="sg-title">Child Portal</strong>
             <span className="sg-count">{counts.child.active} / {counts.child.required} Scenarios</span>
           </div>
-          <span className="sg-status">{counts.child.active === 6 ? '✓ Standard Match' : '⚠️ Count Adjusted'}</span>
+          <span className="sg-status">{counts.child.active === 6 ? '✓ Standard Match' : ' Count Adjusted'}</span>
         </div>
 
         <div className={`safeguard-card ${counts.teen.active === 5 ? 'is-valid' : 'is-warning'}`}>
-          <span className="sg-icon">🧑‍🎓</span>
+          <span className="sg-icon"></span>
           <div>
             <strong className="sg-title">Teen Portal</strong>
             <span className="sg-count">{counts.teen.active} / {counts.teen.required} Scenarios</span>
           </div>
-          <span className="sg-status">{counts.teen.active === 5 ? '✓ Standard Match' : '⚠️ Count Adjusted'}</span>
+          <span className="sg-status">{counts.teen.active === 5 ? '✓ Standard Match' : ' Count Adjusted'}</span>
         </div>
 
         <div className={`safeguard-card ${counts.adult.active === 5 ? 'is-valid' : 'is-warning'}`}>
-          <span className="sg-icon">👨</span>
+          <span className="sg-icon"></span>
           <div>
             <strong className="sg-title">Adult Portal</strong>
             <span className="sg-count">{counts.adult.active} / {counts.adult.required} Scenarios</span>
           </div>
-          <span className="sg-status">{counts.adult.active === 5 ? '✓ Standard Match' : '⚠️ Count Adjusted'}</span>
+          <span className="sg-status">{counts.adult.active === 5 ? '✓ Standard Match' : ' Count Adjusted'}</span>
         </div>
       </div>
 
       {warnings.length > 0 && (
         <div className="admin-warning-box">
           {warnings.map((w, idx) => (
-            <p key={idx}>⚠️ {w}</p>
+            <p key={idx}> {w}</p>
           ))}
         </div>
       )}
@@ -125,7 +125,7 @@ export default function AdminScenariosPage() {
       {/* Filter Toolbar */}
       <div className="admin-filters-toolbar">
         <div className="search-input-wrapper">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"></span>
           <input
             type="text"
             className="admin-search-input"
@@ -170,7 +170,7 @@ export default function AdminScenariosPage() {
         </div>
       ) : scenarios.length === 0 ? (
         <div className="admin-empty-state">
-          <span className="empty-icon">🧩</span>
+          <span className="empty-icon"></span>
           <h3>No Scenarios Found</h3>
           <p>No scenarios matched your filter criteria.</p>
         </div>
@@ -201,14 +201,14 @@ export default function AdminScenariosPage() {
               <p className="scen-desc">{scen.description}</p>
 
               <div className="scen-footer">
-                <span className="scen-session-count">💬 {scen.sessionCount || 0} student sessions</span>
+                <span className="scen-session-count"> {scen.sessionCount || 0} student sessions</span>
                 <div className="scen-actions">
                   <button
                     className="admin-btn-secondary"
                     style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
                     onClick={() => setEditScenario(scen)}
                   >
-                    ✏️ Edit
+                     Edit
                   </button>
                   <button
                     className={`toggle-btn ${scen.isActive ? 'toggle-on' : 'toggle-off'}`}

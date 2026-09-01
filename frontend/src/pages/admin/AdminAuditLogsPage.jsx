@@ -48,7 +48,7 @@ export default function AdminAuditLogsPage() {
       {/* Filter Toolbar */}
       <div className="admin-filters-toolbar">
         <div className="search-input-wrapper">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"></span>
           <input
             type="text"
             className="admin-search-input"
@@ -86,7 +86,7 @@ export default function AdminAuditLogsPage() {
           </div>
         ) : logs.length === 0 ? (
           <div className="admin-empty-state">
-            <span className="empty-icon">📜</span>
+            <span className="empty-icon"></span>
             <h3>No Audit Logs Found</h3>
             <p>No recorded administrative events matched your filters.</p>
           </div>
@@ -151,14 +151,14 @@ export default function AdminAuditLogsPage() {
                 disabled={pagination.page <= 1 || loading}
                 onClick={() => fetchLogs(pagination.page - 1)}
               >
-                ◀ Prev
+                 Prev
               </button>
               <button
                 className="admin-page-btn"
                 disabled={pagination.page >= pagination.pages || loading}
                 onClick={() => fetchLogs(pagination.page + 1)}
               >
-                Next ▶
+                Next
               </button>
             </div>
           </div>

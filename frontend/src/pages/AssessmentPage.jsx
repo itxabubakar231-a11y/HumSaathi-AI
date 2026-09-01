@@ -125,7 +125,7 @@ export default function AssessmentPage() {
   if (error) {
     return (
       <div className="assessment-error-state">
-        <span className="error-icon" aria-hidden="true">⚠️</span>
+        <span className="error-icon" aria-hidden="true"></span>
         <h2>Unable to load assessment</h2>
         <p className="error-text">{error}</p>
         <button className="btn-primary" type="button" onClick={() => window.location.reload()}>
@@ -145,7 +145,7 @@ export default function AssessmentPage() {
         {/* Results Hero Card */}
         <div className="assessment-results-hero">
           <div className="results-badge-pill">
-            <span>🎉 Assessment Complete</span>
+            <span> Assessment Complete</span>
           </div>
 
           <h1 className="results-main-title">{t('assessment.resultsTitle')}</h1>
@@ -172,7 +172,7 @@ export default function AssessmentPage() {
           {results.summary && (
             <div className="results-ai-summary-card">
               <div className="ai-summary-header">
-                <span className="ai-sparkle">✨</span>
+                <span className="ai-sparkle"></span>
                 <strong>AI Learning Summary</strong>
               </div>
               <p className="ai-summary-text">{results.summary}</p>
@@ -200,7 +200,7 @@ export default function AssessmentPage() {
               onClick={getRecommendationAndGo}
               disabled={submitting}
             >
-              {submitting ? t('common.loading') : `${t('assessment.continue')} 🚀`}
+              {submitting ? t('common.loading') : `${t('assessment.continue')} `}
             </button>
           </div>
         </div>
@@ -214,7 +214,7 @@ export default function AssessmentPage() {
       <div className="assessment-header-panel">
         <div className="assessment-top-meta">
           <span className="assessment-kicker">
-            🎯 {t('assessment.eyebrow') || 'Initial Check'}
+             {t('assessment.eyebrow') || 'Initial Check'}
           </span>
           <span className="assessment-counter" aria-live="polite">
             {t('assessment.question')} <strong>{index + 1}</strong> {t('assessment.of')} {total}
@@ -320,14 +320,14 @@ export default function AssessmentPage() {
             {submitting ? (
               <span>Evaluating...</span>
             ) : index === questions.length - 1 ? (
-              <span>{t('assessment.submit')} ⭐</span>
+              <span>{t('assessment.submit')} </span>
             ) : (
               <span>{t('activity.next')} ➔</span>
             )}
           </button>
 
           <p className="assessment-shortcut-hint">
-            💡 <em>Tip: You can also press <strong>1, 2, 3</strong> on your keyboard to select, and <strong>Enter</strong> to continue.</em>
+             <em>Tip: You can also press <strong>1, 2, 3</strong> on your keyboard to select, and <strong>Enter</strong> to continue.</em>
           </p>
         </div>
       </div>

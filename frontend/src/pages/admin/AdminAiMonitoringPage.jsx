@@ -47,11 +47,11 @@ export default function AdminAiMonitoringPage() {
       {/* Engine Status Banner */}
       <div className="admin-engine-status-card">
         <div className="engine-status-left">
-          <span className="engine-icon">🤖</span>
+          <span className="engine-icon"></span>
           <div>
             <h3 className="engine-title">Active AI Model: <code>{overview.aiModel || 'gemini-1.5-flash'}</code></h3>
             <p className="engine-desc">
-              Engine Mode: <strong>{overview.engineMode === 'gemini-live' ? '⚡ Direct Gemini Live API' : '🛡️ Rule-Based Intelligent Fallback'}</strong>
+              Engine Mode: <strong>{overview.engineMode === 'gemini-live' ? ' Direct Gemini Live API' : ' Rule-Based Intelligent Fallback'}</strong>
             </p>
           </div>
         </div>
@@ -66,7 +66,7 @@ export default function AdminAiMonitoringPage() {
       <div className="admin-metrics-grid" style={{ marginTop: '1.5rem' }}>
         <div className="admin-metric-card">
           <div className="metric-icon-box" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-            💬
+
           </div>
           <div className="metric-info">
             <span className="metric-label">Total AI Turns</span>
@@ -77,7 +77,7 @@ export default function AdminAiMonitoringPage() {
 
         <div className="admin-metric-card">
           <div className="metric-icon-box" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-            📋
+
           </div>
           <div className="metric-info">
             <span className="metric-label">Evaluated Sessions</span>
@@ -88,7 +88,7 @@ export default function AdminAiMonitoringPage() {
 
         <div className="admin-metric-card">
           <div className="metric-icon-box" style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899' }}>
-            ⭐
+
           </div>
           <div className="metric-info">
             <span className="metric-label">Overall Rubric Avg</span>
@@ -146,7 +146,7 @@ export default function AdminAiMonitoringPage() {
           <div className="mode-distribution-container">
             {modeComp.map((m) => (
               <div key={m.mode} className="mode-stat-box">
-                <span className="mode-icon">{m.mode.includes('Voice') ? '🎙️' : '⌨️'}</span>
+                <span className="mode-icon">{m.mode.includes('Voice') ? '' : ''}</span>
                 <span className="mode-name">{m.mode}</span>
                 <strong className="mode-pct">{m.percent}%</strong>
                 <span className="mode-count">{m.count} total sessions</span>

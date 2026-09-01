@@ -30,7 +30,7 @@ export default function AdminUsersPage() {
         setPagination(res.pagination || { page: 1, limit: 10, total: 0, pages: 1 });
       })
       .catch((err) => {
-        setFeedbackMsg(`⚠️ Error: ${err.message}`);
+        setFeedbackMsg(` Error: ${err.message}`);
       })
       .finally(() => setLoading(false));
   }, [search, personaFilter, statusFilter]);
@@ -64,10 +64,10 @@ export default function AdminUsersPage() {
     setActionLoading(true);
     try {
       await api.adminUpdateUserStatus(user.id, nextStatus);
-      setFeedbackMsg(`✅ User "${user.name}" status updated.`);
+      setFeedbackMsg(` User "${user.name}" status updated.`);
       fetchUsers(pagination.page);
     } catch (err) {
-      setFeedbackMsg(`⚠️ Failed to update user status: ${err.message}`);
+      setFeedbackMsg(` Failed to update user status: ${err.message}`);
     } finally {
       setActionLoading(false);
     }
@@ -78,11 +78,11 @@ export default function AdminUsersPage() {
     setActionLoading(true);
     try {
       await api.adminUpdateUserPersona(changePersonaUser.id, targetPersona);
-      setFeedbackMsg(`✅ Persona changed to ${targetPersona.toUpperCase()} for "${changePersonaUser.name}".`);
+      setFeedbackMsg(` Persona changed to ${targetPersona.toUpperCase()} for "${changePersonaUser.name}".`);
       setChangePersonaUser(null);
       fetchUsers(pagination.page);
     } catch (err) {
-      setFeedbackMsg(`⚠️ Error: ${err.message}`);
+      setFeedbackMsg(` Error: ${err.message}`);
     } finally {
       setActionLoading(false);
     }
@@ -93,11 +93,11 @@ export default function AdminUsersPage() {
     setActionLoading(true);
     try {
       await api.adminDeleteUser(confirmDeleteUser.id);
-      setFeedbackMsg(`🗑️ User account "${confirmDeleteUser.name}" deleted.`);
+      setFeedbackMsg(` User account "${confirmDeleteUser.name}" deleted.`);
       setConfirmDeleteUser(null);
       fetchUsers(pagination.page);
     } catch (err) {
-      setFeedbackMsg(`⚠️ Failed to delete user: ${err.message}`);
+      setFeedbackMsg(` Failed to delete user: ${err.message}`);
     } finally {
       setActionLoading(false);
     }
@@ -122,7 +122,7 @@ export default function AdminUsersPage() {
       {/* Filters & Search Toolbar */}
       <div className="admin-filters-toolbar">
         <div className="search-input-wrapper">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"></span>
           <input
             type="text"
             className="admin-search-input"
@@ -159,7 +159,7 @@ export default function AdminUsersPage() {
             onClick={() => fetchUsers(pagination.page)}
             disabled={loading}
           >
-            🔄 Refresh
+             Refresh
           </button>
         </div>
       </div>
@@ -173,7 +173,7 @@ export default function AdminUsersPage() {
           </div>
         ) : users.length === 0 ? (
           <div className="admin-empty-state">
-            <span className="empty-icon">👥</span>
+            <span className="empty-icon"></span>
             <h3>No Users Found</h3>
             <p>No user accounts matched the search criteria.</p>
           </div>
@@ -241,7 +241,7 @@ export default function AdminUsersPage() {
                           title="View Details"
                           onClick={() => handleOpenDetails(u)}
                         >
-                          👁️
+
                         </button>
                         <button
                           className="action-btn"
@@ -251,7 +251,7 @@ export default function AdminUsersPage() {
                             setTargetPersona(u.persona || 'child');
                           }}
                         >
-                          🎭
+
                         </button>
                         <button
                           className={`action-btn ${u.isActive ? 'action-deactivate' : 'action-activate'}`}
@@ -259,7 +259,7 @@ export default function AdminUsersPage() {
                           onClick={() => handleToggleStatus(u)}
                           disabled={actionLoading}
                         >
-                          {u.isActive ? '🔒' : '🔓'}
+                          {u.isActive ? '' : ''}
                         </button>
                         <button
                           className="action-btn action-delete"
@@ -267,7 +267,7 @@ export default function AdminUsersPage() {
                           onClick={() => setConfirmDeleteUser(u)}
                           disabled={actionLoading}
                         >
-                          🗑️
+
                         </button>
                       </div>
                     </td>
@@ -288,14 +288,14 @@ export default function AdminUsersPage() {
                 disabled={pagination.page <= 1 || loading}
                 onClick={() => fetchUsers(pagination.page - 1)}
               >
-                ◀ Prev
+                 Prev
               </button>
               <button
                 className="admin-page-btn"
                 disabled={pagination.page >= pagination.pages || loading}
                 onClick={() => fetchUsers(pagination.page + 1)}
               >
-                Next ▶
+                Next
               </button>
             </div>
           </div>
@@ -441,7 +441,7 @@ export default function AdminUsersPage() {
                     className={`persona-select-card ${targetPersona === p ? 'is-selected' : ''}`}
                     onClick={() => setTargetPersona(p)}
                   >
-                    <span className="p-icon">{p === 'child' ? '🧒' : p === 'teen' ? '🧑‍🎓' : '👨'}</span>
+                    <span className="p-icon">{p === 'child' ? '' : p === 'teen' ? '' : ''}</span>
                     <strong className="p-name">{p.toUpperCase()} PORTAL</strong>
                   </button>
                 ))}
@@ -466,7 +466,7 @@ export default function AdminUsersPage() {
               <button className="modal-close-btn" onClick={() => setConfirmDeleteUser(null)}>✕</button>
             </div>
             <div className="modal-body">
-              <div className="danger-modal-icon">⚠️</div>
+              <div className="danger-modal-icon"></div>
               <p>
                 Are you sure you want to permanently delete learner <strong>{confirmDeleteUser.name}</strong> ({confirmDeleteUser.email || 'No email'})?
               </p>

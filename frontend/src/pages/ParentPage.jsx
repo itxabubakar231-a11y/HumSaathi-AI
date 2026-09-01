@@ -23,10 +23,10 @@ export default function ParentPage() {
 
   const getPersonaBadge = (p) => {
     switch (p) {
-      case 'child': return { label: t('persona.child'), icon: '🧒', color: '#F59E0B' };
-      case 'teen': return { label: t('persona.teen'), icon: '🧑‍🎓', color: '#8B5CF6' };
-      case 'adult': return { label: t('persona.adult'), icon: '💼', color: '#0EA5E9' };
-      default: return { label: t('persona.child'), icon: '🧒', color: '#10B981' };
+      case 'child': return { label: t('persona.child'), icon: '', color: '#F59E0B' };
+      case 'teen': return { label: t('persona.teen'), icon: '', color: '#8B5CF6' };
+      case 'adult': return { label: t('persona.adult'), icon: '', color: '#0EA5E9' };
+      default: return { label: t('persona.child'), icon: '', color: '#10B981' };
     }
   };
 
@@ -80,7 +80,7 @@ export default function ParentPage() {
 
           {/* Evidence-Based Strengths for Current Persona */}
           <section className="dashboard-card">
-            <h2>🌟 {t('parent.strengths')}</h2>
+            <h2> {t('parent.strengths')}</h2>
             {view.strengths?.length > 0 ? (
               <ul className="strengths-list-chips" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', listStyle: 'none', padding: 0 }}>
                 {view.strengths.map((str, idx) => (
@@ -96,12 +96,12 @@ export default function ParentPage() {
 
           {/* Areas for Growth / Practice for Current Persona */}
           <section className="dashboard-card">
-            <h2>🎯 {t('parent.needsPractice')}</h2>
+            <h2> {t('parent.needsPractice')}</h2>
             {view.needsPractice?.length > 0 ? (
               <ul className="practice-list-chips" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', listStyle: 'none', padding: 0 }}>
                 {view.needsPractice.map((np, idx) => (
                   <li key={idx} style={{ background: '#FEF3C7', color: '#92400E', padding: '0.35rem 0.85rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.92rem' }}>
-                    ⚡ {np}
+                     {np}
                   </li>
                 ))}
               </ul>
@@ -113,7 +113,7 @@ export default function ParentPage() {
           {/* Persona Skill Breakdown Meters */}
           {view.progress?.length > 0 && (
             <section className="dashboard-card">
-              <h2>📊 {t('parent.skillsBreakdown')}</h2>
+              <h2> {t('parent.skillsBreakdown')}</h2>
               <div className="skills-meter-grid" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
                 {view.progress.map((p, idx) => (
                   <div key={idx} className="skill-meter-item">
@@ -132,7 +132,7 @@ export default function ParentPage() {
 
           {/* Persona-Specific Recent History */}
           <section className="dashboard-card">
-            <h2>⏱️ {t('progress.recent')}</h2>
+            <h2> {t('progress.recent')}</h2>
             {view.recentAttempts?.length > 0 ? (
               <ul className="recent-list" style={{ paddingLeft: '1.25rem', marginTop: '0.5rem' }}>
                 {view.recentAttempts.map((a, i) => (

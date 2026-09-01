@@ -83,7 +83,7 @@ export default function SettingsPage() {
               onClick={() => handleLanguageSelect(lang.id)}
               aria-pressed={language === lang.id}
             >
-              <span className="lang-flag">{lang.id === 'en' ? '🇬🇧' : '🇵🇰'}</span>
+              <span className="lang-flag">{lang.id === 'en' ? '' : ''}</span>
               <span className="lang-name">{t(lang.labelKey)}</span>
             </button>
           ))}

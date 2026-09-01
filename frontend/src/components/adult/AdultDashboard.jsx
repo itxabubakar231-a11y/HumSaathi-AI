@@ -10,7 +10,7 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
       id: 'adult_functional_reading',
       titleKey: 'skills.adult.functionalReading.title',
       descKey: 'skills.adult.functionalReading.desc',
-      icon: '📄',
+      icon: '',
       duration: '10 min',
       difficulty: 'Practical',
       category: 'Functional Reading',
@@ -25,7 +25,7 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
       id: 'adult_problem_solving',
       titleKey: 'skills.adult.problemSolving.title',
       descKey: 'skills.adult.problemSolving.desc',
-      icon: '🧩',
+      icon: '',
       duration: '15 min',
       difficulty: 'Practical',
       category: 'Problem Solving',
@@ -40,7 +40,7 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
       id: 'adult_everyday_comm',
       titleKey: 'skills.adult.everydayComm.title',
       descKey: 'skills.adult.everydayComm.desc',
-      icon: '🗣️',
+      icon: '',
       duration: '10 min',
       difficulty: 'Interactive',
       category: 'Everyday Communication',
@@ -110,10 +110,10 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
           </div>
           <h1 className="hero-greeting-title">
             {language === 'ur'
-              ? `خوش آمدید، ${user.name} 💼`
+              ? `خوش آمدید، ${user.name} `
               : language === 'ur_rm'
-              ? `Welcome, ${user.name} 💼`
-              : `Welcome, ${user.name} 💼`}
+              ? `Welcome, ${user.name} `
+              : `Welcome, ${user.name} `}
           </h1>
           <p className="hero-greeting-subtitle">
             {language === 'ur'
@@ -123,14 +123,14 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
               : 'Practical workplace communication, bill calculations, safety notices, and everyday decision-making.'}
           </p>
           <div className="hero-meta-chips">
-            <span className="hero-chip">💼 {t('persona.adult')} ({language === 'ur' ? '20+ سال' : '20+ years'})</span>
-            <span className="hero-chip">📈 {language === 'ur' ? 'مہارت کی سطح' : 'Proficiency'}: {dashboard?.currentLevel || 'Intermediate'}</span>
-            <span className="hero-chip">✅ {dashboard?.completedCount || 0} {language === 'ur' ? 'عملی ٹاسک مکمل' : language === 'ur_rm' ? 'Tasks Completed' : 'Tasks Completed'}</span>
+            <span className="hero-chip"> {t('persona.adult')} ({language === 'ur' ? '20+ سال' : '20+ years'})</span>
+            <span className="hero-chip"> {language === 'ur' ? 'مہارت کی سطح' : 'Proficiency'}: {dashboard?.currentLevel || 'Intermediate'}</span>
+            <span className="hero-chip"> {dashboard?.completedCount || 0} {language === 'ur' ? 'عملی ٹاسک مکمل' : language === 'ur_rm' ? 'Tasks Completed' : 'Tasks Completed'}</span>
           </div>
         </div>
         <div className="hero-banner-actions">
           <button className="btn-primary hero-cta-btn" onClick={() => navigate('/scenarios')} style={{ background: 'var(--interactive-primary)' }}>
-            🎯 {language === 'ur' ? 'عملی مشق شروع کریں' : language === 'ur_rm' ? 'Practical Mashq Shuru Karein' : 'Start Practical Practice'}
+             {language === 'ur' ? 'عملی مشق شروع کریں' : language === 'ur_rm' ? 'Practical Mashq Shuru Karein' : 'Start Practical Practice'}
           </button>
         </div>
       </header>
@@ -142,10 +142,10 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
             <div style={{ flex: '1 1 300px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <span style={{ background: '#2C7A7B', color: '#fff', fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  🎯 {language === 'ur' ? 'تجویز کردہ اگلا اقدام' : language === 'ur_rm' ? 'Recommended Next Action' : 'Recommended Next Action'}
+                   {language === 'ur' ? 'تجویز کردہ اگلا اقدام' : language === 'ur_rm' ? 'Recommended Next Action' : 'Recommended Next Action'}
                 </span>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                  ⚡ {recommendation.difficulty ? recommendation.difficulty.toUpperCase() : 'PRACTICAL'}
+                   {recommendation.difficulty ? recommendation.difficulty.toUpperCase() : 'PRACTICAL'}
                 </span>
               </div>
               <h3 style={{ margin: '4px 0', fontSize: '1.25rem', fontFamily: 'var(--font-serif)', color: 'var(--text-primary)' }}>
@@ -156,7 +156,7 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
               </p>
             </div>
             <button className="btn-primary" onClick={startRecommended} style={{ padding: '0.65rem 1.25rem', fontSize: '0.95rem', background: '#2C7A7B' }}>
-              💼 {language === 'ur' ? 'یہ ٹاسک شروع کریں' : language === 'ur_rm' ? 'Start This Task' : 'Start This Task'} →
+               {language === 'ur' ? 'یہ ٹاسک شروع کریں' : language === 'ur_rm' ? 'Start This Task' : 'Start This Task'} →
             </button>
           </div>
         </section>
@@ -167,14 +167,14 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
         {/* Card 1: Today's Routine */}
         <div className="dashboard-stat-box plan-box">
           <div className="stat-box-header">
-            <span className="stat-box-icon">💼</span>
+            <span className="stat-box-icon"></span>
             <div>
               <span className="stat-box-kicker">{language === 'ur' ? 'آج کا روٹین' : language === 'ur_rm' ? 'Today\'s Routine' : 'Today\'s Routine'}</span>
               <h3 className="stat-box-title">{dashboard?.completedCount || 0} / 3 {language === 'ur' ? 'ٹاسک' : language === 'ur_rm' ? 'Tasks' : 'Tasks'}</h3>
             </div>
           </div>
           <p className="stat-box-desc">
-            ⏱️ 10-15 min {language === 'ur' ? 'خود مختار مہارتوں کی روزانہ مشق' : language === 'ur_rm' ? 'daily life-skills practice' : 'daily life-skills practice'}
+             10-15 min {language === 'ur' ? 'خود مختار مہارتوں کی روزانہ مشق' : language === 'ur_rm' ? 'daily life-skills practice' : 'daily life-skills practice'}
           </p>
           <button className="btn-primary stat-action-btn" onClick={() => navigate('/scenarios')} style={{ background: '#2C7A7B' }}>
             {language === 'ur' ? 'روٹین شروع کریں' : language === 'ur_rm' ? 'Routine Shuru Karein' : 'Start Routine'} →
@@ -184,14 +184,14 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
         {/* Card 2: Weekly Consistency */}
         <div className="dashboard-stat-box streak-box">
           <div className="stat-box-header">
-            <span className="stat-box-icon">📅</span>
+            <span className="stat-box-icon"></span>
             <div>
               <span className="stat-box-kicker">{language === 'ur' ? 'ہفتہ وار تسلسل' : language === 'ur_rm' ? 'Weekly Consistency' : 'Weekly Consistency'}</span>
               <h3 className="stat-box-title">7 {language === 'ur' ? 'دن متواتر' : language === 'ur_rm' ? 'Days Active' : 'Days Active'}</h3>
             </div>
           </div>
           <p className="stat-box-desc">
-            🌟 {language === 'ur' ? 'بہترین مستقل مزاجی! کیریئر اور خود مختاری کے اہداف پورے ہو رہے ہیں۔' : language === 'ur_rm' ? 'Great consistency! Career & life goals on track.' : 'Great consistency! Career & life goals on track.'}
+             {language === 'ur' ? 'بہترین مستقل مزاجی! کیریئر اور خود مختاری کے اہداف پورے ہو رہے ہیں۔' : language === 'ur_rm' ? 'Great consistency! Career & life goals on track.' : 'Great consistency! Career & life goals on track.'}
           </p>
           <div className="streak-dots-bar">
             {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
@@ -205,7 +205,7 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
         {/* Card 3: Decision Accuracy */}
         <div className="dashboard-stat-box progress-box">
           <div className="stat-box-header">
-            <span className="stat-box-icon">🎯</span>
+            <span className="stat-box-icon"></span>
             <div>
               <span className="stat-box-kicker">{language === 'ur' ? 'فیصلہ سازی کی درستگی' : language === 'ur_rm' ? 'Decision Accuracy' : 'Decision Accuracy'}</span>
               <h3 className="stat-box-title">{Math.round(dashboard?.avgAccuracy || 0)}% {language === 'ur' ? 'درستگی' : language === 'ur_rm' ? 'Accuracy' : 'Accuracy'}</h3>
@@ -254,7 +254,7 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
                   <span className="module-category-pill" style={{ background: 'rgba(49, 151, 149, 0.15)', color: '#2C7A7B' }}>
                     {getCategoryLabel(mod)}
                   </span>
-                  <span className="module-duration-pill">⏱️ {mod.duration}</span>
+                  <span className="module-duration-pill"> {mod.duration}</span>
                 </div>
               </div>
 
@@ -292,7 +292,7 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
         {/* Left Card: Skill Snapshot */}
         <div className="dashboard-card snapshot-card">
           <div className="card-header-line">
-            <h3 className="card-heading-title">📊 {t('dashboard.progressSnapshot') || 'Workplace & Life Mastery'}</h3>
+            <h3 className="card-heading-title"> {t('dashboard.progressSnapshot') || 'Workplace & Life Mastery'}</h3>
             <button className="text-btn" onClick={() => navigate('/progress')}>
               {language === 'ur' ? 'تفصیلات' : 'Details'} ➔
             </button>
@@ -323,7 +323,7 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
         {/* Right Card: Quick AI Workplace Roleplay Assistant */}
         <div className="dashboard-card ai-assistant-promo-card">
           <div className="ai-promo-content">
-            <div className="ai-promo-badge" style={{ background: '#2C7A7B', color: '#fff' }}>🤖 AI Professional Coach</div>
+            <div className="ai-promo-badge" style={{ background: '#2C7A7B', color: '#fff' }}> AI Professional Coach</div>
             <h3>{language === 'ur' ? 'پیشہ ورانہ گفتگو کا حقیقی ماحول' : language === 'ur_rm' ? 'Realistic Workplace Conversations' : 'Realistic Workplace Conversations'}</h3>
             <p>
               {language === 'ur'
@@ -333,7 +333,7 @@ export default function AdultDashboard({ user, dashboard, recommendation, activi
                 : 'Practice talking to managers, swapping shifts with coworkers, and handling customer support calls professionally.'}
             </p>
             <button className="btn-primary" onClick={() => navigate('/scenarios')} style={{ background: '#2C7A7B' }}>
-              🗣️ {language === 'ur' ? 'اے آئی کے ساتھ بات چیت کریں' : language === 'ur_rm' ? 'Start Workplace Roleplay' : 'Start Workplace Roleplay'}
+               {language === 'ur' ? 'اے آئی کے ساتھ بات چیت کریں' : language === 'ur_rm' ? 'Start Workplace Roleplay' : 'Start Workplace Roleplay'}
             </button>
           </div>
         </div>

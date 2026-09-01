@@ -2,11 +2,11 @@ export default function SensoryPanel({ prefs, onChange, t }) {
   const toggle = (key) => onChange({ [key]: !prefs[key] });
 
   const sensoryOptions = [
-    { key: 'soundEnabled', labelKey: 'sensory.sound', icon: '🔊', desc: 'Audio cues and speech playback' },
-    { key: 'animationsEnabled', labelKey: 'sensory.animations', icon: '✨', desc: 'Visual screen transitions and effects' },
-    { key: 'reducedMotion', labelKey: 'sensory.reducedMotion', icon: '🧘', desc: 'Minimize motion for visual comfort' },
-    { key: 'highContrast', labelKey: 'sensory.highContrast', icon: '🌓', desc: 'Maximum contrast for high readability' },
-    { key: 'calmMode', labelKey: 'sensory.calmMode', icon: '🌿', desc: 'Soothing colors and gentle tones' },
+    { key: 'soundEnabled', labelKey: 'sensory.sound', icon: '', desc: 'Audio cues and speech playback' },
+    { key: 'animationsEnabled', labelKey: 'sensory.animations', icon: '', desc: 'Visual screen transitions and effects' },
+    { key: 'reducedMotion', labelKey: 'sensory.reducedMotion', icon: '', desc: 'Minimize motion for visual comfort' },
+    { key: 'highContrast', labelKey: 'sensory.highContrast', icon: '', desc: 'Maximum contrast for high readability' },
+    { key: 'calmMode', labelKey: 'sensory.calmMode', icon: '', desc: 'Soothing colors and gentle tones' },
   ];
 
   return (
@@ -21,7 +21,7 @@ export default function SensoryPanel({ prefs, onChange, t }) {
         <div className="sensory-item-row">
           <div className="sensory-item-info">
             <span className="sensory-item-title">
-              <span className="sensory-icon" aria-hidden="true">🔤</span>
+              <span className="sensory-icon" aria-hidden="true"></span>
               {t('sensory.textSize')}
             </span>
             <span className="sensory-item-desc">Adjust reading text scale across all pages</span>
