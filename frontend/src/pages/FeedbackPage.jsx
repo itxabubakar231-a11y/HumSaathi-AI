@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
+import { RefreshIcon, ArrowRightIcon, HomeIcon, SparklesIcon, CheckIcon } from '../components/ui/Icons';
 
 export default function FeedbackPage() {
   const { state } = useLocation();
@@ -48,7 +49,7 @@ export default function FeedbackPage() {
     return (
       <div className="feedback-page child-feedback-page">
         <div className="child-celebration-hero">
-          <span className="child-celebration-icon" aria-hidden="true">🎉</span>
+          <span className="child-celebration-icon" aria-hidden="true">★</span>
           <h1 className="child-feedback-title">{t('child.sessionComplete')}</h1>
           <p className="child-feedback-subtitle">
             {feedback.message || t('child.greatJob')}
@@ -64,7 +65,7 @@ export default function FeedbackPage() {
                 className={`child-reward-star ${i < (attempt.starsAwarded || 1) ? 'is-earned' : 'is-empty'}`}
                 aria-hidden="true"
               >
-                ⭐
+                ★
               </span>
             ))}
           </div>
@@ -72,11 +73,10 @@ export default function FeedbackPage() {
           {/* Newly Unlocked Badge Banner */}
           {attempt.newlyUnlockedBadges?.length > 0 && (
             <div className="child-new-badge-banner">
-              <span className="new-badge-sparkle" aria-hidden="true">🏆</span>
               <div className="new-badge-info">
                 <p className="new-badge-kicker">{t('child.newBadge')}</p>
                 <h3 className="new-badge-title">
-                  {attempt.newlyUnlockedBadges[0].icon} {t(attempt.newlyUnlockedBadges[0].titleKey)}
+                  {t(attempt.newlyUnlockedBadges[0].titleKey)}
                 </h3>
                 <p className="new-badge-desc">{t(attempt.newlyUnlockedBadges[0].descKey)}</p>
               </div>
@@ -84,7 +84,7 @@ export default function FeedbackPage() {
           )}
 
           <div className="child-task-badge">
-            <span className="badge-icon" aria-hidden="true">✨</span>
+            <span className="badge-icon" aria-hidden="true"><CheckIcon size={16} /></span>
             <span>
               {t('child.completedTasks').replace('{count}', String(attempt.totalCount))}
             </span>
@@ -96,7 +96,7 @@ export default function FeedbackPage() {
 
           {feedback.nextStepHint && (
             <p className="child-hint-step">
-              💡 {feedback.nextStepHint}
+              {feedback.nextStepHint}
             </p>
           )}
         </div>
@@ -104,14 +104,14 @@ export default function FeedbackPage() {
         <div className="child-feedback-actions">
           {(feedback.shouldRetry || attempt.adaptation?.shouldRetry) && (
             <button className="btn-child-secondary" type="button" onClick={retry}>
-              🔄 {t('child.tryAgain')}
+              <RefreshIcon size={16} /> <span>{t('child.tryAgain')}</span>
             </button>
           )}
           <button className="btn-child-primary" type="button" onClick={goNext} disabled={loading}>
-            🚀 {t('child.nextAdventure')}
+            <span>{t('child.nextAdventure')}</span> <ArrowRightIcon size={16} />
           </button>
           <button className="btn-child-outline" type="button" onClick={() => navigate('/dashboard')}>
-            🏡 {t('child.home')}
+            <HomeIcon size={16} /> <span>{t('child.home')}</span>
           </button>
         </div>
       </div>
@@ -131,20 +131,20 @@ export default function FeedbackPage() {
         <p>{t('feedback.score')}</p>
         <p>{t('feedback.correct')}: {attempt.correctCount}/{attempt.totalCount}</p>
         <p className="card-desc">{feedback.encouragement}</p>
-        <p className="card-desc">{feedback.nextStepHint}</p>
+        {feedback.nextStepHint && <p className="card-desc">{feedback.nextStepHint}</p>}
       </div>
 
       <div className="feedback-actions">
         {(feedback.shouldRetry || attempt.adaptation?.shouldRetry) && (
           <button className="btn-secondary" type="button" onClick={retry}>
-            {t('feedback.retry')}
+            <RefreshIcon size={15} /> <span>{t('feedback.retry')}</span>
           </button>
         )}
         <button className="btn-primary" type="button" onClick={goNext} disabled={loading}>
-          {t('feedback.next')}
+          <span>{t('feedback.next')}</span> <ArrowRightIcon size={15} />
         </button>
         <button className="btn-outline" type="button" onClick={() => navigate('/dashboard')}>
-          {t('feedback.dashboard')}
+          <HomeIcon size={15} /> <span>{t('feedback.dashboard')}</span>
         </button>
       </div>
     </div>

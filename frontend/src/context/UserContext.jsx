@@ -103,6 +103,22 @@ export function UserProvider({ children }) {
     return userObj;
   };
 
+  const loginWithGoogle = async (credentialOrToken) => {
+    const payload = typeof credentialOrToken === 'string'
+      ? { credential: credentialOrToken }
+      : credentialOrToken;
+    const result = await api.googleAuth(payload);
+    const userObj = result?.user || result;
+    const token = result?.token;
+
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+    }
+    setUser(userObj);
+    syncUserPreferences(userObj);
+    return { user: userObj, isNewUser: Boolean(result?.isNewUser) };
+  };
+
   const setupUser = async (data) => {
     const payload = { ...data, userId: user?.id };
     const result = await api.setupUser(payload);
@@ -180,6 +196,7 @@ export function UserProvider({ children }) {
         aiMode,
         signupUser,
         loginUser,
+        loginWithGoogle,
         setupUser,
         selectPersona,
         updateSensory,

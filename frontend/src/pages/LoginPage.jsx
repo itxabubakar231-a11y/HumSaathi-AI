@@ -3,9 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
+import GoogleSignInButton from '../components/ui/GoogleSignInButton';
+import { MailIcon, KeyIcon, EyeIcon, EyeOffIcon, ShieldIcon, SparklesIcon, CheckIcon } from '../components/ui/Icons';
 
 export default function LoginPage() {
-  const { loginUser, setUser } = useUser();
+  const { loginUser, loginWithGoogle, setUser } = useUser();
   const { t } = useI18n();
   const navigate = useNavigate();
 
@@ -13,6 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Initial Admin Provisioning Modal state
@@ -54,14 +57,40 @@ export default function LoginPage() {
       const loggedUser = await loginUser({ email: trimmedEmail, password });
       if (loggedUser?.role === 'ADMIN') {
         navigate('/admin/dashboard');
-      } else {
+      } else if (!loggedUser?.persona) {
         navigate('/persona-selection');
+      } else {
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err.message || t('common.error') || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credential) => {
+    setError('');
+    setGoogleLoading(true);
+    try {
+      const result = await loginWithGoogle(credential);
+      const userObj = result?.user;
+      if (userObj?.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (result?.isNewUser || !userObj?.persona) {
+        navigate('/persona-selection');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError(err.message || 'Google authentication failed. Please try again or use email login.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleError = (err) => {
+    setError(err.message || 'Unable to connect to Google authentication.');
   };
 
   const handleInitialAdminSetup = async (e) => {
@@ -102,19 +131,23 @@ export default function LoginPage() {
 
   return (
     <div className="auth-split-layout">
-      {/* Left Branding Panel */}
+      {/* Left Branding Hero Panel */}
       <div className="auth-hero-panel">
         <div className="auth-hero-glow" aria-hidden="true" />
         <div className="auth-hero-content">
           <div className="auth-brand-logo">
-            <span className="logo-icon">H</span>
+            <span className="brand-mark" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="white"/>
+              </svg>
+            </span>
             <span className="logo-text">HumSaathi AI</span>
           </div>
 
           <h1 className="auth-hero-title">
-            Practice. Communicate.
+            Practice conversations.
             <br />
-            <span className="hero-accent">Grow with Confidence.</span>
+            <span className="hero-accent">Grow with confidence.</span>
           </h1>
 
           <p className="auth-hero-desc">
@@ -123,24 +156,30 @@ export default function LoginPage() {
 
           <div className="auth-hero-features">
             <div className="feature-item">
-              <span className="feature-icon">🔒</span>
+              <span className="feature-icon-svg">
+                <ShieldIcon size={20} />
+              </span>
               <div>
                 <strong>Private & Protected</strong>
-                <p>Isolated learning history & secure profile</p>
+                <p>Isolated learning history and secure individual profiles</p>
               </div>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">🎯</span>
+              <span className="feature-icon-svg">
+                <SparklesIcon size={20} />
+              </span>
               <div>
                 <strong>Personalized Coaching</strong>
-                <p>Adaptive scenarios & real-time feedback</p>
+                <p>Adaptive conversational scenarios and real-time guidance</p>
               </div>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">🗣️</span>
+              <span className="feature-icon-svg">
+                <CheckIcon size={20} />
+              </span>
               <div>
                 <strong>Voice & Text Practice</strong>
-                <p>Interactive speech recognition & synthesis</p>
+                <p>Interactive speech recognition, synthesis, and feedback</p>
               </div>
             </div>
           </div>
@@ -151,38 +190,22 @@ export default function LoginPage() {
       <div className="auth-form-panel">
         <div className="auth-card">
           <div className="auth-card-header">
-            <h2 className="auth-card-title">Welcome Back</h2>
-            <p className="auth-card-subtitle">Log in with your private email and password</p>
+            <h2 className="auth-card-title">Sign In</h2>
+            <p className="auth-card-subtitle">Log in to access your personalized learning portal</p>
           </div>
 
           {!hasAdmin && (
-            <div
-              style={{
-                background: '#eff6ff',
-                border: '1px solid #bfdbfe',
-                borderRadius: 'var(--radius-md)',
-                padding: '0.75rem 1rem',
-                marginBottom: '1rem',
-                fontSize: '0.88rem',
-                color: '#1e40af',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
+            <div className="admin-setup-alert" role="status">
               <div>
-                <strong>🛡️ First-Time Admin Setup</strong>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: '#3b82f6' }}>
-                  No admin exists in this database yet.
-                </p>
+                <strong>Administrator Setup Required</strong>
+                <p>No admin account exists in this database yet.</p>
               </div>
               <button
                 type="button"
                 className="admin-btn-primary"
-                style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
                 onClick={() => setShowSetupModal(true)}
               >
-                Setup Admin ➔
+                Set Up Admin
               </button>
             </div>
           )}
@@ -194,7 +217,9 @@ export default function LoginPage() {
                 Email Address
               </label>
               <div className="auth-input-wrapper">
-                <span className="input-icon">✉️</span>
+                <span className="input-icon-svg" aria-hidden="true">
+                  <MailIcon size={18} />
+                </span>
                 <input
                   id="login-email"
                   className="auth-text-input"
@@ -210,27 +235,31 @@ export default function LoginPage() {
 
             {/* Password */}
             <div className="auth-field-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="auth-label-row">
                 <label className="auth-field-label" htmlFor="login-password">
                   Password
                 </label>
                 <button
                   type="button"
+                  className="password-toggle-btn"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    padding: 0,
-                  }}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? '🙈 Hide' : '👁️ Show'}
+                  {showPassword ? (
+                    <>
+                      <EyeOffIcon size={14} /> <span>Hide</span>
+                    </>
+                  ) : (
+                    <>
+                      <EyeIcon size={14} /> <span>Show</span>
+                    </>
+                  )}
                 </button>
               </div>
               <div className="auth-input-wrapper">
-                <span className="input-icon">🔑</span>
+                <span className="input-icon-svg" aria-hidden="true">
+                  <KeyIcon size={18} />
+                </span>
                 <input
                   id="login-password"
                   className="auth-text-input"
@@ -245,25 +274,32 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="error-banner" role="alert" style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.9rem' }}>
-                ⚠️ {error}
+              <div className="error-banner" role="alert">
+                <span>{error}</span>
               </div>
             )}
 
+            {/* Sign In Primary Button */}
             <button
               className="auth-primary-btn"
               type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '0.85rem 1.5rem',
-                fontSize: '1rem',
-                fontWeight: 600,
-                cursor: loading ? 'not-allowed' : 'pointer',
-              }}
+              disabled={loading || googleLoading}
             >
-              {loading ? t('common.loading') : 'Log In ➔'}
+              {loading ? t('common.loading') : 'Sign In'}
             </button>
+
+            {/* Divider */}
+            <div className="auth-divider" aria-hidden="true">
+              <span>or</span>
+            </div>
+
+            {/* Real Google OAuth Button */}
+            <GoogleSignInButton
+              text="Continue with Google"
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              disabled={loading || googleLoading}
+            />
 
             <div className="auth-card-footer">
               <p>
@@ -282,8 +318,8 @@ export default function LoginPage() {
         <div className="admin-modal-overlay" onClick={() => setShowSetupModal(false)}>
           <div className="admin-modal-card" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🛡️ Set Up Master Administrator</h2>
-              <button className="modal-close-btn" onClick={() => setShowSetupModal(false)}>✕</button>
+              <h2>Set Up Master Administrator</h2>
+              <button className="modal-close-btn" onClick={() => setShowSetupModal(false)} aria-label="Close modal">✕</button>
             </div>
             <form onSubmit={handleInitialAdminSetup}>
               <div className="modal-body">
@@ -327,8 +363,8 @@ export default function LoginPage() {
                 </div>
 
                 {setupError && (
-                  <div className="error-banner" style={{ marginTop: '1rem', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', padding: '0.6rem 0.8rem', borderRadius: '6px', fontSize: '0.85rem' }}>
-                    ⚠️ {setupError}
+                  <div className="error-banner" style={{ marginTop: '1rem' }}>
+                    <span>{setupError}</span>
                   </div>
                 )}
               </div>
@@ -337,7 +373,7 @@ export default function LoginPage() {
                   Cancel
                 </button>
                 <button type="submit" className="admin-btn-primary" disabled={setupLoading}>
-                  {setupLoading ? 'Creating Admin...' : 'Create Admin & Log In ➔'}
+                  {setupLoading ? 'Creating Admin...' : 'Create Admin & Log In'}
                 </button>
               </div>
             </form>

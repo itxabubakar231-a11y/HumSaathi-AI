@@ -1,6 +1,15 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
+import {
+  SparklesIcon,
+  ArrowRightIcon,
+  ShieldIcon,
+  MessageIcon,
+  AiIcon,
+  CheckIcon,
+  UserIcon,
+} from '../components/ui/Icons';
 
 export default function LandingPage() {
   const { user } = useUser();
@@ -46,23 +55,25 @@ export default function LandingPage() {
             <div className="landing-actions" style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '2rem' }}>
               {user?.id ? (
                 <>
-                  <button className="btn-primary" type="button" onClick={() => navigate('/dashboard')} style={{ padding: '0.85rem 1.85rem', fontSize: '1rem' }}>
-                    {t('landing.startPracticing') || 'Start Practicing'} ➔
+                  <button className="btn-primary" type="button" onClick={() => navigate('/dashboard')} style={{ padding: '0.85rem 1.85rem', fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>{t('landing.startPracticing') || 'Start Practicing'}</span>
+                    <ArrowRightIcon size={16} />
                   </button>
                   <button className="btn-secondary" type="button" onClick={() => navigate('/persona-selection')} style={{ padding: '0.85rem 1.5rem', fontSize: '0.95rem' }}>
-                    {t('landing.switchPersona') || 'Switch Persona'} 🎭
+                    {t('landing.switchPersona') || 'Switch Portal'}
                   </button>
                 </>
               ) : (
                 <>
-                  <Link className="btn-primary" to="/signup" style={{ padding: '0.85rem 1.85rem', fontSize: '1rem' }}>
-                    {t('landing.startPracticing') || 'Start Practicing'} ➔
+                  <Link className="btn-primary" to="/signup" style={{ padding: '0.85rem 1.85rem', fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>{t('landing.startPracticing') || 'Start Practicing'}</span>
+                    <ArrowRightIcon size={16} />
                   </Link>
                   <button className="btn-secondary" type="button" onClick={() => scrollToSection('how-it-works')} style={{ padding: '0.85rem 1.5rem', fontSize: '0.95rem' }}>
                     {t('landing.exploreHow') || 'Explore How It Works'}
                   </button>
                   <Link className="text-btn" to="/login" style={{ fontSize: '0.92rem', padding: '0.5rem 0.75rem' }}>
-                    {t('landing.loginProfile') || 'Log In to Profile'} 👤
+                    {t('landing.loginProfile') || 'Sign In'}
                   </Link>
                 </>
               )}
@@ -71,13 +82,13 @@ export default function LandingPage() {
             {/* Quick Feature Pills */}
             <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <span className="landing-feature-pill" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-full)', color: 'var(--text-secondary)' }}>
-                ⚡ Adaptive AI
+                Adaptive AI Coaching
               </span>
               <span className="landing-feature-pill" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-full)', color: 'var(--text-secondary)' }}>
-                🗣️ Real-time Voice & Text
+                Real-time Voice & Text
               </span>
               <span className="landing-feature-pill" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-full)', color: 'var(--text-secondary)' }}>
-                🌍 English · اردو · Roman Urdu
+                English · اردو · Roman Urdu
               </span>
             </div>
           </div>
@@ -94,7 +105,7 @@ export default function LandingPage() {
                   </span>
                 </div>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                  🎯 Joining a Group Discussion
+                  Joining a Group Discussion
                 </span>
               </div>
 
@@ -110,7 +121,7 @@ export default function LandingPage() {
                 {/* AI Coach Bubble */}
                 <div className="mockup-bubble-coach">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '0.85rem' }}>🤖</span>
+                    <AiIcon size={16} />
                     <strong style={{ fontSize: '0.8rem', color: 'var(--primary-green)' }}>HumSaathi Coach</strong>
                   </div>
                   <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--text-primary)', lineHeight: '1.5' }}>
@@ -122,10 +133,10 @@ export default function LandingPage() {
               {/* Sub-card AI Context telemetry indicator */}
               <div className="mockup-badge-footer">
                 <span style={{ color: 'var(--primary-green)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  ✨ {t('landing.aiCoachBadge') || 'AI Coach • Context-aware • Multi-turn'}
+                  <SparklesIcon size={13} /> {t('landing.aiCoachBadge') || 'AI Coach • Context-aware • Multi-turn'}
                 </span>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
-                  Adaptive role-play
+                  Adaptive simulation
                 </span>
               </div>
             </div>
@@ -159,12 +170,10 @@ export default function LandingPage() {
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border-color)',
                 boxShadow: 'var(--shadow-sm)',
-                transition: 'transform 0.2s ease',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <span style={{ fontSize: '2rem' }}>🧒</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'rgba(245, 158, 11, 0.12)', color: '#d97706' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'rgba(11, 107, 58, 0.1)', color: '#0B6B3A' }}>
                   Ages 4 – 12
                 </span>
               </div>
@@ -174,9 +183,9 @@ export default function LandingPage() {
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '1rem' }}>
                 Guided foundational games: alphabet letters, numbers, emotion recognition, daily routines, and encouraging star rewards.
               </p>
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>🎮 7 Foundational Games</span>
-                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>⭐ Star Rewards</span>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>7 Foundational Modules</span>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>Sensory-Calm Pace</span>
               </div>
             </div>
 
@@ -188,12 +197,10 @@ export default function LandingPage() {
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border-color)',
                 boxShadow: 'var(--shadow-sm)',
-                transition: 'transform 0.2s ease',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <span style={{ fontSize: '2rem' }}>🧑‍🎓</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'rgba(139, 92, 246, 0.12)', color: '#7c3aed' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'rgba(124, 58, 237, 0.1)', color: '#7c3aed' }}>
                   Ages 13 – 17
                 </span>
               </div>
@@ -203,9 +210,9 @@ export default function LandingPage() {
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '1rem' }}>
                 Peer discussions, school projects, Reading & Vocabulary, Problem Solving, and collaborative communication practice.
               </p>
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>📚 Reading & Vocab</span>
-                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>💬 5 Practice Scenarios</span>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>Reading & Vocabulary</span>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>Problem Solving Scenarios</span>
               </div>
             </div>
 
@@ -217,12 +224,10 @@ export default function LandingPage() {
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border-color)',
                 boxShadow: 'var(--shadow-sm)',
-                transition: 'transform 0.2s ease',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <span style={{ fontSize: '2rem' }}>💼</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'rgba(6, 182, 212, 0.12)', color: '#0891b2' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7' }}>
                   Ages 18+
                 </span>
               </div>
@@ -232,9 +237,9 @@ export default function LandingPage() {
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '1rem' }}>
                 Workplace dialogues, manager task clarification, functional reading of utility invoices and transit schedules, and independent living.
               </p>
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>📄 Functional Reading</span>
-                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>💼 5 Workplace Scenarios</span>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>Functional Literacy</span>
+                <span style={{ fontSize: '0.75rem', background: 'var(--bg-tertiary)', padding: '2px 7px', borderRadius: '4px', color: 'var(--text-secondary)' }}>Workplace Dialogue</span>
               </div>
             </div>
           </div>
@@ -242,11 +247,11 @@ export default function LandingPage() {
 
         {/* Feature Highlights Grid */}
         <div className="landing-features" style={{ marginTop: '2rem' }}>
-          <div className="landing-feature-pill">🎯 Contextual AI Role-Play</div>
-          <div className="landing-feature-pill">🗣️ Natural Voice & Text Modes</div>
-          <div className="landing-feature-pill">📊 Persona-Calibrated Feedback</div>
-          <div className="landing-feature-pill">🌍 English, Urdu (اردو) & Roman Urdu</div>
-          <div className="landing-feature-pill">🛡️ Sensory & Calm Accessibility</div>
+          <div className="landing-feature-pill">Contextual AI Role-Play</div>
+          <div className="landing-feature-pill">Natural Voice & Text Modes</div>
+          <div className="landing-feature-pill">Persona-Calibrated Feedback</div>
+          <div className="landing-feature-pill">English, Urdu & Roman Urdu</div>
+          <div className="landing-feature-pill">Sensory & Calm Accessibility</div>
         </div>
 
         {/* Bottom Disclaimer */}

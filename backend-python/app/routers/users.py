@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
+import httpx
+from app.config import settings
 from app.database import get_db
 from app.models.user import User
 from app.schemas.common import parse_json, stringify_json
@@ -17,6 +19,7 @@ from app.schemas.user import (
     PersonaUpdateRequest,
     SensoryUpdateRequest,
     LanguageUpdateRequest,
+    GoogleAuthRequest,
 )
 from app.services.auth_service import hash_password, verify_password, create_access_token
 from app.dependencies.auth import get_current_user, get_optional_current_user
@@ -185,6 +188,105 @@ def login_user(payload: UserLoginRequest, db: Session = Depends(get_db)):
     return {
         "token": token,
         "user": format_user(user),
+    }
+
+@router.post("/auth/google")
+@router.post("/google")
+def google_auth(payload: GoogleAuthRequest, db: Session = Depends(get_db)):
+    token = payload.idToken or payload.credential
+    if not token or not token.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Google ID token/credential is required.",
+        )
+    token = token.strip()
+
+    # 1. Verify token with Google's official tokeninfo endpoint
+    try:
+        with httpx.Client(timeout=10.0) as client:
+            resp = client.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={token}")
+            if resp.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid or expired Google token. Please sign in again.",
+                )
+            token_info = resp.json()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google authentication service is currently unreachable.",
+        ) from exc
+
+    # 2. Validate email verification
+    email_verified = str(token_info.get("email_verified", "")).lower() in ["true", "1"]
+    if not email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google account email is not verified.",
+        )
+
+    # 3. Validate audience if server has GOOGLE_CLIENT_ID configured
+    aud = token_info.get("aud")
+    if settings.GOOGLE_CLIENT_ID and aud != settings.GOOGLE_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google token audience mismatch.",
+        )
+
+    # 4. Extract verified user info
+    email = (token_info.get("email") or "").strip().lower()
+    name = (token_info.get("name") or token_info.get("given_name") or email.split("@")[0] or "Learner").strip()
+
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email address not provided in Google identity token.",
+        )
+
+    # 5. Check if user already exists
+    existing_user = db.query(User).filter(User.email == email).first()
+    is_new_user = False
+
+    if existing_user:
+        if getattr(existing_user, "isActive", True) is False:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This account has been deactivated. Please contact an administrator.",
+            )
+        user = existing_user
+        try:
+            user.lastActiveAt = datetime.utcnow()
+            db.commit()
+        except Exception:
+            pass
+    else:
+        # 6. Create new learner account — strictly 'learner', NEVER 'ADMIN'
+        is_new_user = True
+        user = User(
+            name=name,
+            email=email,
+            passwordHash=None,
+            role="learner",
+            persona="child",
+            language="en",
+            sensoryPrefs=stringify_json(DEFAULT_SENSORY),
+            isActive=True,
+            setupComplete=False,
+            createdAt=datetime.utcnow(),
+            updatedAt=datetime.utcnow(),
+            lastActiveAt=datetime.utcnow(),
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    auth_token = create_access_token(user.id)
+    return {
+        "token": auth_token,
+        "user": format_user(user),
+        "isNewUser": is_new_user,
     }
 
 @router.get("/me")

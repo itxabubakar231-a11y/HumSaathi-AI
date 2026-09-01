@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
+import { ShieldIcon, CheckIcon, SparklesIcon, LockIcon } from '../components/ui/Icons';
 
 export default function ParentPage() {
   const { user } = useUser();
@@ -23,10 +24,10 @@ export default function ParentPage() {
 
   const getPersonaBadge = (p) => {
     switch (p) {
-      case 'child': return { label: t('persona.child'), icon: '🧒', color: '#F59E0B' };
-      case 'teen': return { label: t('persona.teen'), icon: '🧑‍🎓', color: '#8B5CF6' };
-      case 'adult': return { label: t('persona.adult'), icon: '💼', color: '#0EA5E9' };
-      default: return { label: t('persona.child'), icon: '🧒', color: '#10B981' };
+      case 'child': return { label: t('persona.child'), color: '#0B6B3A' };
+      case 'teen': return { label: t('persona.teen'), color: '#7C3AED' };
+      case 'adult': return { label: t('persona.adult'), color: '#0284C7' };
+      default: return { label: t('persona.child'), color: '#0B6B3A' };
     }
   };
 
@@ -35,43 +36,49 @@ export default function ParentPage() {
   const personaInfo = getPersonaBadge(view?.learner?.persona || user.persona);
 
   return (
-    <div className="parent-page">
+    <div className="parent-page" style={{ maxWidth: '800px', margin: '0 auto', padding: 'var(--space-md) var(--space-sm)' }}>
       <p className="eyebrow">{t('parent.title')}</p>
-      <h1>{t('parent.title')}</h1>
-      <p className="intro">{t('parent.intro')}</p>
+      <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', marginBottom: '0.5rem' }}>{t('parent.title')}</h1>
+      <p className="intro" style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{t('parent.intro')}</p>
 
       {!view ? (
-        <form onSubmit={loadView} className="pin-form">
-          <label>
-            {t('parent.pin')}
+        <form onSubmit={loadView} className="pin-form dashboard-card" style={{ maxWidth: '420px', padding: '2rem' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontWeight: 600 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <LockIcon size={16} /> {t('parent.pin')}
+            </span>
             <input
               type="password"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
               maxLength={8}
               placeholder="1234"
+              className="auth-text-input"
+              style={{ fontSize: '1.2rem', letterSpacing: '0.2em', textAlign: 'center' }}
             />
           </label>
-          {error && <p className="error-text">{error}</p>}
-          <button className="btn-primary" type="submit">{t('parent.view')}</button>
+          {error && <p className="error-text" style={{ marginTop: '0.75rem', fontSize: '0.88rem' }}>{error}</p>}
+          <button className="btn-primary" type="submit" style={{ width: '100%', marginTop: '1.25rem' }}>
+            {t('parent.view')}
+          </button>
         </form>
       ) : (
-        <div className="parent-view">
+        <div className="parent-view" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {/* Learner & Active Portal Header Card */}
-          <section className="dashboard-card parent-learner-card">
-            <div className="parent-card-header">
-              <h2>{t('parent.learner')}</h2>
+          <section className="dashboard-card parent-learner-card" style={{ padding: '1.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
+            <div className="parent-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 700 }}>{t('parent.learner')}</h2>
               <span
                 className="persona-tag"
-                style={{ backgroundColor: `${personaInfo.color}18`, color: personaInfo.color, border: `1.5px solid ${personaInfo.color}40`, padding: '0.25rem 0.75rem', borderRadius: '9999px', fontWeight: 800 }}
+                style={{ backgroundColor: `${personaInfo.color}15`, color: personaInfo.color, border: `1.5px solid ${personaInfo.color}40`, padding: '0.25rem 0.75rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.85rem' }}
               >
-                {personaInfo.icon} {personaInfo.label} Portal
+                {personaInfo.label} Portal
               </span>
             </div>
-            <p className="learner-meta-text">
+            <p className="learner-meta-text" style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
               <strong>{view.learner.name}</strong> · {t(`lang.${view.learner.language}`) || view.learner.language}
             </p>
-            <div className="parent-stats-inline" style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+            <div className="parent-stats-inline" style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', flexWrap: 'wrap', fontSize: '0.92rem' }}>
               <div><strong>{t('progress.level')}:</strong> {view.currentLevel}</div>
               <div><strong>{t('progress.completed')}:</strong> {view.completedCount}</div>
               <div><strong>{t('progress.accuracy')}:</strong> {view.avgAccuracy}%</div>
@@ -79,12 +86,15 @@ export default function ParentPage() {
           </section>
 
           {/* Evidence-Based Strengths for Current Persona */}
-          <section className="dashboard-card">
-            <h2>🌟 {t('parent.strengths')}</h2>
+          <section className="dashboard-card" style={{ padding: '1.5rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0B6B3A' }}>
+              <CheckIcon size={18} />
+              <span>{t('parent.strengths')}</span>
+            </h2>
             {view.strengths?.length > 0 ? (
               <ul className="strengths-list-chips" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', listStyle: 'none', padding: 0 }}>
                 {view.strengths.map((str, idx) => (
-                  <li key={idx} style={{ background: '#D1FAE5', color: '#065F46', padding: '0.35rem 0.85rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.92rem' }}>
+                  <li key={idx} style={{ background: '#E8F7F0', color: '#0B6B3A', padding: '0.35rem 0.85rem', borderRadius: '9999px', fontWeight: 600, fontSize: '0.88rem' }}>
                     ✓ {str}
                   </li>
                 ))}
@@ -95,13 +105,16 @@ export default function ParentPage() {
           </section>
 
           {/* Areas for Growth / Practice for Current Persona */}
-          <section className="dashboard-card">
-            <h2>🎯 {t('parent.needsPractice')}</h2>
+          <section className="dashboard-card" style={{ padding: '1.5rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#7C3AED' }}>
+              <SparklesIcon size={18} />
+              <span>{t('parent.needsPractice')}</span>
+            </h2>
             {view.needsPractice?.length > 0 ? (
-              <ul className="practice-list-chips" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', listStyle: 'none', padding: 0 }}>
+              <ul className="needs-practice-list-chips" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', listStyle: 'none', padding: 0 }}>
                 {view.needsPractice.map((np, idx) => (
-                  <li key={idx} style={{ background: '#FEF3C7', color: '#92400E', padding: '0.35rem 0.85rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.92rem' }}>
-                    ⚡ {np}
+                  <li key={idx} style={{ background: '#F3E8FF', color: '#6D28D9', padding: '0.35rem 0.85rem', borderRadius: '9999px', fontWeight: 600, fontSize: '0.88rem' }}>
+                    • {np}
                   </li>
                 ))}
               </ul>
@@ -110,40 +123,20 @@ export default function ParentPage() {
             )}
           </section>
 
-          {/* Persona Skill Breakdown Meters */}
-          {view.progress?.length > 0 && (
-            <section className="dashboard-card">
-              <h2>📊 {t('parent.skillsBreakdown')}</h2>
-              <div className="skills-meter-grid" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
-                {view.progress.map((p, idx) => (
-                  <div key={idx} className="skill-meter-item">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginBottom: '0.25rem' }}>
-                      <span>{p.skill.replace('_', ' ').toUpperCase()}</span>
-                      <span>{p.accuracy}%</span>
-                    </div>
-                    <div style={{ height: '8px', background: '#E5E7EB', borderRadius: '9999px', overflow: 'hidden' }}>
-                      <div style={{ width: `${Math.max(5, Math.min(100, p.accuracy))}%`, height: '100%', background: '#10B981', borderRadius: '9999px' }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Persona-Specific Recent History */}
-          <section className="dashboard-card">
-            <h2>⏱️ {t('progress.recent')}</h2>
-            {view.recentAttempts?.length > 0 ? (
-              <ul className="recent-list" style={{ paddingLeft: '1.25rem', marginTop: '0.5rem' }}>
-                {view.recentAttempts.map((a, i) => (
-                  <li key={i} style={{ marginBottom: '0.4rem' }}>
-                    <strong>{a.title}</strong> — {a.score}% {language === 'ur' ? 'اسکور' : 'score'}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted-text">{t('parent.noAttempts')}</p>
-            )}
+          {/* Sensory Profile Summary */}
+          <section className="dashboard-card" style={{ padding: '1.5rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <ShieldIcon size={18} />
+              <span>{t('parent.sensorySummary')}</span>
+            </h2>
+            <div className="sensory-summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+              {Object.entries(view.sensoryPrefs || {}).map(([k, v]) => (
+                <div key={k} className="sensory-summary-item" style={{ background: 'var(--bg-tertiary)', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm)' }}>
+                  <span className="sensory-key" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block' }}>{k}</span>
+                  <strong className="sensory-val" style={{ fontSize: '0.9rem' }}>{String(v)}</strong>
+                </div>
+              ))}
+            </div>
           </section>
         </div>
       )}

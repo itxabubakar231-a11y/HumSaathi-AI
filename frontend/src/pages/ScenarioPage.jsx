@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
+import { MessageIcon, MicIcon, RefreshIcon, ArrowLeftIcon, ArrowRightIcon } from '../components/ui/Icons';
 
 function getLocalizedText(val, lang, fallback = '') {
   if (!val) return fallback;
@@ -116,10 +117,10 @@ export default function ScenarioPage() {
         <p className="error-text">{error}</p>
         <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
           <button className="btn-primary" onClick={fetchScenarios}>
-            🔄 {t('common.playAgain') || t('common.continue') || 'Retry'}
+            <RefreshIcon size={16} /> <span>{t('common.playAgain') || 'Retry'}</span>
           </button>
           <button className="btn-secondary" onClick={() => navigate('/dashboard')}>
-            ← {t('nav.dashboard')}
+            <ArrowLeftIcon size={16} /> <span>{t('nav.dashboard')}</span>
           </button>
         </div>
       </div>
@@ -142,7 +143,7 @@ export default function ScenarioPage() {
       {/* Difficulty Filter Chips */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-md)', flexWrap: 'wrap', alignItems: 'center' }}>
         <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-          ⚡ {t('scenarios.filterDifficulty')}
+          {t('scenarios.filterDifficulty')}
         </span>
         {[
           { id: 'all', label: t('scenarios.all') },
@@ -175,7 +176,9 @@ export default function ScenarioPage() {
             border: '1.5px dashed var(--border-color)',
           }}
         >
-          <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: 'var(--space-xs)' }}>💬</span>
+          <div style={{ margin: '0 auto var(--space-xs)', color: 'var(--text-tertiary)', display: 'flex', justifyContent: 'center' }}>
+            <MessageIcon size={36} />
+          </div>
           <h3 style={{ fontSize: '1.25rem', marginBottom: 'var(--space-xs)', color: 'var(--text-primary)' }}>
             {t('scenarios.noAvailable')}
           </h3>
@@ -188,7 +191,7 @@ export default function ScenarioPage() {
             style={{ padding: '0.5rem 1.25rem', fontSize: '0.9rem' }}
             onClick={() => setFilterDifficulty('all')}
           >
-            {t('scenarios.viewAll')} ➔
+            <span>{t('scenarios.viewAll')}</span> <ArrowRightIcon size={14} />
           </button>
         </div>
       ) : (
@@ -218,8 +221,8 @@ export default function ScenarioPage() {
             >
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-xs)' }}>
-                  <span className="module-icon-wrap" style={{ width: '2.75rem', height: '2.75rem', fontSize: '1.25rem', marginBottom: 0 }}>
-                    💬
+                  <span className="module-icon-wrap" style={{ width: '2.5rem', height: '2.5rem', marginBottom: 0, color: 'var(--primary-green)' }}>
+                    <MessageIcon size={18} />
                   </span>
                   <span
                     style={{
@@ -235,7 +238,7 @@ export default function ScenarioPage() {
                           ? '#e53e3e'
                           : scen.difficulty === 'medium'
                           ? '#dd6b20'
-                          : '#38a169',
+                          : '#0B6B3A',
                     }}
                   >
                     {getDifficultyLabel(scen.difficulty)}
@@ -268,17 +271,19 @@ export default function ScenarioPage() {
               <div style={{ display: 'flex', gap: 'var(--space-xs)', marginTop: 'var(--space-xs)' }}>
                 <button
                   className="btn-primary"
-                  style={{ flex: 1, padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
+                  style={{ flex: 1, padding: '0.6rem 0.8rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
                   onClick={() => handleStart(scen.id, 'text')}
                 >
-                  💬 {t('scenarios.startText')}
+                  <MessageIcon size={15} />
+                  <span>{t('scenarios.startText')}</span>
                 </button>
                 <button
                   className="btn-secondary"
-                  style={{ flex: 1, padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
+                  style={{ flex: 1, padding: '0.6rem 0.8rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
                   onClick={() => handleStart(scen.id, 'voice')}
                 >
-                  🎙️ {t('scenarios.startVoice')}
+                  <MicIcon size={15} />
+                  <span>{t('scenarios.startVoice')}</span>
                 </button>
               </div>
             </div>

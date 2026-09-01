@@ -3,9 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { DEFAULT_SENSORY } from '../utils/preferences';
+import GoogleSignInButton from '../components/ui/GoogleSignInButton';
+import { UserIcon, MailIcon, KeyIcon, LockIcon, EyeIcon, EyeOffIcon, ShieldIcon, SparklesIcon, CheckIcon } from '../components/ui/Icons';
 
 export default function SignupPage() {
-  const { signupUser } = useUser();
+  const { signupUser, loginWithGoogle } = useUser();
   const { t } = useI18n();
   const navigate = useNavigate();
 
@@ -15,6 +17,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Password strength calculator
@@ -74,33 +77,61 @@ export default function SignupPage() {
         name: trimmedName,
         email: trimmedEmail,
         password,
-        persona: 'child', // default initial, user confirms in persona selection next
+        persona: 'child', // default initial, user chooses in persona selection next
         language: 'en',
         sensoryPrefs: DEFAULT_SENSORY,
       });
       navigate('/persona-selection');
     } catch (err) {
-      setError(err.message || t('common.error'));
+      setError(err.message || t('common.error') || 'Failed to create account.');
     } finally {
       setSaving(false);
     }
   };
 
+  const handleGoogleSuccess = async (credential) => {
+    setError('');
+    setGoogleLoading(true);
+    try {
+      const result = await loginWithGoogle(credential);
+      const userObj = result?.user;
+      if (userObj?.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (result?.isNewUser || !userObj?.persona) {
+        navigate('/persona-selection');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError(err.message || 'Google signup failed. Please try again or use standard registration.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleError = (err) => {
+    setError(err.message || 'Unable to connect to Google authentication.');
+  };
+
   return (
     <div className="auth-split-layout">
-      {/* Left Hero Panel */}
+      {/* Left Branding Hero Panel */}
       <div className="auth-hero-panel">
         <div className="auth-hero-glow" aria-hidden="true" />
         <div className="auth-hero-content">
           <div className="auth-brand-logo">
-            <span className="logo-icon">H</span>
+            <span className="brand-mark" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="white"/>
+              </svg>
+            </span>
             <span className="logo-text">HumSaathi AI</span>
           </div>
 
           <h1 className="auth-hero-title">
-            Start Your
+            Start your
             <br />
-            <span className="hero-accent">Learning Journey.</span>
+            <span className="hero-accent">learning journey.</span>
           </h1>
 
           <p className="auth-hero-desc">
@@ -109,24 +140,30 @@ export default function SignupPage() {
 
           <div className="auth-hero-features">
             <div className="feature-item">
-              <span className="feature-icon">🔒</span>
+              <span className="feature-icon-svg">
+                <ShieldIcon size={20} />
+              </span>
               <div>
                 <strong>Private & Secure Account</strong>
-                <p>Your profile and learning data stay protected</p>
+                <p>Your profile and practice data stay completely protected</p>
               </div>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">🎭</span>
+              <span className="feature-icon-svg">
+                <SparklesIcon size={20} />
+              </span>
               <div>
-                <strong>3 Distinct Portals</strong>
-                <p>Tailored for Child, Teen, and Adult learners</p>
+                <strong>Three Distinct Portals</strong>
+                <p>Tailored experiences for Child, Teen, and Adult learners</p>
               </div>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">🌐</span>
+              <span className="feature-icon-svg">
+                <CheckIcon size={20} />
+              </span>
               <div>
                 <strong>Multilingual Coaching</strong>
-                <p>English, Urdu & Roman Urdu support</p>
+                <p>English, Urdu, and Roman Urdu conversation support</p>
               </div>
             </div>
           </div>
@@ -137,8 +174,8 @@ export default function SignupPage() {
       <div className="auth-form-panel">
         <div className="auth-card">
           <div className="auth-card-header">
-            <h2 className="auth-card-title">Create Your Account</h2>
-            <p className="auth-card-subtitle">Set up your secure credentials to get started</p>
+            <h2 className="auth-card-title">Create Account</h2>
+            <p className="auth-card-subtitle">Set up your credentials to begin practicing</p>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form" noValidate>
@@ -148,7 +185,9 @@ export default function SignupPage() {
                 Full Name <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div className="auth-input-wrapper">
-                <span className="input-icon">👤</span>
+                <span className="input-icon-svg" aria-hidden="true">
+                  <UserIcon size={18} />
+                </span>
                 <input
                   id="signup-name"
                   className="auth-text-input"
@@ -156,6 +195,7 @@ export default function SignupPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Zain Malik"
+                  autoComplete="name"
                   required
                 />
               </div>
@@ -167,7 +207,9 @@ export default function SignupPage() {
                 Email Address <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div className="auth-input-wrapper">
-                <span className="input-icon">✉️</span>
+                <span className="input-icon-svg" aria-hidden="true">
+                  <MailIcon size={18} />
+                </span>
                 <input
                   id="signup-email"
                   className="auth-text-input"
@@ -183,27 +225,31 @@ export default function SignupPage() {
 
             {/* Password */}
             <div className="auth-field-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="auth-label-row">
                 <label className="auth-field-label" htmlFor="signup-password">
                   Password <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <button
                   type="button"
+                  className="password-toggle-btn"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    padding: 0,
-                  }}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? '🙈 Hide' : '👁️ Show'}
+                  {showPassword ? (
+                    <>
+                      <EyeOffIcon size={14} /> <span>Hide</span>
+                    </>
+                  ) : (
+                    <>
+                      <EyeIcon size={14} /> <span>Show</span>
+                    </>
+                  )}
                 </button>
               </div>
               <div className="auth-input-wrapper">
-                <span className="input-icon">🔑</span>
+                <span className="input-icon-svg" aria-hidden="true">
+                  <KeyIcon size={18} />
+                </span>
                 <input
                   id="signup-password"
                   className="auth-text-input"
@@ -242,7 +288,9 @@ export default function SignupPage() {
                 Confirm Password <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div className="auth-input-wrapper">
-                <span className="input-icon">🔒</span>
+                <span className="input-icon-svg" aria-hidden="true">
+                  <LockIcon size={18} />
+                </span>
                 <input
                   id="signup-confirm-password"
                   className="auth-text-input"
@@ -257,32 +305,38 @@ export default function SignupPage() {
             </div>
 
             {error && (
-              <div className="error-banner" role="alert" style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.9rem' }}>
-                ⚠️ {error}
+              <div className="error-banner" role="alert">
+                <span>{error}</span>
               </div>
             )}
 
-            {/* Submit Button */}
+            {/* Create Account Primary Button */}
             <button
               className="auth-primary-btn"
               type="submit"
-              disabled={saving}
-              style={{
-                width: '100%',
-                padding: '0.85rem 1.5rem',
-                fontSize: '1rem',
-                fontWeight: 600,
-                cursor: saving ? 'not-allowed' : 'pointer',
-              }}
+              disabled={saving || googleLoading}
             >
-              {saving ? t('common.loading') : 'Create Account & Choose Persona ➔'}
+              {saving ? t('common.loading') : 'Create Account'}
             </button>
+
+            {/* Divider */}
+            <div className="auth-divider" aria-hidden="true">
+              <span>or</span>
+            </div>
+
+            {/* Real Google OAuth Button */}
+            <GoogleSignInButton
+              text="Continue with Google"
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              disabled={saving || googleLoading}
+            />
 
             <div className="auth-card-footer">
               <p>
                 Already have an account?{' '}
                 <Link to="/login" className="auth-link">
-                  Log in here
+                  Sign in here
                 </Link>
               </p>
             </div>

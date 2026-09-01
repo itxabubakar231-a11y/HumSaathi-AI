@@ -2,16 +2,26 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import { api } from '../../services/api';
+import {
+  AnalyticsIcon,
+  UsersIcon,
+  ActivitiesIcon,
+  ShieldIcon,
+  AiIcon,
+  LogsIcon,
+  SettingsIcon,
+  UserIcon,
+} from '../ui/Icons';
 
 const adminNavItems = [
-  { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
-  { path: '/admin/users', label: 'Users', icon: '👥' },
-  { path: '/admin/scenarios', label: 'Scenarios', icon: '🧩' },
-  { path: '/admin/analytics', label: 'Analytics', icon: '📈' },
-  { path: '/admin/permissions', label: 'Permissions', icon: '🛡️' },
-  { path: '/admin/ai-monitoring', label: 'AI Monitoring', icon: '🤖' },
-  { path: '/admin/audit-logs', label: 'Audit Logs', icon: '📜' },
-  { path: '/admin/settings', label: 'System Status', icon: '⚙️' },
+  { path: '/admin/dashboard', label: 'Dashboard', Icon: AnalyticsIcon },
+  { path: '/admin/users', label: 'Users', Icon: UsersIcon },
+  { path: '/admin/scenarios', label: 'Scenarios', Icon: ActivitiesIcon },
+  { path: '/admin/analytics', label: 'Analytics', Icon: AnalyticsIcon },
+  { path: '/admin/permissions', label: 'Permissions', Icon: ShieldIcon },
+  { path: '/admin/ai-monitoring', label: 'AI Monitoring', Icon: AiIcon },
+  { path: '/admin/audit-logs', label: 'Audit Logs', Icon: LogsIcon },
+  { path: '/admin/settings', label: 'System Status', Icon: SettingsIcon },
 ];
 
 export default function AdminLayout({ children }) {
@@ -40,7 +50,9 @@ export default function AdminLayout({ children }) {
       <aside className={`admin-sidebar ${mobileMenuOpen ? 'is-open' : ''}`}>
         <div className="admin-sidebar-header">
           <Link to="/admin/dashboard" className="admin-brand-link">
-            <span className="admin-logo-badge">🛡️</span>
+            <span className="admin-logo-badge">
+              <ShieldIcon size={20} />
+            </span>
             <div>
               <span className="admin-brand-title">HumSaathi AI</span>
               <span className="admin-brand-subtitle">Control Center</span>
@@ -52,6 +64,7 @@ export default function AdminLayout({ children }) {
           <p className="admin-nav-heading">MANAGEMENT</p>
           {adminNavItems.map((item) => {
             const active = isCurrentActive(item.path);
+            const ItemIcon = item.Icon;
             return (
               <button
                 key={item.path}
@@ -62,7 +75,9 @@ export default function AdminLayout({ children }) {
                   setMobileMenuOpen(false);
                 }}
               >
-                <span className="admin-nav-icon">{item.icon}</span>
+                <span className="admin-nav-icon">
+                  <ItemIcon size={18} />
+                </span>
                 <span className="admin-nav-text">{item.label}</span>
                 {active && <span className="admin-nav-indicator" />}
               </button>
@@ -88,7 +103,7 @@ export default function AdminLayout({ children }) {
               onClick={() => navigate('/dashboard')}
               title="Switch to Learner Portal"
             >
-              🎓 Learner View
+              Learner View
             </button>
             <button
               className="admin-logout-btn"
@@ -98,7 +113,7 @@ export default function AdminLayout({ children }) {
               }}
               title="Log Out"
             >
-              🚪 Exit
+              Sign Out
             </button>
           </div>
         </div>
@@ -131,12 +146,14 @@ export default function AdminLayout({ children }) {
                 }}
               />
               <span className="status-label">
-                {systemStatus?.status === 'operational' ? 'System Operational' : 'Degraded Mode'}
+                {systemStatus?.status === 'operational' ? 'Operational' : 'Degraded'}
               </span>
             </div>
 
             <div className="admin-profile-chip" onClick={() => navigate('/admin/settings')}>
-              <span className="admin-chip-icon">👤</span>
+              <span className="admin-chip-icon">
+                <UserIcon size={14} />
+              </span>
               <span className="admin-chip-email">{user?.email || 'admin@humsaathi.ai'}</span>
             </div>
           </div>

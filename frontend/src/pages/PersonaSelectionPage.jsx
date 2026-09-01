@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
+import { ArrowRightIcon, CheckIcon, SparklesIcon } from '../components/ui/Icons';
 
 export default function PersonaSelectionPage() {
   const { user, selectPersona } = useUser();
@@ -14,36 +15,30 @@ export default function PersonaSelectionPage() {
   const personas = [
     {
       id: 'child',
-      icon: '🧒',
       badge: 'Ages 4 – 12',
       title: 'Child Portal',
-      subtitle: 'Friendly, guided & sensory-calm',
-      desc: 'Fun educational games, letters, numbers, emotion matching, daily routines & story adventures.',
-      accent: '#f59e0b',
-      bgGradient: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(251, 191, 36, 0.03) 100%)',
-      highlights: ['🎮 Learning Games', '⭐ Star Rewards', '😊 Emotion Matching'],
+      subtitle: 'Guided learning & sensory-calm focus',
+      desc: 'Interactive early learning, letter sounds, numbers, emotion recognition, and daily routines.',
+      accent: '#0B6B3A',
+      highlights: ['Visual Matching', 'Foundational Skills', 'Guided Routines'],
     },
     {
       id: 'teen',
-      icon: '🧑‍🎓',
       badge: 'Ages 13 – 17',
       title: 'Teen Portal',
-      subtitle: 'Modern, independent & social',
-      desc: 'School challenges, peer dynamics, Reading & Vocabulary, Problem Solving, and Communication.',
-      accent: '#8b5cf6',
-      bgGradient: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(167, 139, 250, 0.03) 100%)',
-      highlights: ['📚 Reading & Vocab', '🧩 Problem Solving', '💬 Communication'],
+      subtitle: 'Academic, peer & social dynamics',
+      desc: 'Reading comprehension, vocabulary building, everyday problem solving, and conversational practice.',
+      accent: '#7C3AED',
+      highlights: ['Reading & Vocabulary', 'Problem Solving', 'Peer Communication'],
     },
     {
       id: 'adult',
-      icon: '👨',
       badge: 'Ages 18+',
       title: 'Adult Portal',
-      subtitle: 'Mature, practical & professional',
-      desc: 'Functional Reading, Everyday Problem Solving (Shopping, Time, Money), and Everyday Communication.',
-      accent: '#06b6d4',
-      bgGradient: 'linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(56, 189, 248, 0.03) 100%)',
-      highlights: ['📄 Functional Reading', '💵 Shopping, Time & Money', '🗣️ Workplace & Daily Comm'],
+      subtitle: 'Practical, workplace & life independence',
+      desc: 'Functional literacy (invoices, notices), everyday problem solving (budgeting, transit), and workplace dialogue.',
+      accent: '#0284C7',
+      highlights: ['Functional Reading', 'Everyday Decisions', 'Professional Dialogue'],
     },
   ];
 
@@ -62,16 +57,16 @@ export default function PersonaSelectionPage() {
 
   const getActiveAccent = () => {
     const found = personas.find((p) => p.id === selectedPersona);
-    return found ? found.accent : '#8b5cf6';
+    return found ? found.accent : '#0B6B3A';
   };
 
   return (
     <div className="persona-experience-page">
       <div className="persona-hero-header">
         <span className="persona-eyebrow-badge">PORTAL SELECTION</span>
-        <h1 className="persona-main-title">Choose Your Experience</h1>
+        <h1 className="persona-main-title">Choose Your Practice Portal</h1>
         <p className="persona-main-subtitle">
-          Select a practice portal tailored specifically to your age, communication goals, and learning level.
+          Select a learning experience tailored to your communication goals, developmental pace, and daily scenarios.
         </p>
       </div>
 
@@ -85,7 +80,6 @@ export default function PersonaSelectionPage() {
               className={`persona-experience-card ${isSelected ? 'is-selected' : ''}`}
               style={{
                 '--persona-accent': p.accent,
-                '--persona-bg': p.bgGradient,
               }}
               onClick={() => setSelectedPersona(p.id)}
               role="button"
@@ -93,14 +87,24 @@ export default function PersonaSelectionPage() {
               onKeyDown={(e) => e.key === 'Enter' && setSelectedPersona(p.id)}
             >
               <div className="persona-card-topbar">
-                <span className="persona-hero-icon">{p.icon}</span>
-                <span className="persona-age-badge" style={{ backgroundColor: isSelected ? p.accent : undefined }}>
+                <span
+                  className="persona-portal-pill"
+                  style={{
+                    color: isSelected ? '#ffffff' : p.accent,
+                    backgroundColor: isSelected ? p.accent : 'var(--bg-tertiary)',
+                  }}
+                >
                   {p.badge}
                 </span>
+                {isSelected && (
+                  <span className="persona-selected-badge" style={{ color: p.accent }}>
+                    <CheckIcon size={16} /> Selected
+                  </span>
+                )}
               </div>
 
               <div className="persona-card-body">
-                <h3 className="persona-title">{p.title}</h3>
+                <h2 className="persona-title">{p.title}</h2>
                 <span className="persona-subtitle">{p.subtitle}</span>
                 <p className="persona-description">{p.desc}</p>
 
@@ -116,7 +120,7 @@ export default function PersonaSelectionPage() {
               <div className="persona-card-footer">
                 <div className="radio-check-wrap">
                   <span className={`radio-circle ${isSelected ? 'is-checked' : ''}`}>
-                    {isSelected ? '✓' : ''}
+                    {isSelected ? <CheckIcon size={12} /> : null}
                   </span>
                   <span className="radio-label">
                     {isSelected ? 'Active Selection' : 'Click to select'}
@@ -137,7 +141,8 @@ export default function PersonaSelectionPage() {
           disabled={saving}
           style={{ backgroundColor: getActiveAccent() }}
         >
-          {saving ? t('common.loading') : `Enter ${selectedPersona.toUpperCase()} Portal 🚀`}
+          <span>{saving ? t('common.loading') : `Enter ${selectedPersona.charAt(0).toUpperCase() + selectedPersona.slice(1)} Portal`}</span>
+          <ArrowRightIcon size={18} />
         </button>
       </div>
     </div>

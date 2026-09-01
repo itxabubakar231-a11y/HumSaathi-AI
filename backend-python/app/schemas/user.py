@@ -56,3 +56,8 @@ class SensoryUpdateRequest(BaseModel):
 
 class LanguageUpdateRequest(BaseModel):
     language: Literal['en', 'ur', 'ur_rm']
+
+class GoogleAuthRequest(BaseModel):
+    idToken: Optional[str] = None
+    credential: Optional[str] = None
+

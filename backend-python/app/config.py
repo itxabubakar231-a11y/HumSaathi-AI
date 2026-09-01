@@ -25,6 +25,14 @@ class Settings(BaseSettings):
     AI_BASE_URL: str = os.getenv("AI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai")
     AI_MODEL: str = os.getenv("AI_MODEL", "gemini-1.5-flash")
 
+    # Google OAuth configuration
+    GOOGLE_CLIENT_ID: str = (
+        os.getenv("GOOGLE_CLIENT_ID") or
+        os.getenv("VITE_GOOGLE_CLIENT_ID") or
+        ""
+    )
+    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+
     @property
     def cors_origins(self) -> list[str]:
         defaults = [

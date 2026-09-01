@@ -25,6 +25,7 @@ export const api = {
   health: () => request('/api/health'),
   signupUser: (body) => request('/api/users/signup', { method: 'POST', body: JSON.stringify(body) }),
   loginUser: (body) => request('/api/users/login', { method: 'POST', body: JSON.stringify(body) }),
+  googleAuth: (body) => request('/api/users/auth/google', { method: 'POST', body: JSON.stringify(body) }),
   getMe: () => request('/api/users/me'),
   logoutUser: () => request('/api/users/logout', { method: 'POST', body: '{}' }),
   setupUser: (body) => request('/api/users/setup', { method: 'POST', body: JSON.stringify(body) }),
