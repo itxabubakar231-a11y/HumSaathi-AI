@@ -43,7 +43,7 @@ export default function GoogleSignInButton({
     document.head.appendChild(script);
   }, []);
 
-  // Initialize GSI if clientId is available
+  // Initialize GSI and render button if clientId is available
   useEffect(() => {
     if (!scriptLoaded || !clientId || typeof window === 'undefined' || !window.google?.accounts?.id) {
       return;
@@ -63,7 +63,7 @@ export default function GoogleSignInButton({
         cancel_on_tap_outside: true,
       });
 
-      // Render native hidden/overlay button in container if container is available
+      // Render native button in container if container is available
       if (googleBtnContainerRef.current) {
         googleBtnContainerRef.current.innerHTML = '';
         window.google.accounts.id.renderButton(googleBtnContainerRef.current, {
@@ -76,6 +76,13 @@ export default function GoogleSignInButton({
           logo_alignment: 'left',
         });
       }
+
+      // Optionally attempt One Tap prompt if supported
+      try {
+        window.google.accounts.id.prompt();
+      } catch {
+        // One Tap suppression handled silently
+      }
     } catch (err) {
       console.warn('GSI initialization error:', err);
     }
@@ -84,22 +91,14 @@ export default function GoogleSignInButton({
   const handleCustomButtonClick = () => {
     if (!clientId) {
       setConfigNotice(
-        'Google OAuth requires VITE_GOOGLE_CLIENT_ID environment variable. Please set it in your environment or use email & password.'
+        'Google Sign-In requires the VITE_GOOGLE_CLIENT_ID environment variable to be configured in Vercel Project Settings or .env file. You can also sign in with your email and password above.'
       );
       return;
     }
 
     if (window.google?.accounts?.id) {
       try {
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            // If One Tap is skipped/suppressed, trigger native button click if available
-            const nativeBtn = googleBtnContainerRef.current?.querySelector('div[role="button"]');
-            if (nativeBtn) {
-              nativeBtn.click();
-            }
-          }
-        });
+        window.google.accounts.id.prompt();
       } catch (err) {
         console.warn('Google prompt invocation notice:', err);
       }
@@ -109,15 +108,25 @@ export default function GoogleSignInButton({
   };
 
   return (
-    <div className="google-auth-wrapper" style={{ width: '100%' }}>
-      {/* Hidden native container for Google renderButton fallback */}
-      <div
-        ref={googleBtnContainerRef}
-        style={{
-          display: clientId && scriptLoaded ? 'none' : 'none',
-        }}
-        aria-hidden="true"
-      />
+    <div className="google-auth-wrapper" style={{ width: '100%', position: 'relative' }}>
+      {/* Interactive Google Render Button overlay when clientId and script are loaded */}
+      {clientId && scriptLoaded && (
+        <div
+          ref={googleBtnContainerRef}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            opacity: 0.001,
+            zIndex: 2,
+            overflow: 'hidden',
+            pointerEvents: disabled ? 'none' : 'auto',
+          }}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Styled accessible Google Auth Button */}
       <button

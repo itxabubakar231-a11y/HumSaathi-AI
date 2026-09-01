@@ -36,9 +36,30 @@ This guide explains how to deploy **HumSaathi AI** (Vite React Frontend + FastAP
    | `DATABASE_URL` | Optional | PostgreSQL URI (e.g. Supabase, Neon, Vercel Postgres). If omitted, SQLite `/tmp/humsaathi.db` is used. | `postgresql://user:pass@host/db` |
    | `ADMIN_EMAIL` | Optional | Initial administrator email for Control Center | `admin@humsaathi.ai` |
    | `ADMIN_PASSWORD` | Optional | Initial administrator password | `AdminSecurePass123!` |
-   | `ALLOWED_ORIGINS` | Optional | Allowed CORS origins (defaults to `*`) | `https://your-app.vercel.app` |
+   | `ALLOWED_ORIGINS` | Optional | Allowed CORS origins (defaults to `*`) | `https://hum-saathi-ai.vercel.app` |
+   | `VITE_GOOGLE_CLIENT_ID` | Required for Google Auth (Frontend) | Google OAuth 2.0 Client ID for Google Identity Services frontend button | `xxxx.apps.googleusercontent.com` |
+   | `GOOGLE_CLIENT_ID` | Required for Google Auth (Backend) | Google OAuth 2.0 Client ID for server-side token audience verification | `xxxx.apps.googleusercontent.com` |
+   | `GOOGLE_CLIENT_SECRET` | Optional (Backend) | Google OAuth 2.0 Client Secret (never exposed to client) | `GOCSPX-...` |
+
+### Google Cloud Console Setup (OAuth 2.0 Credentials)
+
+1. Go to **[Google Cloud Console](https://console.cloud.google.com/)** -> **APIs & Services** -> **Credentials**.
+2. Create or configure an **OAuth 2.0 Client ID** (Application type: **Web application**).
+3. Under **Authorized JavaScript origins**, add:
+   - `https://hum-saathi-ai.vercel.app` (Production)
+   - `http://localhost:5173` (Local Dev - Vite)
+   - `http://localhost:3000` (Local Dev fallback)
+4. Under **Authorized redirect URIs**, add:
+   - `https://hum-saathi-ai.vercel.app`
+   - `https://hum-saathi-ai.vercel.app/login`
+   - `https://hum-saathi-ai.vercel.app/signup`
+   - `http://localhost:5173`
+   - `http://localhost:5173/login`
+5. Copy the **Client ID** and add it as `VITE_GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_ID` in your Vercel Environment Variables.
+6. Trigger a redeploy in Vercel so Vite bakes `VITE_GOOGLE_CLIENT_ID` into the frontend build.
 
 4. Click **Deploy**. Vercel will build both the frontend and serverless Python backend functions.
+
 
 ---
 

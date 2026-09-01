@@ -143,3 +143,27 @@ def test_google_auth_deactivated_account_rejected():
     with patch("httpx.Client.get", return_value=mock_resp):
         response = client.post("/api/users/auth/google", json={"credential": "token_deactivated"})
         assert response.status_code == 403
+
+def test_google_auth_audience_mismatch_rejected():
+    from app.config import settings
+    fake_google_response = {
+        "email": "test_google_aud@example.com",
+        "email_verified": "true",
+        "name": "Audience Mismatch User",
+        "aud": "attacker-wrong-client-id.apps.googleusercontent.com",
+    }
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = fake_google_response
+
+    original_client_id = settings.GOOGLE_CLIENT_ID
+    try:
+        settings.GOOGLE_CLIENT_ID = "legitimate-app-client-id.apps.googleusercontent.com"
+        with patch("httpx.Client.get", return_value=mock_resp):
+            response = client.post("/api/users/auth/google", json={"credential": "token_with_wrong_aud"})
+            assert response.status_code == 401
+            assert "audience" in get_error(response).lower()
+    finally:
+        settings.GOOGLE_CLIENT_ID = original_client_id
+
