@@ -9,7 +9,6 @@ export default function GoogleSignInButton({
 }) {
   const googleBtnContainerRef = useRef(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [configNotice, setConfigNotice] = useState(null);
 
   const clientId =
     import.meta.env.VITE_GOOGLE_CLIENT_ID ||
@@ -90,8 +89,8 @@ export default function GoogleSignInButton({
 
   const handleCustomButtonClick = () => {
     if (!clientId) {
-      setConfigNotice(
-        'Google Sign-In requires the VITE_GOOGLE_CLIENT_ID environment variable to be configured in Vercel Project Settings or .env file. You can also sign in with your email and password above.'
+      onError?.(
+        new Error('Google Sign-In is temporarily unavailable. Please use your email and password to sign in.')
       );
       return;
     }
@@ -103,7 +102,7 @@ export default function GoogleSignInButton({
         console.warn('Google prompt invocation notice:', err);
       }
     } else {
-      setConfigNotice('Google Sign-In is initializing. Please try again in a moment.');
+      onError?.(new Error('Google Sign-In is initializing. Please try again in a moment.'));
     }
   };
 
@@ -139,26 +138,6 @@ export default function GoogleSignInButton({
         <GoogleIcon size={20} className="google-icon-svg" />
         <span className="google-btn-label">{text}</span>
       </button>
-
-      {configNotice && (
-        <div
-          className="google-config-notice"
-          role="status"
-          style={{
-            marginTop: '0.5rem',
-            padding: '0.6rem 0.85rem',
-            background: 'var(--bg-tertiary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-sm)',
-            fontSize: '0.8rem',
-            color: 'var(--text-secondary)',
-            lineHeight: '1.4',
-            textAlign: 'left',
-          }}
-        >
-          <span>ℹ️ {configNotice}</span>
-        </div>
-      )}
     </div>
   );
 }
