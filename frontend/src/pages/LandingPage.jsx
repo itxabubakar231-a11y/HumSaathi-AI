@@ -44,8 +44,7 @@ export default function LandingPage() {
     <div className="hs-landing" dir={isRtl ? 'rtl' : 'ltr'}>
       <header className="hs-landing-nav">
         <Link className="hs-logo" to="/" aria-label="HumSaathi home">
-          <BrandMark compact />
-          <span><strong>HumSaathi</strong><small>ہم ساتھی</small></span>
+          <img className="hs-logo-image" src="/humsaathi-logo-v1.png" alt="HumSaathi" />
         </Link>
         <nav aria-label="Landing page navigation">
           <a href="#approach">Approach</a><a href="#portals">Portals</a><a href="#care">Accessibility</a>
@@ -124,7 +123,7 @@ export default function LandingPage() {
         <section className="hs-final-cta"><div className="hs-final-pattern" aria-hidden="true" /><motion.div {...reveal} transition={{ duration: 0.55 }}><BrandMark /><span className="hs-urdu hs-final-urdu">آئیں، مل کر آگے بڑھیں</span><h2>Your next conversation can feel easier.</h2><p>Start small, practise safely, and carry new confidence into the real world.</p><button className="hs-button hs-button-ivory" type="button" onClick={enterApp}>{user?.id ? 'Return to dashboard' : 'Create your free profile'} <ArrowRightIcon size={18} /></button></motion.div></section>
       </main>
 
-      <footer className="hs-footer"><Link className="hs-logo" to="/"><BrandMark compact /><span><strong>HumSaathi</strong><small>AI learning companion</small></span></Link><p>{t('app.disclaimer') || 'HumSaathi supports practice and learning; it does not replace professional care.'}</p><span>Built with care in Pakistan</span></footer>
+      <footer className="hs-footer"><Link className="hs-logo" to="/"><img className="hs-logo-image" src="/humsaathi-logo-v1.png" alt="HumSaathi" /></Link><p>{t('app.disclaimer') || 'HumSaathi supports practice and learning; it does not replace professional care.'}</p><span>Built with care in Pakistan</span></footer>
     </div>
   );
 }

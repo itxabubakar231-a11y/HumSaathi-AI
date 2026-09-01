@@ -1,5 +1,9 @@
 # HumSaathi AI
 
+<p align="center">
+  <img src="frontend/public/humsaathi-logo-v1.png" alt="HumSaathi logo" width="520" />
+</p>
+
 > A multilingual, persona-aware communication and life-skills companion built in Pakistan for child, teen, and adult learners.
 
 **Live application:** [https://hum-saathi-ai.vercel.app](https://hum-saathi-ai.vercel.app)

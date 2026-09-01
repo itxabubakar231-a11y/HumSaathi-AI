@@ -18,17 +18,6 @@ const navItems = [
 
 const personaLabels = { child: 'Child', teen: 'Teen', adult: 'Adult' };
 
-function ShellBrand() {
-  return (
-    <span className="hs-shell-brand-mark" aria-hidden="true">
-      <svg viewBox="0 0 48 48">
-        <path d="M33.7 9.8A15.8 15.8 0 1 0 34.9 36 13.5 13.5 0 1 1 33.7 9.8Z" fill="currentColor" />
-        <path d="m32.7 17.2 1.8 3.7 4.1.6-3 2.8.7 4.1-3.6-1.9-3.7 1.9.7-4.1-2.9-2.8 4.1-.6 1.8-3.7Z" fill="currentColor" />
-      </svg>
-    </span>
-  );
-}
-
 export default function AppShell({ children }) {
   const { t, language } = useI18n();
   const { user, updateLanguage, logout } = useUser();
@@ -44,7 +33,7 @@ export default function AppShell({ children }) {
   const sidebarContent = (
     <>
       <div className="hs-shell-sidebar-head">
-        <Link to="/" className="hs-shell-logo"><ShellBrand /><span><strong>HumSaathi</strong><small>ہم ساتھی</small></span></Link>
+        <Link to="/" className="hs-shell-logo"><img src="/humsaathi-logo-v1.png" alt="HumSaathi" /></Link>
         <button className="hs-shell-close" type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu"><CloseIcon /></button>
       </div>
 
