@@ -8,13 +8,14 @@ from app.models.conversation import CommunicationScenario, ConversationSession
 from app.schemas.common import parse_json
 from app.schemas.conversation import StartConversationRequest, SendMessageRequest
 from app.services.conversation_service import start_session, send_message, end_session
-from app.data.scenarios import DEFAULT_SCENARIOS
+from app.data.scenarios import DEFAULT_SCENARIOS, ALL_SCENARIOS, GENERAL_CHAT_SCENARIO
 
 router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
 def format_scenario(s: Union[CommunicationScenario, Dict[str, Any]], language: Optional[str] = None):
     s_id = s.id if hasattr(s, "id") else s.get("id")
-    s_def = next((item for item in DEFAULT_SCENARIOS if item["id"] == s_id), None)
+    s_def = next((item for item in ALL_SCENARIOS if item["id"] == s_id), None)
+
 
     title_data = s_def["title"] if s_def and isinstance(s_def.get("title"), dict) else (getattr(s, "title", None) or (s.get("title") if isinstance(s, dict) else ""))
     desc_data = s_def["description"] if s_def and isinstance(s_def.get("description"), dict) else (getattr(s, "description", None) or (s.get("description") if isinstance(s, dict) else ""))
@@ -101,11 +102,12 @@ def list_scenarios(
     persona: Optional[str] = Query(None),
     language: Optional[str] = Query(None),
     difficulty: Optional[str] = Query(None),
+    include_general: bool = Query(False),
     db: Session = Depends(get_db),
 ):
     results = []
-    # Always prioritize DEFAULT_SCENARIOS definitions to ensure accurate persona isolation, difficulty distribution, and translations
-    for s in DEFAULT_SCENARIOS:
+    pool = ALL_SCENARIOS if include_general else DEFAULT_SCENARIOS
+    for s in pool:
         if persona and persona not in s["personas"]:
             continue
         if language and language not in s["languages"]:
@@ -122,7 +124,7 @@ def get_scenario(
     language: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
-    s_def = next((item for item in DEFAULT_SCENARIOS if item["id"] == scenario_id), None)
+    s_def = next((item for item in ALL_SCENARIOS if item["id"] == scenario_id), None)
     if s_def:
         return {"scenario": format_scenario(s_def, language=language)}
 
@@ -137,6 +139,7 @@ def get_scenario(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Scenario not found",
     )
+
 
 from app.models.user import User
 from app.dependencies.auth import get_optional_current_user

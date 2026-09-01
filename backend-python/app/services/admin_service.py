@@ -330,13 +330,14 @@ def get_admin_scenarios(
     results = []
     for s in all_scenarios:
         personas_list = parse_json(s.personas, [])
-        if s.isActive:
+        if s.isActive and s.id != "scenario_general_chat":
             if "child" in personas_list:
                 child_count += 1
             if "teen" in personas_list:
                 teen_count += 1
             if "adult" in personas_list:
                 adult_count += 1
+
 
         if persona and persona != "all" and persona not in personas_list:
             continue

@@ -19,6 +19,7 @@ def clean_json_text(raw_text: str) -> str:
     return text.strip()
 
 async def call_ai_chat(messages: List[Dict[str, str]], temperature: float = 0.5) -> Optional[Dict[str, Any]]:
+    """Calls AI for structured JSON responses (evaluation, scoring, scenario feedback)."""
     if not is_ai_available():
         logger.info("[HumSaathi AI] No API key provided. Using rule-based fallback.")
         return None
@@ -36,7 +37,7 @@ async def call_ai_chat(messages: List[Dict[str, str]], temperature: float = 0.5)
     }
 
     try:
-        async with httpx.AsyncClient(timeout=20.0) as client:
+        async with httpx.AsyncClient(timeout=25.0) as client:
             response = await client.post(url, headers=headers, json=payload)
             if response.status_code != 200:
                 logger.warning(f"[HumSaathi AI Error] HTTP {response.status_code}: {response.text}")
@@ -56,7 +57,6 @@ async def call_ai_chat(messages: List[Dict[str, str]], temperature: float = 0.5)
                 if isinstance(parsed, dict):
                     return parsed
             except Exception:
-                # If model returned a raw conversational string instead of JSON
                 if cleaned:
                     return {"response": cleaned}
 
@@ -64,4 +64,42 @@ async def call_ai_chat(messages: List[Dict[str, str]], temperature: float = 0.5)
     except Exception as e:
         logger.warning(f"[HumSaathi AI] AI request failed: {e}. Falling back to rules.")
         return None
+
+async def call_ai_text(messages: List[Dict[str, str]], temperature: float = 0.7) -> Optional[str]:
+    """Calls AI for natural conversational responses, explanations, code generation, and general Q&A."""
+    if not is_ai_available():
+        logger.info("[HumSaathi AI] No API key provided. Using contextual knowledge engine.")
+        return None
+
+    url = f"{settings.AI_BASE_URL.rstrip('/')}/chat/completions"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {settings.AI_API_KEY}",
+    }
+    payload = {
+        "model": settings.AI_MODEL,
+        "temperature": temperature,
+        "messages": messages,
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=25.0) as client:
+            response = await client.post(url, headers=headers, json=payload)
+            if response.status_code != 200:
+                logger.warning(f"[HumSaathi AI Text Error] HTTP {response.status_code}: {response.text}")
+                return None
+
+            data = response.json()
+            choices = data.get("choices", [])
+            if not choices:
+                return None
+            content = choices[0].get("message", {}).get("content")
+            if not content:
+                return None
+
+            return content.strip()
+    except Exception as e:
+        logger.warning(f"[HumSaathi AI] AI text request failed: {e}. Falling back to contextual knowledge engine.")
+        return None
+
 

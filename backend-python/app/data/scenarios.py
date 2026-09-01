@@ -1,6 +1,114 @@
 import json
 
+GENERAL_CHAT_SCENARIO = {
+    "id": "scenario_general_chat",
+    "title": {
+        "en": "HumSaathi AI Assistant & General Chat",
+        "ur": "ہم ساتھی اے آئی اسسٹنٹ اور عمومی گفتگو",
+        "ur_rm": "HumSaathi AI Assistant & General Chat"
+    },
+    "description": {
+        "en": "Ask anything! Science, coding, general knowledge, school topics, interview prep, translations, or casual conversation.",
+        "ur": "کچھ بھی پوچھیں! سائنس، کوڈنگ، عمومی معلومات، تعلیمی سوالات، انٹرویو کی تیاری، ترجمہ یا عام گفتگو۔",
+        "ur_rm": "Kuch bhi poochein! Science, coding, general knowledge, school topics, interview prep, translations, ya aam baat cheet."
+    },
+    "aiRole": {
+        "en": "HumSaathi AI Coach",
+        "ur": "ہم ساتھی اے آئی کوچ",
+        "ur_rm": "HumSaathi AI Coach"
+    },
+    "personas": ["child", "teen", "adult"],
+    "languages": ["en", "ur", "ur_rm"],
+    "difficulty": "easy",
+    "objectives": {
+        "en": [
+            "Ask clear and curious questions on any topic",
+            "Explore explanations, coding, translations, and ideas",
+            "Practice active learning and natural dialogue"
+        ],
+        "ur": [
+            "کسی بھی موضوع پر واضح اور پُرجوش سوالات پوچھیں",
+            "وضاحتیں، کوڈنگ، ترجمہ اور نئے خیالات دریافت کریں",
+            "سیکھنے اور گفتگو کی مشق کریں"
+        ],
+        "ur_rm": [
+            "Kisi bhi topic par clear aur curious sawalat poochein",
+            "Explanations, coding, translation aur ideas explore karein",
+            "Learning aur natural dialogue ki practice karein"
+        ]
+    },
+    "context": "You are HumSaathi AI, an intelligent, helpful, and empathetic AI assistant and conversational coach. You answer questions accurately on any topic, tailor complexity to the learner persona, and communicate fluently in English, Urdu script, or Roman Urdu.",
+    "initialPrompt": {
+        "en": "Hello! I am your HumSaathi AI Assistant. You can ask me anything — like 'What is AI?', 'Explain photosynthesis', 'Write a Python function to reverse a string', translations, or practice scenarios. What would you like to explore today?",
+        "ur": "السلام علیکم! میں آپ کا ہم ساتھی اے آئی اسسٹنٹ ہوں۔ مجھ سے کچھ بھی پوچھیں — جیسے سائنس، کوڈنگ، عمومی معلومات، ترجمہ یا عام گفتگو۔ آج آپ کیا جاننا چاہتے ہیں؟",
+        "ur_rm": "Assalam-o-Alaikum! Main aap ka HumSaathi AI Assistant hoon. Mujh se kuch bhi poochein — jaise science, coding, general knowledge, translation ya casual practice. Aaj aap kya seekhna chahte hain?"
+    },
+    "options": [
+        {
+            "id": "opt_gen_1",
+            "type": "best",
+            "score": 100,
+            "text": {
+                "en": "Can you explain how Artificial Intelligence works in simple terms?",
+                "ur": "کیا آپ آسان الفاظ میں سمجھا سکتے ہیں کہ مصنوعی ذہانت (AI) کیسے کام کرتی ہے؟",
+                "ur_rm": "Kya aap aasan lafzon mein samjha sakte hain ke AI kaise kaam karti hai?"
+            },
+            "feedback": {
+                "en": "Great question! Clear and asks for a simple, accessible explanation.",
+                "ur": "بہت اچھا سوال! واضح اور آسان وضاحت کی درخواست۔",
+                "ur_rm": "Bohot acha question! Clear aur easy explanation ki request."
+            }
+        },
+        {
+            "id": "opt_gen_2",
+            "type": "weaker",
+            "score": 75,
+            "text": {
+                "en": "Can you write a Python function to reverse a string?",
+                "ur": "کیا آپ اسٹرنگ کو الٹنے (reverse) کے لیے ازگر (Python) کا فنکشن لکھ سکتے ہیں؟",
+                "ur_rm": "Kya aap string reverse karne ke liye aik Python function likh sakte hain?"
+            },
+            "feedback": {
+                "en": "Direct and specific programming request.",
+                "ur": "واضح اور مخصوص پروگرامنگ کی درخواست۔",
+                "ur_rm": "Direct aur specific programming request."
+            }
+        },
+        {
+            "id": "opt_gen_3",
+            "type": "inappropriate",
+            "score": 40,
+            "text": {
+                "en": "Help me prepare for an upcoming job or school interview.",
+                "ur": "نوکری یا تعلیمی انٹرویو کی تیاری میں میری مدد کریں۔",
+                "ur_rm": "Interview ki preparation mein meri madad karein."
+            },
+            "feedback": {
+                "en": "Practical real-world preparation goal.",
+                "ur": "حقیقی دنیا کے انٹرویو کی تیاری کا بہترین ہدف۔",
+                "ur_rm": "Real-world interview preparation ka behtareen goal."
+            }
+        },
+        {
+            "id": "opt_gen_4",
+            "type": "incorrect",
+            "score": 0,
+            "text": {
+                "en": "Tell me a fun joke or riddle.",
+                "ur": "مجھے کوئی لطیفہ یا پہیلی سنائیں۔",
+                "ur_rm": "Mujhe koi fun joke ya riddle sunayein."
+            },
+            "feedback": {
+                "en": "Lighthearted casual interaction.",
+                "ur": "ہلکی پھلکی گفتگو۔",
+                "ur_rm": "Lighthearted casual interaction."
+            }
+        }
+    ]
+}
+
 DEFAULT_SCENARIOS = [
+
     # ==========================================
     # Child Scenarios (6 scenarios, Easy/Med/Chall)
     # ==========================================
@@ -1712,3 +1820,6 @@ DEFAULT_SCENARIOS = [
         ]
     }
 ]
+
+ALL_SCENARIOS = [GENERAL_CHAT_SCENARIO] + DEFAULT_SCENARIOS
+
