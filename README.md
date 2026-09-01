@@ -1,93 +1,100 @@
-# HumSaathi AI
+# HumSaathi AI (ہم ساتھی)
 
-A comprehensive learning support platform.
+An intelligent, accessible, and multilingual assistive learning & communication coaching platform for Child, Teen, and Adult learners.
 
-## Project Structure
+---
 
-This project uses a clear full-stack structure:
-- `frontend/` - React/Vite web application
-- `backend/` - Node.js/Express API with Prisma
+## Unified Project Architecture
 
-## Getting Started (Full Stack)
+```
+Frontend (React, Vite, Responsive UI, STT/TTS)
+       │  (Proxies /api -> http://localhost:8000)
+       ▼
+ONE Unified Backend (FastAPI, Python 3.11, Uvicorn on Port 8000)
+ ┌─────────────────────────────────────────────────────────────┐
+ │ • Authentication (PBKDF2-HMAC-SHA256, Google OAuth, JWT)    │
+ │ • Persona-Adaptive Portals (Child, Teen, Adult)             │
+ │ • General AI Assistant & Multilingual Practice Scenarios    │
+ │ • 7 Interactive Child Learning Games & Real-world Scenarios │
+ │ • Evaluation Engine & Communication Rubrics                 │
+ │ • Progress Tracking & Parent Protected Views                │
+ │ • Admin Security, RBAC & AI Monitoring                      │
+ └─────────────────────────────────────────────────────────────┘
+       ▼
+Database (SQLite / PostgreSQL with SQLAlchemy ORM)
+```
 
-To run both the frontend and backend simultaneously from the root:
+---
+
+## Quick Start (Full Stack)
+
+To run the entire application with ONE single command from the project root:
 
 ```bash
+# 1. Install frontend dependencies
 npm install
-npm run setup
-npm run dev:all
-```
 
-## Backend Setup Instructions
-
-The backend is built with Node.js, Express, Prisma (SQLite), and Zod. It provides the core API for users, assessments, activities, and AI adaptations.
-
-### 1. Install Dependencies
-Navigate to the `backend/` directory and install dependencies:
-```bash
-cd backend
-npm install
-```
-
-### 2. Environment Variables
-Create a `.env` file in the `backend/` directory:
-```bash
-cp .env.example .env
-```
-Update the `.env` file if necessary. The AI features use fallback rules if `AI_API_KEY` is empty, so it works out of the box without a key.
-
-### 3. Initialize Prisma (Database)
-Generate the Prisma client and push the schema to the SQLite database:
-```bash
-npm run db:generate
-npm run db:push
-```
-
-### 4. Seed the Database
-Seed the database with sample activities and users:
-```bash
-npm run db:seed
-```
-*(Alternatively, you can run `npm run db:setup` to push and seed in one command).*
-
-### 5. Start the Backend
-```bash
+# 2. Run full-stack development environment (Frontend on 5173 + Backend on 8000)
 npm run dev
-# OR for production
-npm start
 ```
-The server will run on `http://localhost:3000` (or the PORT defined in `.env`).
 
-## Frontend Setup Instructions
+The web application will open on `http://localhost:5173` and automatically communicate with the unified backend on `http://localhost:8000`.
 
-### 1. Install Dependencies
-Navigate to the `frontend/` directory and install dependencies:
+---
+
+## Individual Service Commands
+
+### Unified Backend (`backend-python/`)
+```bash
+cd backend-python
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+- **API Base**: `http://localhost:8000/api`
+- **Swagger Documentation**: `http://localhost:8000/docs`
+- **Health Check**: `http://localhost:8000/api/health`
+- **Run Test Suite**: `pytest`
+
+### Frontend (`frontend/`)
 ```bash
 cd frontend
 npm install
-```
-
-### 2. Environment Variables
-Ensure the `frontend/.env` file contains the correct backend URL:
-```env
-VITE_API_URL=http://localhost:3000
-```
-
-### 3. Start the Frontend
-```bash
 npm run dev
 ```
-The React application will be available at `http://localhost:5173`.
+- **Web App**: `http://localhost:5173`
+- **Production Build**: `npm run build`
 
-### Available API Endpoints
+---
 
-- `GET /api/health` - Check backend health and AI mode
-- `POST /api/users/setup` - Create/update user profile
-- `GET /api/users/:userId` - Get user profile
-- `GET /api/assessment/:userId/questions` - Get initial assessment questions
-- `POST /api/assessment/:userId/submit` - Submit assessment
-- `GET /api/activities` - Get filtered activities
-- `GET /api/activities/:id` - Get specific activity details
-- `POST /api/attempts/:userId/submit` - Submit activity attempt
-- `GET /api/progress/:userId` - Get learner progress on skills
-- `GET /api/dashboard/:userId` - Get full learner dashboard stats
+## Core Capabilities & Endpoints
+
+### 1. Authentication & Security
+- `POST /api/users/signup` — User registration with PBKDF2-HMAC-SHA256 password hashing.
+- `POST /api/users/login` — Secure login returning cryptographic bearer tokens.
+- `POST /api/users/auth/google` — Google Identity Services OAuth verification & auto-provisioning.
+- `GET /api/users/me` — Authenticated profile lookup.
+
+### 2. Conversational AI & Scenarios
+- `GET /api/conversations/scenarios` — Multilingual scenarios with persona isolation.
+- `POST /api/conversations/start` — Start a new communication or General AI Assistant session.
+- `POST /api/conversations/{sessionId}/message` — Multi-turn dialogue with real-time persona calibration.
+- `POST /api/evaluation/conversation` — Comprehensive scoring on clarity, relevance, and appropriateness.
+
+### 3. Child Activities & Modules
+- `GET /api/activities` — 7 foundational activities (Letters, Numbers, Colors, Shapes, Counting, Animals, Emotions, Routines).
+- `POST /api/attempts/{userId}/submit` — Activity evaluation and star reward system.
+
+### 4. Progress & Parent Portal
+- `GET /api/dashboard/{userId}` — Learner dashboard stats and adaptive recommendations.
+- `POST /api/dashboard/{userId}/parent` — PIN-protected parent portal.
+
+### 5. Admin Panel & Monitoring
+- `GET /api/admin/dashboard` — Platform overview, user metrics, and AI health monitoring.
+- `GET /api/admin/users` — User management and persona adjustment.
+- `GET /api/admin/audit-logs` — Immutable audit trail of administrative actions.
+
+---
+
+## Deployment
+Deployed on Vercel via serverless Python entry [`api/index.py`](api/index.py) matching [`vercel.json`](vercel.json).
+Live production URL: **https://hum-saathi-ai.vercel.app**

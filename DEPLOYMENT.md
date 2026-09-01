@@ -47,8 +47,9 @@ This guide explains how to deploy **HumSaathi AI** (Vite React Frontend + FastAP
 2. Create or configure an **OAuth 2.0 Client ID** (Application type: **Web application**).
 3. Under **Authorized JavaScript origins**, add:
    - `https://hum-saathi-ai.vercel.app` (Production)
-   - `http://localhost:5173` (Local Dev - Vite)
-   - `http://localhost:3000` (Local Dev fallback)
+   - `http://localhost:5173` (Local Dev - Frontend)
+   - `http://localhost:8000` (Local Dev - Backend)
+
 4. Under **Authorized redirect URIs**, add:
    - `https://hum-saathi-ai.vercel.app`
    - `https://hum-saathi-ai.vercel.app/login`

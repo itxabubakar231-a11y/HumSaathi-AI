@@ -4,22 +4,16 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build": "npm run build --prefix frontend",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:backend": "cd backend-python && uvicorn app.main:app --reload --port 8000",
-    "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "start": "cd backend-python && uvicorn app.main:app --port 8000",
+    "build": "npm run build --prefix frontend",
     "postinstall": "npm install --prefix frontend"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
-    "prisma": "^6.5.0",
     "vercel": "^59.10.0"
-  },
-  "dependencies": {
-    "@prisma/client": "^6.5.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "zod": "^3.24.2"
   }
 }
