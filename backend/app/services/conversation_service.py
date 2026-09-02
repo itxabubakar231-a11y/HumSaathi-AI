@@ -9,6 +9,7 @@ from app.models.conversation import CommunicationScenario, ConversationSession
 from app.schemas.common import parse_json, stringify_json
 from app.services.ai.ai_service import call_ai_chat, call_ai_text, is_ai_available
 from app.services.ai.conversation_policy import (
+    HUMSAATHI_COACHING_SYSTEM_PROMPT,
     GENERAL_GROUNDING_POLICY,
     PRACTICE_SCOPE_POLICY,
     detect_off_topic_request,
@@ -1758,7 +1759,7 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
             # GENERAL AI ASSISTANT & CHATBOT PIPELINE
             # ==========================================
             system_prompt = (
-                f"You are HumSaathi AI, a world-class, knowledgeable, empathetic conversational AI assistant and adaptive communication coach.\n"
+                f"{HUMSAATHI_COACHING_SYSTEM_PROMPT}\n\n"
                 f"Learner Persona: {user_persona.upper()} (Language: {lang_name}, Sensory Prefs: {sensory_info})\n"
                 f"{lang_rule}\n\n"
                 f"ROLE & CORE DIRECTIVES:\n"
@@ -1799,7 +1800,8 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
             # STRUCTURED PRACTICE SCENARIO PIPELINE
             # ==========================================
             system_prompt = (
-                f"You are HumSaathi AI, role-playing as the character defined by the selected communication scenario: {role_str}.\n"
+                f"{HUMSAATHI_COACHING_SYSTEM_PROMPT}\n\n"
+                f"You are currently role-playing as the character defined by the selected communication scenario: {role_str}.\n"
                 f"Scenario ID: {session.scenarioId}\n"
                 f"Scenario Title: {title_str}\n"
                 f"Scenario Description: {desc_str}\n"
