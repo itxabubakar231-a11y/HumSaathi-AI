@@ -56,7 +56,7 @@ export default function ProgressPage() {
           </p>
         </div>
         <div className="progress-header-badge">
-          📅 {language === 'ur' ? 'اس ہفتے' : language === 'ur_rm' ? 'Is hafte' : 'This Week'}
+           {language === 'ur' ? 'اس ہفتے' : language === 'ur_rm' ? 'Is hafte' : 'This Week'}
         </div>
       </div>
 
@@ -64,34 +64,34 @@ export default function ProgressPage() {
       <div className="stats-grid web-stats-grid">
         <div className="stat-card">
           <div className="stat-card-icon-wrap" style={{ background: '#E8F7F0', color: '#0B6B3A' }}>
-            ✅
+
           </div>
           <div className="stat-card-content">
             <span className="stat-label">{language === 'ur' ? 'مکمل سرگرمیاں' : t('progress.completed')}</span>
             <span className="stat-value">{dashboard.completedCount}</span>
-            <span className="stat-hint">🎯 {language === 'ur' ? 'ہفتہ وار ہدف جاری ہے' : language === 'ur_rm' ? 'Hadaf jari hai' : 'Target on track'}</span>
+            <span className="stat-hint"> {language === 'ur' ? 'ہفتہ وار ہدف جاری ہے' : language === 'ur_rm' ? 'Hadaf jari hai' : 'Target on track'}</span>
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-card-icon-wrap" style={{ background: '#EBF5FF', color: '#0284C7' }}>
-            🎯
+
           </div>
           <div className="stat-card-content">
             <span className="stat-label">{language === 'ur' ? 'اوسط درستگی' : t('progress.accuracy')}</span>
             <span className="stat-value">{Math.round(dashboard.avgAccuracy)}%</span>
-            <span className="stat-hint">📈 +5% {language === 'ur' ? 'پچھلے ہفتے سے بہتر' : language === 'ur_rm' ? 'Pichlay hafte se behtar' : 'vs last week'}</span>
+            <span className="stat-hint"> +5% {language === 'ur' ? 'پچھلے ہفتے سے بہتر' : language === 'ur_rm' ? 'Pichlay hafte se behtar' : 'vs last week'}</span>
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-card-icon-wrap" style={{ background: '#FEF3C7', color: '#D97706' }}>
-            🔥
+
           </div>
           <div className="stat-card-content">
             <span className="stat-label">{language === 'ur' ? 'مسلسل سلسلہ' : language === 'ur_rm' ? 'Active Streak' : 'Active Streak'}</span>
             <span className="stat-value">7 {language === 'ur' ? 'دن' : language === 'ur_rm' ? 'Din' : 'Days'}</span>
-            <span className="stat-hint">⚡ Level: <strong style={{ textTransform: 'capitalize' }}>{dashboard.currentLevel}</strong></span>
+            <span className="stat-hint"> Level: <strong style={{ textTransform: 'capitalize' }}>{dashboard.currentLevel}</strong></span>
           </div>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function ProgressPage() {
         <div className="dashboard-grid-split" style={{ marginBottom: 'var(--space-md)' }}>
           <section className="dashboard-card strength-highlight-card">
             <div className="card-header-flex">
-              <span className="badge-highlight-pill green-pill">🌟 {t('progress.strongest')}</span>
+              <span className="badge-highlight-pill green-pill"> {t('progress.strongest')}</span>
             </div>
             <h3 className="highlight-skill-title">
               {dashboard.strongest.skill.replace('_', ' ').toUpperCase()}
@@ -120,7 +120,7 @@ export default function ProgressPage() {
 
           <section className="dashboard-card practice-highlight-card">
             <div className="card-header-flex">
-              <span className="badge-highlight-pill amber-pill">🎯 {t('progress.needsPractice')}</span>
+              <span className="badge-highlight-pill amber-pill"> {t('progress.needsPractice')}</span>
             </div>
             <h3 className="highlight-skill-title">
               {dashboard.needsPractice ? dashboard.needsPractice.skill.replace('_', ' ').toUpperCase() : 'Skill Practice'}
@@ -133,7 +133,7 @@ export default function ProgressPage() {
                 : 'Recommended for your next practice session to boost confidence.'}
             </p>
             <button className="btn-primary btn-sm" onClick={() => navigate(user?.persona === 'child' ? '/dashboard' : '/scenarios')}>
-              🚀 {language === 'ur' ? 'ابھی مشق شروع کریں' : language === 'ur_rm' ? 'Abhi mashq karein' : 'Practice Now'}
+               {language === 'ur' ? 'ابھی مشق شروع کریں' : language === 'ur_rm' ? 'Abhi mashq karein' : 'Practice Now'}
             </button>
           </section>
         </div>
@@ -142,7 +142,7 @@ export default function ProgressPage() {
       {/* Row 3: Detailed Skill Progression Meters */}
       <section className="dashboard-card skill-breakdown-card" style={{ marginBottom: 'var(--space-md)' }}>
         <div className="card-header-line">
-          <h3 className="card-heading-title">📊 {language === 'ur' ? 'مہارتوں کا تفصیلی جائزہ' : language === 'ur_rm' ? 'Skills Ka Tafseeli Jaiza' : 'Detailed Skills Mastery Breakdown'}</h3>
+          <h3 className="card-heading-title"> {language === 'ur' ? 'مہارتوں کا تفصیلی جائزہ' : language === 'ur_rm' ? 'Skills Ka Tafseeli Jaiza' : 'Detailed Skills Mastery Breakdown'}</h3>
           <span className="card-meta-note">
             {language === 'ur' ? 'خودکار AI تجزیہ' : language === 'ur_rm' ? 'AI Jaiza' : 'AI-Evaluated Performance'}
           </span>
@@ -175,7 +175,7 @@ export default function ProgressPage() {
       {/* Row 4: Recent Activity Log */}
       <section className="dashboard-card recent-log-card">
         <h3 className="card-heading-title" style={{ marginBottom: 'var(--space-sm)' }}>
-          ⏱️ {t('progress.recent') || 'Recent Practice Sessions'}
+           {t('progress.recent') || 'Recent Practice Sessions'}
         </h3>
 
         {dashboard.recentAttempts?.length ? (

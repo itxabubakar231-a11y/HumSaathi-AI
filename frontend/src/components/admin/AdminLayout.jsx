@@ -4,14 +4,14 @@ import { useUser } from '../../context/UserContext';
 import { api } from '../../services/api';
 
 const adminNavItems = [
-  { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
-  { path: '/admin/users', label: 'Users', icon: '👥' },
-  { path: '/admin/scenarios', label: 'Scenarios', icon: '🧩' },
-  { path: '/admin/analytics', label: 'Analytics', icon: '📈' },
-  { path: '/admin/permissions', label: 'Permissions', icon: '🛡️' },
-  { path: '/admin/ai-monitoring', label: 'AI Monitoring', icon: '🤖' },
-  { path: '/admin/audit-logs', label: 'Audit Logs', icon: '📜' },
-  { path: '/admin/settings', label: 'System Status', icon: '⚙️' },
+  { path: '/admin/dashboard', label: 'Dashboard', icon: '' },
+  { path: '/admin/users', label: 'Users', icon: '' },
+  { path: '/admin/scenarios', label: 'Scenarios', icon: '' },
+  { path: '/admin/analytics', label: 'Analytics', icon: '' },
+  { path: '/admin/permissions', label: 'Permissions', icon: '' },
+  { path: '/admin/ai-monitoring', label: 'AI Monitoring', icon: '' },
+  { path: '/admin/audit-logs', label: 'Audit Logs', icon: '' },
+  { path: '/admin/settings', label: 'System Status', icon: '' },
 ];
 
 export default function AdminLayout({ children }) {
@@ -40,7 +40,7 @@ export default function AdminLayout({ children }) {
       <aside className={`admin-sidebar ${mobileMenuOpen ? 'is-open' : ''}`}>
         <div className="admin-sidebar-header">
           <Link to="/admin/dashboard" className="admin-brand-link">
-            <span className="admin-logo-badge">🛡️</span>
+            <span className="admin-logo-badge"></span>
             <div>
               <span className="admin-brand-title">HumSaathi AI</span>
               <span className="admin-brand-subtitle">Control Center</span>
@@ -88,7 +88,7 @@ export default function AdminLayout({ children }) {
               onClick={() => navigate('/dashboard')}
               title="Switch to Learner Portal"
             >
-              🎓 Learner View
+               Learner View
             </button>
             <button
               className="admin-logout-btn"
@@ -98,7 +98,7 @@ export default function AdminLayout({ children }) {
               }}
               title="Log Out"
             >
-              🚪 Exit
+               Exit
             </button>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function AdminLayout({ children }) {
             </div>
 
             <div className="admin-profile-chip" onClick={() => navigate('/admin/settings')}>
-              <span className="admin-chip-icon">👤</span>
+              <span className="admin-chip-icon"></span>
               <span className="admin-chip-email">{user?.email || 'admin@humsaathi.ai'}</span>
             </div>
           </div>

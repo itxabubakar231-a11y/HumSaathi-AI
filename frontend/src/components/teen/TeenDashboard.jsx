@@ -10,7 +10,7 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
       id: 'teen_reading_vocab',
       titleKey: 'skills.teen.readingVocab.title',
       descKey: 'skills.teen.readingVocab.desc',
-      icon: '📚',
+      icon: '',
       duration: '15 min',
       difficulty: 'Adaptive',
       category: 'Reading & Vocab',
@@ -25,7 +25,7 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
       id: 'teen_problem_solving',
       titleKey: 'skills.teen.problemSolving.title',
       descKey: 'skills.teen.problemSolving.desc',
-      icon: '🧩',
+      icon: '',
       duration: '12 min',
       difficulty: 'Adaptive',
       category: 'Problem Solving',
@@ -40,7 +40,7 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
       id: 'teen_communication',
       titleKey: 'skills.teen.communication.title',
       descKey: 'skills.teen.communication.desc',
-      icon: '💬',
+      icon: '',
       duration: '10 min',
       difficulty: 'Interactive',
       category: 'AI Communication',
@@ -106,14 +106,14 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
         <div className="hero-banner-content">
           <div className="hero-greeting-pill">
             <span className="hero-greeting-dot" />
-            {language === 'ur' ? 'خوش آمدید' : language === 'ur_rm' ? 'Khush Aamdeed' : 'Welcome Back'} 👋
+            {language === 'ur' ? 'خوش آمدید' : language === 'ur_rm' ? 'Khush Aamdeed' : 'Welcome Back'}
           </div>
           <h1 className="hero-greeting-title">
             {language === 'ur'
-              ? `السلام علیکم، ${user.name} 🌟`
+              ? `السلام علیکم، ${user.name} `
               : language === 'ur_rm'
-              ? `Assalam-o-Alaikum, ${user.name} 🌟`
-              : `Assalam-o-Alaikum, ${user.name} 🌟`}
+              ? `Assalam-o-Alaikum, ${user.name} `
+              : `Assalam-o-Alaikum, ${user.name} `}
           </h1>
           <p className="hero-greeting-subtitle">
             {language === 'ur'
@@ -123,14 +123,14 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
               : 'Empowering your communication, budget planning, and everyday decision making with adaptive practice.'}
           </p>
           <div className="hero-meta-chips">
-            <span className="hero-chip">🧑‍🎓 {t('persona.teen')} ({language === 'ur' ? '13-19 سال' : '13-19 years'})</span>
-            <span className="hero-chip">⚡ {language === 'ur' ? 'لیول' : 'Level'}: {dashboard?.currentLevel || 'Intermediate'}</span>
-            <span className="hero-chip">🎯 {dashboard?.completedCount || 0} {language === 'ur' ? 'سرگرمیاں مکمل' : language === 'ur_rm' ? 'Activities Done' : 'Activities Completed'}</span>
+            <span className="hero-chip"> {t('persona.teen')} ({language === 'ur' ? '13-19 سال' : '13-19 years'})</span>
+            <span className="hero-chip"> {language === 'ur' ? 'لیول' : 'Level'}: {dashboard?.currentLevel || 'Intermediate'}</span>
+            <span className="hero-chip"> {dashboard?.completedCount || 0} {language === 'ur' ? 'سرگرمیاں مکمل' : language === 'ur_rm' ? 'Activities Done' : 'Activities Completed'}</span>
           </div>
         </div>
         <div className="hero-banner-actions">
           <button className="btn-primary hero-cta-btn" onClick={() => navigate('/scenarios')}>
-            🚀 {language === 'ur' ? 'آج کی مشق شروع کریں' : language === 'ur_rm' ? 'Aaj ki mashq shuru karein' : 'Start Today\'s Practice'}
+             {language === 'ur' ? 'آج کی مشق شروع کریں' : language === 'ur_rm' ? 'Aaj ki mashq shuru karein' : 'Start Today\'s Practice'}
           </button>
         </div>
       </header>
@@ -142,10 +142,10 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
             <div style={{ flex: '1 1 300px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <span style={{ background: 'var(--interactive-primary)', color: '#fff', fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  🎯 {language === 'ur' ? 'اگلا تجویز کردہ قدم' : language === 'ur_rm' ? 'Agla Step' : 'Your Next Step'}
+                   {language === 'ur' ? 'اگلا تجویز کردہ قدم' : language === 'ur_rm' ? 'Agla Step' : 'Your Next Step'}
                 </span>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                  ⚡ {recommendation.difficulty ? recommendation.difficulty.toUpperCase() : 'MEDIUM'}
+                   {recommendation.difficulty ? recommendation.difficulty.toUpperCase() : 'MEDIUM'}
                 </span>
               </div>
               <h3 style={{ margin: '4px 0', fontSize: '1.25rem', fontFamily: 'var(--font-serif)', color: 'var(--text-primary)' }}>
@@ -156,7 +156,7 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
               </p>
             </div>
             <button className="btn-primary" onClick={startRecommended} style={{ padding: '0.65rem 1.25rem', fontSize: '0.95rem' }}>
-              ⚡ {language === 'ur' ? 'تجویز کردہ مشق شروع کریں' : language === 'ur_rm' ? 'Start Recommended' : 'Start Recommended'} →
+               {language === 'ur' ? 'تجویز کردہ مشق شروع کریں' : language === 'ur_rm' ? 'Start Recommended' : 'Start Recommended'} →
             </button>
           </div>
         </section>
@@ -167,14 +167,14 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
         {/* Card 1: Today's Plan */}
         <div className="dashboard-stat-box plan-box">
           <div className="stat-box-header">
-            <span className="stat-box-icon">📋</span>
+            <span className="stat-box-icon"></span>
             <div>
               <span className="stat-box-kicker">{language === 'ur' ? 'آج کا منصوبہ' : language === 'ur_rm' ? 'Aaj Ka Plan' : 'Today\'s Plan'}</span>
               <h3 className="stat-box-title">{dashboard?.completedCount || 0} / 3 {language === 'ur' ? 'سرگرمیاں' : language === 'ur_rm' ? 'Activities' : 'Activities'}</h3>
             </div>
           </div>
           <p className="stat-box-desc">
-            ⏱️ 15-20 min {language === 'ur' ? 'روزانہ مشق کا ہدف' : language === 'ur_rm' ? 'daily practice goal' : 'daily practice goal'}
+             15-20 min {language === 'ur' ? 'روزانہ مشق کا ہدف' : language === 'ur_rm' ? 'daily practice goal' : 'daily practice goal'}
           </p>
           <button className="btn-primary stat-action-btn" onClick={() => navigate('/scenarios')}>
             {language === 'ur' ? 'منصوبہ شروع کریں' : language === 'ur_rm' ? 'Plan Shuru Karein' : 'Start Plan'} →
@@ -184,14 +184,14 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
         {/* Card 2: Current Streak */}
         <div className="dashboard-stat-box streak-box">
           <div className="stat-box-header">
-            <span className="stat-box-icon">🔥</span>
+            <span className="stat-box-icon"></span>
             <div>
               <span className="stat-box-kicker">{language === 'ur' ? 'مسلسل کارکردگی' : language === 'ur_rm' ? 'Current Streak' : 'Current Streak'}</span>
               <h3 className="stat-box-title">7 {language === 'ur' ? 'دن' : language === 'ur_rm' ? 'Din' : 'Days'}</h3>
             </div>
           </div>
           <p className="stat-box-desc">
-            🌟 {language === 'ur' ? 'شاندار مستقل مزاجی! آگے بڑھتے رہیں۔' : language === 'ur_rm' ? 'Great consistency! Keep it up.' : 'Great consistency! Keep up the momentum.'}
+             {language === 'ur' ? 'شاندار مستقل مزاجی! آگے بڑھتے رہیں۔' : language === 'ur_rm' ? 'Great consistency! Keep it up.' : 'Great consistency! Keep up the momentum.'}
           </p>
           <div className="streak-dots-bar">
             {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
@@ -205,7 +205,7 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
         {/* Card 3: Overall Progress */}
         <div className="dashboard-stat-box progress-box">
           <div className="stat-box-header">
-            <span className="stat-box-icon">📊</span>
+            <span className="stat-box-icon"></span>
             <div>
               <span className="stat-box-kicker">{language === 'ur' ? 'مجموعی پیشرفت' : language === 'ur_rm' ? 'Overall Progress' : 'Overall Progress'}</span>
               <h3 className="stat-box-title">{Math.round(dashboard?.avgAccuracy || 0)}% {language === 'ur' ? 'درستگی' : language === 'ur_rm' ? 'Accuracy' : 'Accuracy'}</h3>
@@ -254,7 +254,7 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
                   <span className="module-category-pill">
                     {getCategoryLabel(mod)}
                   </span>
-                  <span className="module-duration-pill">⏱️ {mod.duration}</span>
+                  <span className="module-duration-pill"> {mod.duration}</span>
                 </div>
               </div>
 
@@ -291,7 +291,7 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
         {/* Left Card: Skill Snapshot */}
         <div className="dashboard-card snapshot-card">
           <div className="card-header-line">
-            <h3 className="card-heading-title">📈 {t('dashboard.progressSnapshot') || 'Skill Mastery Snapshot'}</h3>
+            <h3 className="card-heading-title"> {t('dashboard.progressSnapshot') || 'Skill Mastery Snapshot'}</h3>
             <button className="text-btn" onClick={() => navigate('/progress')}>
               {language === 'ur' ? 'تفصیلات' : 'Details'} ➔
             </button>
@@ -322,7 +322,7 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
         {/* Right Card: Quick AI Practice Assistant Launch */}
         <div className="dashboard-card ai-assistant-promo-card">
           <div className="ai-promo-content">
-            <div className="ai-promo-badge">🤖 HumSaathi AI Coach</div>
+            <div className="ai-promo-badge"> HumSaathi AI Coach</div>
             <h3>{language === 'ur' ? 'بات چیت کا محفوظ ماحول' : language === 'ur_rm' ? 'Safe AI Conversation Space' : 'Safe AI Conversation Space'}</h3>
             <p>
               {language === 'ur'
@@ -332,7 +332,7 @@ export default function TeenDashboard({ user, dashboard, recommendation, activit
                 : 'Practice speaking with teachers, making friends, and resolving social situations in a supportive, judgment-free space.'}
             </p>
             <button className="btn-primary" onClick={() => navigate('/scenarios')}>
-              💬 {language === 'ur' ? 'اے آئی کے ساتھ بات کریں' : language === 'ur_rm' ? 'AI Coach Se Baat Karein' : 'Chat with AI Coach'}
+               {language === 'ur' ? 'اے آئی کے ساتھ بات کریں' : language === 'ur_rm' ? 'AI Coach Se Baat Karein' : 'Chat with AI Coach'}
             </button>
           </div>
         </div>

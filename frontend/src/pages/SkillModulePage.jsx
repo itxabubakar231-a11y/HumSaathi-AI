@@ -174,7 +174,7 @@ export default function SkillModulePage() {
       {/* Difficulty Filter Tabs */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-md)', flexWrap: 'wrap', alignItems: 'center' }}>
         <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-          ⚡ {language === 'ur' ? 'درجہ بندی' : language === 'ur_rm' ? 'Difficulty' : 'Difficulty'}:
+           {language === 'ur' ? 'درجہ بندی' : language === 'ur_rm' ? 'Difficulty' : 'Difficulty'}:
         </span>
         {[
           { id: 'all', label: language === 'ur' ? 'تمام' : language === 'ur_rm' ? 'All' : 'All' },
@@ -223,7 +223,7 @@ export default function SkillModulePage() {
       {/* Completion Modal / State */}
       {showCompletionModal ? (
         <div className="dashboard-card" style={{ backgroundColor: 'var(--bg-secondary)', border: '2px solid var(--interactive-primary)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-lg)', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 'var(--space-xs)' }}>🎉</div>
+          <div style={{ fontSize: '3rem', marginBottom: 'var(--space-xs)' }}></div>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', color: 'var(--text-primary)', marginBottom: '8px' }}>
             {language === 'ur' ? 'ماڈیول مکمل ہو گیا!' : language === 'ur_rm' ? 'Module Complete!' : 'Module Complete!'}
           </h2>
@@ -239,7 +239,7 @@ export default function SkillModulePage() {
               {language === 'ur' ? 'ڈیش بورڈ پر جائیں' : language === 'ur_rm' ? 'Dashboard Jayein' : 'Go to Dashboard'} ➔
             </button>
             <button className="btn-secondary" onClick={() => { setShowCompletionModal(false); setActiveScenarioIdx(0); }}>
-              🔄 {language === 'ur' ? 'دوبارہ مشق کریں' : language === 'ur_rm' ? 'Practice Again' : 'Practice Again'}
+               {language === 'ur' ? 'دوبارہ مشق کریں' : language === 'ur_rm' ? 'Practice Again' : 'Practice Again'}
             </button>
           </div>
         </div>
@@ -259,7 +259,7 @@ export default function SkillModulePage() {
           {currentScenario.passage && (
             <div style={{ backgroundColor: 'rgba(124, 111, 159, 0.08)', border: '1px solid rgba(124, 111, 159, 0.25)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-md)', fontSize: '1.02rem', lineHeight: '1.75' }}>
               <p style={{ fontWeight: '700', color: 'var(--interactive-primary)', marginBottom: '0.5rem', textTransform: 'uppercase', fontSize: '0.82rem', letterSpacing: '0.05em' }}>
-                📄 {language === 'ur' ? 'مطالعہ کا مواد / نوٹس' : language === 'ur_rm' ? 'Reading Material / Notice' : 'Reading Material / Notice'}
+                 {language === 'ur' ? 'مطالعہ کا مواد / نوٹس' : language === 'ur_rm' ? 'Reading Material / Notice' : 'Reading Material / Notice'}
               </p>
               <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--text-primary)' }}>{currentScenario.passage}</p>
             </div>
@@ -269,7 +269,7 @@ export default function SkillModulePage() {
           {currentScenario.vocabulary && (
             <div style={{ backgroundColor: 'rgba(56, 161, 105, 0.1)', border: '1px solid var(--accent-positive)', padding: 'var(--space-sm) var(--space-md)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-md)', fontSize: '0.95rem' }}>
               <p style={{ fontWeight: '600', color: 'var(--accent-positive)', margin: 0 }}>
-                💡 {currentScenario.vocabulary}
+                 {currentScenario.vocabulary}
               </p>
             </div>
           )}
@@ -277,12 +277,12 @@ export default function SkillModulePage() {
           {/* Situation / Task */}
           <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: 'var(--space-sm) var(--space-md)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-md)', fontSize: '1rem', lineHeight: '1.6' }}>
             <p style={{ margin: 0 }}>
-              <strong>📖 {language === 'ur' ? 'صورتحال / منظرنامہ:' : language === 'ur_rm' ? 'Situation / Task:' : 'Situation / Task:'}</strong> {currentScenario.situation}
+              <strong> {language === 'ur' ? 'صورتحال / منظرنامہ:' : language === 'ur_rm' ? 'Situation / Task:' : 'Situation / Task:'}</strong> {currentScenario.situation}
             </p>
           </div>
 
           <p style={{ fontWeight: '600', marginBottom: 'var(--space-sm)', fontSize: '1.05rem', color: 'var(--text-primary)' }}>
-            🎯 {currentScenario.prompt}
+             {currentScenario.prompt}
           </p>
 
           {/* Options / Form */}
@@ -341,7 +341,7 @@ export default function SkillModulePage() {
                 >
                   {isCustomMode
                     ? (language === 'ur' ? '← دیے گئے اختیارات میں سے منتخب کریں' : language === 'ur_rm' ? '← Choose from options' : '← Choose from suggested options')
-                    : (language === 'ur' ? '✏️ اپنا جواب خود تحریر کریں' : language === 'ur_rm' ? '✏️ Write custom solution' : '✏️ Write your own solution instead')}
+                    : (language === 'ur' ? ' اپنا جواب خود تحریر کریں' : language === 'ur_rm' ? ' Write custom solution' : ' Write your own solution instead')}
                 </button>
 
                 <button
@@ -351,7 +351,7 @@ export default function SkillModulePage() {
                 >
                   {evaluating
                     ? t('common.loading')
-                    : (language === 'ur' ? 'تجزیہ حاصل کریں ✨' : language === 'ur_rm' ? 'Analyze Solution ✨' : 'Submit & Analyze ✨')}
+                    : (language === 'ur' ? 'تجزیہ حاصل کریں ' : language === 'ur_rm' ? 'Analyze Solution ' : 'Submit & Analyze ')}
                 </button>
               </div>
             </form>
@@ -360,7 +360,7 @@ export default function SkillModulePage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
               {/* Score Banner */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', backgroundColor: evaluationResult.score >= 80 ? 'rgba(56, 161, 105, 0.12)' : 'rgba(221, 107, 32, 0.12)', border: '1px solid var(--border-color)' }}>
-                <span style={{ fontSize: '2rem' }}>{evaluationResult.score >= 80 ? '🌟' : '💡'}</span>
+                <span style={{ fontSize: '2rem' }}>{evaluationResult.score >= 80 ? '' : ''}</span>
                 <div>
                   <h3 style={{ fontSize: '1.1rem', margin: 0, color: evaluationResult.score >= 80 ? 'var(--accent-positive)' : 'var(--accent-highlight)' }}>
                     {evaluationResult.score >= 80
@@ -377,7 +377,7 @@ export default function SkillModulePage() {
               {evaluationResult.consequences && (
                 <div style={{ padding: 'var(--space-sm) var(--space-md)', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)' }}>
                   <h4 style={{ fontSize: '0.95rem', marginBottom: '4px', color: 'var(--text-primary)' }}>
-                    🔍 {language === 'ur' ? 'امکانی نتائج اور اثرات:' : language === 'ur_rm' ? 'Likely Outcomes & Consequences:' : 'Likely Outcomes & Consequences:'}
+                     {language === 'ur' ? 'امکانی نتائج اور اثرات:' : language === 'ur_rm' ? 'Likely Outcomes & Consequences:' : 'Likely Outcomes & Consequences:'}
                   </h4>
                   <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', margin: 0 }}>{evaluationResult.consequences}</p>
                 </div>
@@ -387,7 +387,7 @@ export default function SkillModulePage() {
               {evaluationResult.betterApproach && (
                 <div style={{ padding: 'var(--space-sm) var(--space-md)', backgroundColor: 'var(--interactive-active)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                   <h4 style={{ fontSize: '0.95rem', marginBottom: '4px', color: 'var(--interactive-primary)' }}>
-                    💡 {language === 'ur' ? 'بہترین طریقہ کار اور مشورہ:' : language === 'ur_rm' ? 'Recommended Pro Tip:' : 'Recommended Pro Tip:'}
+                     {language === 'ur' ? 'بہترین طریقہ کار اور مشورہ:' : language === 'ur_rm' ? 'Recommended Pro Tip:' : 'Recommended Pro Tip:'}
                   </h4>
                   <p style={{ fontSize: '0.92rem', color: 'var(--text-primary)', margin: 0 }}>{evaluationResult.betterApproach}</p>
                 </div>
@@ -395,7 +395,7 @@ export default function SkillModulePage() {
 
               <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-xs)', flexWrap: 'wrap' }}>
                 <button className="btn-secondary" onClick={handleRetryCurrent}>
-                  🔄 {language === 'ur' ? 'دوبارہ کوشش کریں' : language === 'ur_rm' ? 'Try Again' : 'Try Again'}
+                   {language === 'ur' ? 'دوبارہ کوشش کریں' : language === 'ur_rm' ? 'Try Again' : 'Try Again'}
                 </button>
                 <button className="btn-primary" onClick={handleNextScenario}>
                   {activeScenarioIdx + 1 < scenarios.length

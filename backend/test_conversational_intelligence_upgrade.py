@@ -117,7 +117,7 @@ def test_10_unexpected_natural_language_inputs(db_session):
 
 
 # =============================================================================
-# 2. TEST JUDGE DEMO QUESTIONS (Product-level questions during role-play)
+# 2. TEST JUDGE DEMO QUESTIONS (Product-level questions in General Chat)
 # =============================================================================
 
 def test_judge_demo_questions_handling(db_session):
@@ -135,7 +135,7 @@ def test_judge_demo_questions_handling(db_session):
 
     start_resp = client.post(
         "/api/conversations/start",
-        json={"scenarioId": "scenario_group_discussion", "mode": "text", "language": "en"},
+        json={"scenarioId": "scenario_general_chat", "mode": "text", "language": "en"},
         headers=headers,
     )
     assert start_resp.status_code == 200
@@ -147,7 +147,7 @@ def test_judge_demo_questions_handling(db_session):
         ("Why is this useful for neurodiverse learners?", ["safe", "low-anxiety", "social cues", "turn-taking", "communication"]),
         ("Can you speak Urdu?", ["yes", "urdu", "roman urdu", "support", "fluent"]),
         ("Can you speak Roman Urdu?", ["yes", "roman urdu", "support", "urdu", "english"]),
-        ("Do you remember what I said earlier?", ["yes", "remember", "conversation", "history", "keep going"]),
+        ("Do you remember what I said earlier?", ["current session", "messages", "context"]),
     ]
 
     for question, expected_terms in demo_questions:

@@ -27,7 +27,7 @@ export default function AdminDashboardPage() {
   if (error) {
     return (
       <div className="admin-error-card">
-        <span className="error-icon">⚠️</span>
+        <span className="error-icon"></span>
         <h3>Failed to Load Dashboard</h3>
         <p>{error}</p>
         <button className="btn-secondary" onClick={() => window.location.reload()}>Retry</button>
@@ -57,10 +57,10 @@ export default function AdminDashboardPage() {
         </div>
         <div className="admin-header-actions">
           <button className="admin-btn-primary" onClick={() => navigate('/admin/users')}>
-            👥 Manage Users
+             Manage Users
           </button>
           <button className="admin-btn-secondary" onClick={() => navigate('/admin/scenarios')}>
-            🧩 Edit Scenarios
+             Edit Scenarios
           </button>
         </div>
       </div>
@@ -69,7 +69,7 @@ export default function AdminDashboardPage() {
       <div className="admin-metrics-grid">
         <div className="admin-metric-card">
           <div className="metric-icon-box" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-            👥
+
           </div>
           <div className="metric-info">
             <span className="metric-label">Total Users</span>
@@ -80,7 +80,7 @@ export default function AdminDashboardPage() {
 
         <div className="admin-metric-card">
           <div className="metric-icon-box" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}>
-            🧒
+
           </div>
           <div className="metric-info">
             <span className="metric-label">Child Learners</span>
@@ -91,7 +91,7 @@ export default function AdminDashboardPage() {
 
         <div className="admin-metric-card">
           <div className="metric-icon-box" style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>
-            🧑‍🎓
+
           </div>
           <div className="metric-info">
             <span className="metric-label">Teen Learners</span>
@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
 
         <div className="admin-metric-card">
           <div className="metric-icon-box" style={{ background: 'rgba(6, 182, 212, 0.1)', color: '#06b6d4' }}>
-            👨
+
           </div>
           <div className="metric-info">
             <span className="metric-label">Adult Learners</span>
@@ -113,7 +113,7 @@ export default function AdminDashboardPage() {
 
         <div className="admin-metric-card">
           <div className="metric-icon-box" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-            💬
+
           </div>
           <div className="metric-info">
             <span className="metric-label">Practice Sessions</span>
@@ -124,7 +124,7 @@ export default function AdminDashboardPage() {
 
         <div className="admin-metric-card">
           <div className="metric-icon-box" style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899' }}>
-            🎯
+
           </div>
           <div className="metric-info">
             <span className="metric-label">Average Score</span>
@@ -173,7 +173,7 @@ export default function AdminDashboardPage() {
           <div className="mode-distribution-container">
             {modeDist.map((m) => (
               <div key={m.name} className="mode-stat-box">
-                <span className="mode-icon">{m.name.includes('Voice') ? '🎙️' : '⌨️'}</span>
+                <span className="mode-icon">{m.name.includes('Voice') ? '' : ''}</span>
                 <span className="mode-name">{m.name}</span>
                 <strong className="mode-pct">{m.percent}%</strong>
                 <span className="mode-count">{m.count} total sessions</span>
@@ -191,7 +191,7 @@ export default function AdminDashboardPage() {
           <div className="lang-distribution-list">
             {langDist.map((l) => (
               <div key={l.code} className="lang-stat-item">
-                <span className="lang-icon">{l.code === 'en' ? '🇬🇧' : '🇵🇰'}</span>
+                <span className="lang-icon">{l.code === 'en' ? '' : ''}</span>
                 <div className="lang-details">
                   <span className="lang-title">{l.name}</span>
                   <span className="lang-sub">{l.count} registered learners</span>

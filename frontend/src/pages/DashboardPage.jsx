@@ -97,7 +97,7 @@ export default function DashboardPage() {
     <div className="dashboard">
       <header className="dashboard-header">
         <div className="welcome-text">
-          <p className="eyebrow">{t('dashboard.welcome')} 👋</p>
+          <p className="eyebrow">{t('dashboard.welcome')} </p>
           <h1>{user?.name || 'Learner'}</h1>
         </div>
         <div className="context-indicator">
@@ -112,7 +112,7 @@ export default function DashboardPage() {
         <h2>Choose Your Practice Portal</h2>
         <p className="card-desc">Please select a persona portal (Child, Teen, or Adult) to customize your practice modules.</p>
         <button className="btn-primary" type="button" onClick={() => navigate('/persona-selection')} style={{ marginTop: 'var(--space-sm)' }}>
-          Select Practice Persona 🎭
+          Select Practice Persona
         </button>
       </section>
     </div>

@@ -397,7 +397,7 @@ export default function ConversationPage() {
       <aside className="practice-info-sidebar">
         <div className="practice-info-header">
           <span className="practice-badge-kicker">
-            🎯 {t('conversation.interactivePractice')}
+             {t('conversation.interactivePractice')}
           </span>
           <h2 className="practice-scenario-title">{scenarioTitle}</h2>
           <p className="practice-scenario-desc">{scenarioDesc}</p>
@@ -430,7 +430,7 @@ export default function ConversationPage() {
         <div className="ai-context-panel">
           <div className="ai-context-panel-title">
             <span className="ai-context-kicker">
-              ✨ {t('conversation.humsaathiUnderstands') || 'HUMSAATHI UNDERSTANDS'}
+               {t('conversation.humsaathiUnderstands') || 'HUMSAATHI UNDERSTANDS'}
             </span>
           </div>
           <div className="ai-context-chips-row">
@@ -448,28 +448,28 @@ export default function ConversationPage() {
             </span>
           </div>
           <div className="ai-adaptive-status">
-            <span>⚡ {t('conversation.adaptiveGenerated') || 'Adaptive response generated'}</span>
+            <span> {t('conversation.adaptiveGenerated') || 'Adaptive response generated'}</span>
           </div>
         </div>
 
         {/* Metadata Card */}
         <div className="practice-meta-card">
           <div className="meta-row">
-            <span className="meta-label">🤖 {t('conversation.roleLabel') || 'Role'}:</span>
+            <span className="meta-label"> {t('conversation.roleLabel') || 'Role'}:</span>
             <strong className="meta-val">{scenarioRole}</strong>
           </div>
           <div className="meta-row">
-            <span className="meta-label">🎯 {t('conversation.goalLabel') || 'Goal'}:</span>
+            <span className="meta-label"> {t('conversation.goalLabel') || 'Goal'}:</span>
             <strong className="meta-val" style={{ fontSize: '0.85rem' }}>{primaryGoal}</strong>
           </div>
           <div className="meta-row">
-            <span className="meta-label">🌐 {t('conversation.language') || 'Language:'}</span>
+            <span className="meta-label"> {t('conversation.language') || 'Language:'}</span>
             <strong className="meta-val">
               {language === 'ur' ? 'اردو (Urdu)' : language === 'ur_rm' ? 'Roman Urdu' : 'English'}
             </strong>
           </div>
           <div className="meta-row">
-            <span className="meta-label">⚡ {t('conversation.difficulty') || 'Difficulty:'}</span>
+            <span className="meta-label"> {t('conversation.difficulty') || 'Difficulty:'}</span>
             <strong className="meta-val" style={{ textTransform: 'capitalize' }}>
               {getDifficultyLabel(scenarioData.difficulty)}
             </strong>
@@ -478,7 +478,7 @@ export default function ConversationPage() {
 
         {/* Tips Card */}
         <div className="practice-tips-card">
-          <h4>💡 {t('conversation.tipsTitle')}</h4>
+          <h4> {t('conversation.tipsTitle')}</h4>
           <ul>
             <li>{t('conversation.tip1')}</li>
             <li>{t('conversation.tip2')}</li>
@@ -488,7 +488,7 @@ export default function ConversationPage() {
 
         <div className="practice-sidebar-actions">
           <button className="btn-secondary end-session-btn" onClick={handleFinish}>
-            🏁 {t('conversation.endBtn')}
+             {t('conversation.endBtn')}
           </button>
         </div>
       </aside>
@@ -521,14 +521,14 @@ export default function ConversationPage() {
                 stopSpeaking();
               }}
             >
-              💬 {t('conversation.modeText')}
+               {t('conversation.modeText')}
             </button>
             <button
               type="button"
               className={`mode-toggle-btn ${mode === 'voice' ? 'is-active' : ''}`}
               onClick={() => setMode('voice')}
             >
-              🎙️ {t('conversation.modeVoice')}
+               {t('conversation.modeVoice')}
             </button>
           </div>
         </div>
@@ -544,12 +544,12 @@ export default function ConversationPage() {
                 <div className="bubble-avatar-ai" title={scenarioRole}>
                   {(() => {
                     const r = String(scenarioRole || '').toLowerCase();
-                    if (r.includes('manager') || r.includes('supervisor')) return '👔';
-                    if (r.includes('teacher')) return '👩‍🏫';
-                    if (r.includes('classmate') || r.includes('friend') || r.includes('student')) return '🧑‍🎓';
-                    if (r.includes('support') || r.includes('agent')) return '🎧';
-                    if (r.includes('pharmacist') || r.includes('doctor') || r.includes('receptionist')) return '💊';
-                    return '🎭';
+                    if (r.includes('manager') || r.includes('supervisor')) return '';
+                    if (r.includes('teacher')) return '';
+                    if (r.includes('classmate') || r.includes('friend') || r.includes('student')) return '';
+                    if (r.includes('support') || r.includes('agent')) return '';
+                    if (r.includes('pharmacist') || r.includes('doctor') || r.includes('receptionist')) return '';
+                    return '';
                   })()}
                 </div>
               )}
@@ -584,7 +584,7 @@ export default function ConversationPage() {
                     title="Play voice audio"
                     aria-label="Listen to message audio"
                   >
-                    {speakingIdx === idx ? `⏹️ ${t('conversation.stop')}` : `🔊 ${t('conversation.listen')}`}
+                    {speakingIdx === idx ? ` ${t('conversation.stop')}` : ` ${t('conversation.listen')}`}
                   </button>
                 )}
               </div>
@@ -599,7 +599,7 @@ export default function ConversationPage() {
           {/* AI Thinking Animation */}
           {sending && (
             <div className="chat-bubble-row ai-row">
-              <div className="bubble-avatar-ai">🤖</div>
+              <div className="bubble-avatar-ai"></div>
               <div className="ai-thinking-pill" aria-label="AI is generating response">
                 <span className="online-pulse-dot" />
                 <span style={{ fontSize: '0.85rem', fontStyle: 'italic' }}>
@@ -633,7 +633,7 @@ export default function ConversationPage() {
                 letterSpacing: '0.03em',
               }}
             >
-              💡 {t('conversation.suggestedResponses') || 'Suggested responses'}
+               {t('conversation.suggestedResponses') || 'Suggested responses'}
             </span>
             <div
               style={{
@@ -663,7 +663,7 @@ export default function ConversationPage() {
                     onClick={() => handleSendMessage(optText)}
                     disabled={sending}
                   >
-                    <span>💬</span>
+                    <span></span>
                     <span>{optText}</span>
                   </button>
                 );
@@ -748,7 +748,7 @@ export default function ConversationPage() {
                       onClick={startRecording}
                       disabled={sending}
                     >
-                      🎙️ {t('voice.tapToSpeak')}
+                       {t('voice.tapToSpeak')}
                     </button>
                   )}
 
@@ -767,7 +767,7 @@ export default function ConversationPage() {
                       }}
                       onClick={stopRecording}
                     >
-                      ⏹️ {t('conversation.stop')}
+                       {t('conversation.stop')}
                     </button>
                   )}
 
@@ -780,7 +780,7 @@ export default function ConversationPage() {
                           style={{ padding: '0.6rem 1rem', fontSize: '0.9rem' }}
                           onClick={togglePlayAudio}
                         >
-                          {isPlayingAudio ? '⏸️ Stop' : `▶️ ${t('voice.playPreview')}`}
+                          {isPlayingAudio ? ' Stop' : ` ${t('voice.playPreview')}`}
                         </button>
                       )}
                       <button
@@ -797,7 +797,7 @@ export default function ConversationPage() {
                         style={{ padding: '0.6rem 1rem', fontSize: '0.9rem', color: '#ef4444' }}
                         onClick={deleteRecording}
                       >
-                        🗑️ {t('voice.deleteRecording')}
+                         {t('voice.deleteRecording')}
                       </button>
                       <button
                         className="btn-primary"
@@ -806,7 +806,7 @@ export default function ConversationPage() {
                         onClick={() => handleSendMessage(recordedTranscript)}
                         disabled={sending}
                       >
-                        🚀 {sending ? (t('voice.processingVoice') || 'Processing your voice…') : t('voice.sendVoiceMessage')}
+                         {sending ? (t('voice.processingVoice') || 'Processing your voice…') : t('voice.sendVoiceMessage')}
                       </button>
                     </>
                   )}
@@ -817,7 +817,7 @@ export default function ConversationPage() {
                     style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', marginInlineStart: 'auto' }}
                     onClick={() => setMode('text')}
                   >
-                    💬 {t('voice.switchToText')}
+                     {t('voice.switchToText')}
                   </button>
                 </div>
               </div>
@@ -827,7 +827,7 @@ export default function ConversationPage() {
                   {t('voice.micError')}
                 </p>
                 <button className="btn-primary" type="button" onClick={() => setMode('text')}>
-                  💬 {t('voice.switchToText')}
+                   {t('voice.switchToText')}
                 </button>
               </div>
             )}
@@ -857,7 +857,7 @@ export default function ConversationPage() {
                 onClick={() => setMode('voice')}
                 title={t('scenarios.startVoice')}
               >
-                🎙️
+
               </button>
             )}
           </form>

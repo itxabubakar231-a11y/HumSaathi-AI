@@ -68,7 +68,7 @@ export default function ActivityPage() {
   if (fetchError || !activity || questions.length === 0) {
     return (
       <div className="activity-page child-activity-container error-state" style={{ textAlign: 'center', padding: '40px 20px' }}>
-        <span className="error-icon" aria-hidden="true" style={{ fontSize: '3rem', display: 'block', marginBottom: '12px' }}>⚠️</span>
+        <span className="error-icon" aria-hidden="true" style={{ fontSize: '3rem', display: 'block', marginBottom: '12px' }}></span>
         <h2>{t('common.error')}</h2>
         <p className="error-text" style={{ margin: '12px 0 24px' }}>
           {fetchError || 'Unable to load questions for this activity.'}
@@ -79,7 +79,7 @@ export default function ActivityPage() {
             type="button"
             onClick={() => navigate('/dashboard')}
           >
-            🏠 {t('common.back') || 'Back to Dashboard'}
+             {t('common.back') || 'Back to Dashboard'}
           </button>
         </div>
       </div>
@@ -228,7 +228,7 @@ export default function ActivityPage() {
             onClick={() => setShowHint((prev) => !prev)}
             aria-expanded={showHint}
           >
-            💡 {showHint ? t('child.hideHint') : t('child.hint')}
+             {showHint ? t('child.hideHint') : t('child.hint')}
           </button>
           {showHint && (
             <div className="hint-box" role="note">
@@ -288,14 +288,14 @@ export default function ActivityPage() {
       {/* Inline Gentle Feedback Message */}
       {checkedState === 'correct' && (
         <div className="gentle-feedback-banner correct" role="status">
-          <span className="banner-icon" aria-hidden="true">🎉</span>
+          <span className="banner-icon" aria-hidden="true"></span>
           <p>{t('child.wellDone')}</p>
         </div>
       )}
 
       {checkedState === 'incorrect' && (
         <div className="gentle-feedback-banner retry" role="status">
-          <span className="banner-icon" aria-hidden="true">🌱</span>
+          <span className="banner-icon" aria-hidden="true"></span>
           <p>{t('child.tryAgainPrompt')}</p>
         </div>
       )}
@@ -321,7 +321,7 @@ export default function ActivityPage() {
             type="button"
             onClick={handleTryAgain}
           >
-            🔄 {t('child.tryAgain')}
+             {t('child.tryAgain')}
           </button>
         )}
 

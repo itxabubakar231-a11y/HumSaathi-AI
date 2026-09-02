@@ -1,34 +1,35 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { UserProvider, useUser } from './context/UserContext';
 import { I18nProvider } from './context/I18nContext';
 import AppShell from './components/layout/AppShell';
 import LandingPage from './pages/LandingPage';
-import SetupPage from './pages/SetupPage';
-import AssessmentPage from './pages/AssessmentPage';
-import DashboardPage from './pages/DashboardPage';
-import ActivityPage from './pages/ActivityPage';
-import FeedbackPage from './pages/FeedbackPage';
-import ProgressPage from './pages/ProgressPage';
-import SettingsPage from './pages/SettingsPage';
-import ParentPage from './pages/ParentPage';
-import ScenarioPage from './pages/ScenarioPage';
-import ConversationPage from './pages/ConversationPage';
-import ConversationFeedbackPage from './pages/ConversationFeedbackPage';
-import SkillModulePage from './pages/SkillModulePage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import PersonaSelectionPage from './pages/PersonaSelectionPage';
+const SetupPage = lazy(() => import('./pages/SetupPage'));
+const AssessmentPage = lazy(() => import('./pages/AssessmentPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const ActivityPage = lazy(() => import('./pages/ActivityPage'));
+const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
+const ProgressPage = lazy(() => import('./pages/ProgressPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const ParentPage = lazy(() => import('./pages/ParentPage'));
+const ScenarioPage = lazy(() => import('./pages/ScenarioPage'));
+const ConversationPage = lazy(() => import('./pages/ConversationPage'));
+const ConversationFeedbackPage = lazy(() => import('./pages/ConversationFeedbackPage'));
+const SkillModulePage = lazy(() => import('./pages/SkillModulePage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const PersonaSelectionPage = lazy(() => import('./pages/PersonaSelectionPage'));
 
 // Admin Components & Pages
-import AdminLayout from './components/admin/AdminLayout';
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
-import AdminUsersPage from './pages/admin/AdminUsersPage';
-import AdminScenariosPage from './pages/admin/AdminScenariosPage';
-import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
-import AdminPermissionsPage from './pages/admin/AdminPermissionsPage';
-import AdminAiMonitoringPage from './pages/admin/AdminAiMonitoringPage';
-import AdminAuditLogsPage from './pages/admin/AdminAuditLogsPage';
-import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
+const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'));
+const AdminScenariosPage = lazy(() => import('./pages/admin/AdminScenariosPage'));
+const AdminAnalyticsPage = lazy(() => import('./pages/admin/AdminAnalyticsPage'));
+const AdminPermissionsPage = lazy(() => import('./pages/admin/AdminPermissionsPage'));
+const AdminAiMonitoringPage = lazy(() => import('./pages/admin/AdminAiMonitoringPage'));
+const AdminAuditLogsPage = lazy(() => import('./pages/admin/AdminAuditLogsPage'));
+const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettingsPage'));
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useUser();
@@ -66,6 +67,7 @@ function AppRoutes() {
 
   return (
     <I18nProvider language={language}>
+      <Suspense fallback={<div className="loading-screen"><span className="loading-orbit" />Loading HumSaathi...</div>}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/landing" element={<Navigate to="/" replace />} />
@@ -280,6 +282,7 @@ function AppRoutes() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
     </I18nProvider>
   );
 }

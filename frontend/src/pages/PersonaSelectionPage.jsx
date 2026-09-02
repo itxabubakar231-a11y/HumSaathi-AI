@@ -14,36 +14,36 @@ export default function PersonaSelectionPage() {
   const personas = [
     {
       id: 'child',
-      icon: '🧒',
+      icon: '',
       badge: 'Ages 4 – 12',
       title: 'Child Portal',
       subtitle: 'Friendly, guided & sensory-calm',
       desc: 'Fun educational games, letters, numbers, emotion matching, daily routines & story adventures.',
       accent: '#f59e0b',
       bgGradient: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(251, 191, 36, 0.03) 100%)',
-      highlights: ['🎮 Learning Games', '⭐ Star Rewards', '😊 Emotion Matching'],
+      highlights: [' Learning Games', ' Star Rewards', ' Emotion Matching'],
     },
     {
       id: 'teen',
-      icon: '🧑‍🎓',
+      icon: '',
       badge: 'Ages 13 – 17',
       title: 'Teen Portal',
       subtitle: 'Modern, independent & social',
       desc: 'School challenges, peer dynamics, Reading & Vocabulary, Problem Solving, and Communication.',
       accent: '#8b5cf6',
       bgGradient: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(167, 139, 250, 0.03) 100%)',
-      highlights: ['📚 Reading & Vocab', '🧩 Problem Solving', '💬 Communication'],
+      highlights: [' Reading & Vocab', ' Problem Solving', ' Communication'],
     },
     {
       id: 'adult',
-      icon: '👨',
+      icon: '',
       badge: 'Ages 18+',
       title: 'Adult Portal',
       subtitle: 'Mature, practical & professional',
       desc: 'Functional Reading, Everyday Problem Solving (Shopping, Time, Money), and Everyday Communication.',
       accent: '#06b6d4',
       bgGradient: 'linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(56, 189, 248, 0.03) 100%)',
-      highlights: ['📄 Functional Reading', '💵 Shopping, Time & Money', '🗣️ Workplace & Daily Comm'],
+      highlights: [' Functional Reading', ' Shopping, Time & Money', ' Workplace & Daily Comm'],
     },
   ];
 
@@ -137,7 +137,7 @@ export default function PersonaSelectionPage() {
           disabled={saving}
           style={{ backgroundColor: getActiveAccent() }}
         >
-          {saving ? t('common.loading') : `Enter ${selectedPersona.toUpperCase()} Portal 🚀`}
+          {saving ? t('common.loading') : `Enter ${selectedPersona.toUpperCase()} Portal `}
         </button>
       </div>
     </div>

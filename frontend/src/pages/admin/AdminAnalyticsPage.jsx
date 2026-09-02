@@ -127,7 +127,7 @@ export default function AdminAnalyticsPage() {
           <div className="mode-distribution-container">
             {modeDist.map((m) => (
               <div key={m.name} className="mode-stat-box">
-                <span className="mode-icon">{m.name.includes('Voice') ? '🎙️' : '⌨️'}</span>
+                <span className="mode-icon">{m.name.includes('Voice') ? '' : ''}</span>
                 <span className="mode-name">{m.name}</span>
                 <strong className="mode-pct">{m.percent}%</strong>
                 <span className="mode-count">{m.count} total sessions</span>
@@ -145,7 +145,7 @@ export default function AdminAnalyticsPage() {
           <div className="lang-distribution-list">
             {langDist.map((l) => (
               <div key={l.code} className="lang-stat-item">
-                <span className="lang-icon">{l.code === 'en' ? '🇬🇧' : '🇵🇰'}</span>
+                <span className="lang-icon">{l.code === 'en' ? '' : ''}</span>
                 <div className="lang-details">
                   <span className="lang-title">{l.name}</span>
                   <span className="lang-sub">{l.count} active profiles</span>

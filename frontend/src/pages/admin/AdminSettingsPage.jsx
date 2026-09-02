@@ -92,28 +92,28 @@ export default function AdminSettingsPage() {
             </div>
             <div className="security-specs-list">
               <div className="spec-row">
-                <span className="spec-icon">🔒</span>
+                <span className="spec-icon"></span>
                 <div>
                   <strong>Role-Based Access Control (RBAC)</strong>
                   <p>Server-side authentication on every Admin API endpoint</p>
                 </div>
               </div>
               <div className="spec-row">
-                <span className="spec-icon">🛡️</span>
+                <span className="spec-icon"></span>
                 <div>
                   <strong>Password Isolation</strong>
                   <p>NIST-compliant PBKDF2-HMAC-SHA256 hashing; secrets never exposed via API</p>
                 </div>
               </div>
               <div className="spec-row">
-                <span className="spec-icon">👤</span>
+                <span className="spec-icon"></span>
                 <div>
                   <strong>Persona Data Isolation</strong>
                   <p>Strict user token scoping prevents cross-learner IDOR exposure</p>
                 </div>
               </div>
               <div className="spec-row">
-                <span className="spec-icon">📜</span>
+                <span className="spec-icon"></span>
                 <div>
                   <strong>Tamper-Evident Audit Logging</strong>
                   <p>Administrative modifications tracked with timestamp and target ID</p>

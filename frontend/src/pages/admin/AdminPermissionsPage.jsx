@@ -11,7 +11,7 @@ export default function AdminPermissionsPage() {
     setLoading(true);
     api.adminGetPermissions()
       .then((res) => setData(res))
-      .catch((err) => setFeedbackMsg(`⚠️ Error: ${err.message}`))
+      .catch((err) => setFeedbackMsg(` Error: ${err.message}`))
       .finally(() => setLoading(false));
   };
 
@@ -24,14 +24,14 @@ export default function AdminPermissionsPage() {
     try {
       if (currentlyGranted) {
         await api.adminRevokePermission(adminId, permId);
-        setFeedbackMsg(`✅ Revoked permission "${permId}".`);
+        setFeedbackMsg(` Revoked permission "${permId}".`);
       } else {
         await api.adminGrantPermission(adminId, permId);
-        setFeedbackMsg(`✅ Granted permission "${permId}".`);
+        setFeedbackMsg(` Granted permission "${permId}".`);
       }
       fetchPermissions();
     } catch (err) {
-      setFeedbackMsg(`⚠️ Failed to update permission: ${err.message}`);
+      setFeedbackMsg(` Failed to update permission: ${err.message}`);
     } finally {
       setUpdating(false);
     }
@@ -103,7 +103,7 @@ export default function AdminPermissionsPage() {
                   <tr key={adm.id}>
                     <td>
                       <div className="user-table-cell">
-                        <span className="user-avatar-small">🛡️</span>
+                        <span className="user-avatar-small"></span>
                         <div>
                           <strong>{adm.name}</strong>
                           <span className="user-email-dim">{adm.email}</span>

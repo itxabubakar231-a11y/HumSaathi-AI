@@ -18,7 +18,11 @@ def clean_json_text(raw_text: str) -> str:
         text = re.sub(r"\s*```$", "", text)
     return text.strip()
 
-async def call_ai_chat(messages: List[Dict[str, str]], temperature: float = 0.5) -> Optional[Dict[str, Any]]:
+async def call_ai_chat(
+    messages: List[Dict[str, str]],
+    temperature: float = 0.5,
+    max_tokens: int = 700,
+) -> Optional[Dict[str, Any]]:
     """Calls AI for structured JSON responses (evaluation, scoring, scenario feedback)."""
     if not is_ai_available():
         logger.info("[HumSaathi AI] No API key provided. Using rule-based fallback.")
@@ -32,6 +36,7 @@ async def call_ai_chat(messages: List[Dict[str, str]], temperature: float = 0.5)
     payload = {
         "model": settings.AI_MODEL,
         "temperature": temperature,
+        "max_tokens": max_tokens,
         "messages": messages,
         "response_format": {"type": "json_object"},
     }
@@ -65,7 +70,11 @@ async def call_ai_chat(messages: List[Dict[str, str]], temperature: float = 0.5)
         logger.warning(f"[HumSaathi AI] AI request failed: {e}. Falling back to rules.")
         return None
 
-async def call_ai_text(messages: List[Dict[str, str]], temperature: float = 0.7) -> Optional[str]:
+async def call_ai_text(
+    messages: List[Dict[str, str]],
+    temperature: float = 0.7,
+    max_tokens: int = 900,
+) -> Optional[str]:
     """Calls AI for natural conversational responses, explanations, code generation, and general Q&A."""
     if not is_ai_available():
         logger.info("[HumSaathi AI] No API key provided. Using contextual knowledge engine.")
@@ -79,6 +88,7 @@ async def call_ai_text(messages: List[Dict[str, str]], temperature: float = 0.7)
     payload = {
         "model": settings.AI_MODEL,
         "temperature": temperature,
+        "max_tokens": max_tokens,
         "messages": messages,
     }
 
