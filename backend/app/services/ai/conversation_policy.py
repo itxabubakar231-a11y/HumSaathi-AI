@@ -163,3 +163,59 @@ def recent_chat_history(history: List[Dict[str, Any]], limit: int = 18) -> List[
         for item in selected
         if item.get("content")
     ]
+
+
+def validate_ai_response(response_text: str, language: str, role_str: str, is_general: bool = False) -> bool:
+    if not response_text or len(response_text.strip()) < 5:
+        return False
+    clean = response_text.lower().strip()
+
+    # Critical security leak checks (strictly forbidden everywhere)
+    critical_leaks = [
+        "system prompt", "api key", "database credentials", "openai_api_key", "gemini_api_key",
+        "secret_token", "bearer ey", "internal rubric", "scoring criteria"
+    ]
+    for leak in critical_leaks:
+        if leak in clean:
+            return False
+
+    unsupported_overclaims = [
+        "guaranteed accurate", "100% accurate", "i verified this live", "i checked this live",
+        "i remember our full conversation history", "i have permanent memory",
+    ]
+    for phrase in unsupported_overclaims:
+        if phrase in clean:
+            return False
+
+    if not is_general:
+        # Roleplay filler words only restricted during structured in-character practice
+        forbidden = [
+            "as an ai", "i am an ai", "i am a language model", "as a language model", "as an ai assistant",
+            "as a large language model",
+            "let's improve your communication skills",
+            "good job communicating", "great job", "keep practicing", "communication is excellent", "excellent communication",
+            "correct answer", "that is the correct", "that's the correct",
+            "here is your response:", "objectives achieved:", "scenario objectives:"
+        ]
+        for f in forbidden:
+            if f in clean:
+                return False
+
+    has_ur = any('\u0600' <= c <= '\u06FF' for c in response_text)
+
+    # 1. Urdu Script Enforcement: Must contain Urdu characters
+    if language == "ur":
+        if not has_ur:
+            return False
+
+    # 2. Roman Urdu Enforcement: Must be Latin script, NOT Urdu script
+    elif language == "ur_rm":
+        if has_ur:
+            return False
+
+    # 3. English Enforcement: Must NOT contain Urdu script
+    elif language == "en":
+        if has_ur:
+            return False
+
+    return True
