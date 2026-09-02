@@ -11,41 +11,86 @@ from app.services.ai.conversation_policy import (
 
 _REFERENT_PRONOUNS = {
     "it", "this", "that", "these", "those",
-    "ye", "yeh", "woh", "wo", "isko", "usko", "iska", "uska",
-    "یہ", "وہ", "اس", "اسے", "اسکو"
+    "ye", "yeh", "woh", "wo", "isko", "usko", "iska", "uska", "unko", "unka", "unki",
+    "یہ", "وہ", "اس", "اسے", "اسکو", "انہیں"
 }
+
+_GENERIC_FOLLOWUP_PATTERNS = [
+    # 1. Asking what to say / do
+    r"^(?:what\s+(?:should|can|do)\s+i\s+(?:say|do)(?:\s+(?:first|next|then|now|to\s+them))?|what\s+to\s+(?:say|do)(?:\s+first)?)\b",
+    # 2. What if variants (e.g. what if they ask, what if i get nervous, what if they don't respond, what if they ignore)
+    r"^what\s+if\s+(?:they|she|he|i|we|someone|the\s+interviewer|that)\b",
+    r"^what\s+if\s+that\s+doesn'?t\s+work\b",
+    # 3. Examples and elaborations
+    r"^(?:can\s+you\s+)?(?:give|show)\s+(?:me\s+)?(?:an?|another|one\s+more)\s+example\b",
+    r"^(?:another\s+(?:one|example)|give\s+an?\s+example|more\s+examples?)\b",
+    # 4. Simplifications
+    r"^(?:make\s+it\s+(?:simpler|simple|easier|less\s+awkward|shorter|longer|more\s+polite)|simplify\s+(?:this|it)?)\b",
+    # 5. Question words / short follow-ups
+    r"^(?:tell\s+me\s+more|what\s+next|what\s+now|what\s+about\s+it|how\s+does\s+it\s+work|can\s+you\s+explain(?:\s+this|\s+it)?|explain\s+(?:this|it)?)\b",
+    r"^(?:why|how|why\?|how\?|how\s+so\??|how\s+come\??)$",
+    # 6. Urdu / Roman Urdu follow-ups
+    r"^(?:misal\s+do|aur\s+batao|samjhao|isko\s+samjhao|ye\s+kaise\s+hota\s+hai|kya\s+bolun|kya\s+kahoon|phir\s+kya|ab\s+kya)\b",
+]
+
+
+
+def is_generic_followup(text: str) -> bool:
+    clean = text.strip().lower()
+    # Normalize trailing punctuation before regex matching
+    clean_normalized = re.sub(r"[.!?,:;\"'()\[\]{}]+$", "", clean).strip()
+    words = [w.strip(".,!?:;\"'()[]{}") for w in clean.split()]
+    if not words:
+        return True
+    if any(re.search(pat, clean_normalized, re.IGNORECASE) for pat in _GENERIC_FOLLOWUP_PATTERNS):
+        return True
+    if any(re.search(pat, clean, re.IGNORECASE) for pat in _GENERIC_FOLLOWUP_PATTERNS):
+        return True
+    if len(words) <= 4:
+        non_stop = [w for w in words if w not in _REFERENT_PRONOUNS and w not in {"why", "how", "what", "can", "you", "give", "me", "do", "this", "first", "say", "is", "it"}]
+        if not non_stop:
+            return True
+    return False
+
 
 
 def resolve_referent_anchor(history: List[Dict[str, Any]], current_message: str) -> str:
     """
     Extracts and resolves what pronouns or short follow-ups refer to based on earlier dialogue turns.
-    Example:
-      Turn 1 (User): "What is photosynthesis?"
-      Turn 2 (Assistant): "Photosynthesis is the process..."
-      Turn 3 (User): "ye kaise hota hai?"
-      -> Resolves anchor: "photosynthesis (from recent turn: 'What is photosynthesis?')"
+    Maintains a persistent primary topic anchor across 4+ turns of multi-turn dialogue while
+    allowing explicit topic switches when the user introduces a new substantive topic.
     """
     current_clean = current_message.strip()
     words = [w.lower().strip(".,!?:;\"'()[]{}") for w in current_clean.split()]
 
-    # If the user message is requesting an example, explanation, or uses pronouns/follow-ups
-    has_pronoun = any(w in _REFERENT_PRONOUNS for w in words)
-    has_request = any(k in current_clean.lower() for k in ["example", "misal", "explain", "samjhao", "how does", "is it", "why", "kyun", "kaise"])
-    is_followup = len(words) <= 8 or has_pronoun or has_request
+    # Check if current message is an explicit substantive domain topic
+    substantive_markers = {
+        "friend", "friends", "work", "office", "interview", "manager", "boss", "teacher",
+        "classmate", "class fellow", "doctor", "pharmacy", "medicine", "presentation",
+        "homework", "child", "kid", "dost", "dosti", "naukri", "job", "salary", "shift"
+    }
+    has_substantive_content = any(m in current_clean.lower() for m in substantive_markers)
 
-    if not is_followup and len(words) > 5:
+    if not is_generic_followup(current_clean) and (has_substantive_content or len(words) > 7):
         return current_clean[:240]
 
-    # Look back in history for the last substantial user query or assistant topic
+
+    # Look back in history for the latest substantive primary topic anchor (skipping intermediate generic follow-ups)
     for item in reversed(history):
         role = item.get("role")
         content = str(item.get("content", "")).strip()
         if not content:
             continue
         if role == "user":
-            content_words = [w.lower() for w in content.split()]
-            if len(content_words) >= 3 and not all(w in _REFERENT_PRONOUNS for w in content_words):
-                return content[:240]
+            if not is_generic_followup(content):
+                content_words = [w.lower() for w in content.split()]
+                if len(content_words) >= 3 and not all(w in _REFERENT_PRONOUNS for w in content_words):
+                    return content[:240]
+
+    # Fallback to the first available non-empty user turn or current clean message
+    for item in history:
+        if item.get("role") == "user" and item.get("content"):
+            return str(item.get("content")).strip()[:240]
 
     return current_clean[:240]
 
@@ -79,16 +124,23 @@ def assemble_context_window(
     detected_lang = detect_language(user_message, default_lang=user_language)
     active_language = detected_lang if detected_lang in ["ur", "ur_rm"] else user_language
 
-    # 3. Resolve Referent Anchor
+    # 3. Resolve Referent Anchor (Persistent Primary Topic)
     topic_anchor = resolve_referent_anchor(history, user_message)
 
-    # 4. Retrieve Relevant Application Knowledge
+    # 4. Retrieve Relevant Application Knowledge (combining persistent topic anchor with current message)
+    if topic_anchor and topic_anchor.lower() != user_message.lower():
+        retrieval_query = f"{topic_anchor} {user_message}"
+    else:
+        retrieval_query = topic_anchor or user_message
+
     relevant_knowledge = retrieve_relevant_knowledge(
         intent=intent,
         persona=user_persona,
-        user_message=user_message,
+        user_message=retrieval_query,
         scenario_id=scenario_id,
     )
+
+
 
     # Language directives
     if active_language == "ur":

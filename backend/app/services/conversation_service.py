@@ -1759,11 +1759,12 @@ async def send_message(db: Session, session_id: str, user_id: str, user_message:
         # If user message is an unsafe prompt injection attempt, safely deflect
         if not context_payload["is_safe"]:
             if resolved_lang == "ur":
-                response_text = "میں ہم ساتھی کے طور پر صرف مثبت، محفوظ اور مفید بات چیت میں آپ کی رہنمائی کر سکتا ہوں۔ آئیے اپنے سیکھنے کے سفر کو جاری رکھیں۔"
+                response_text = "ہم ساتھی ایک تعلیمی اور مواصلاتی مشق کا معاون پلیٹ فارم ہے۔ ہم طبی یا نفسیاتی تشخیص، ادویات کا تعین یا سسٹم کی خفیہ معلومات ظاہر کرنے کے مجاز نہیں ہیں۔ براہِ کرم تصدیق شدہ ماہرِ امراض یا ڈاکٹر سے رجوع کریں، یا مواصلاتی مشق جاری رکھیں۔"
             elif resolved_lang == "ur_rm":
-                response_text = "Main HumSaathi ke tor par sirf positive, safe aur helpful communication practice mein aap ki guidance kar sakta hoon. Aaiye practice jari rakhein."
+                response_text = "HumSaathi aik educational aur communication practice tool hai. Hum medical/clinical diagnosis, dawa/dosage prescription ya system credentials provide nahi kar sakte. Barah-e-karam doctor ya specialist se mashwara karein."
             else:
-                response_text = "As your HumSaathi communication coach, I am dedicated to safe, respectful, and productive learning. Let's continue with our communication practice."
+                response_text = "HumSaathi is an educational communication support tool and cannot provide medical diagnoses, prescriptions, medication/dosage advice, or expose system credentials. Please consult a licensed physician or developmental specialist for clinical care."
+
 
         if not response_text:
             start_time = datetime.utcnow()

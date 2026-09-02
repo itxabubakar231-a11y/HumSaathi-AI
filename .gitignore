@@ -12,3 +12,5 @@ HumSaathi-AI-main
 .env.local
 
 .vercel
+.vercel_python_packages
+
