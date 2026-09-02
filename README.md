@@ -41,7 +41,7 @@ The interface is responsive from 320 px mobile layouts through large desktop scr
 
 The refreshed interface uses a distinctly Pakistani but contemporary visual language:
 
-- Deep emerald and ivory form the primary palette, supported by saffron and indigo accents.
+- Muted pine, slate, and warm neutral surfaces form the primary palette, with a restrained clay accent.
 - Crescent-and-star brand geometry and subtle repeating craft patterns provide local character without distracting from learning.
 - Urdu typography, right-to-left composition, and the line “Har qadam par, HumSaathi” reinforce the product’s cultural origin.
 - Motion is purposeful: page reveals, navigation indicators, conversation entrances, and ambient hero details clarify state and hierarchy.

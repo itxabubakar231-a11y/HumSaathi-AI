@@ -49,9 +49,9 @@ export default function AppShell({ children }) {
           const Icon = item.icon;
           const active = location.pathname === item.path || (item.path === '/scenarios' && location.pathname.startsWith('/conversation'));
           return (
-            <button key={item.path} className={`hs-shell-nav-item ${active ? 'is-active' : ''}`} type="button" onClick={() => go(item.path)} aria-current={active ? 'page' : undefined}>
+            <motion.button key={item.path} className={`hs-shell-nav-item ${active ? 'is-active' : ''}`} type="button" onClick={() => go(item.path)} aria-current={active ? 'page' : undefined} whileHover={reduceMotion ? {} : { x: 4, z: 12 }} whileTap={reduceMotion ? {} : { scale: .97 }}>
               <Icon size={19} /><span>{t(item.labelKey) || item.label}</span>{active && <motion.i layoutId="shell-nav-indicator" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
-            </button>
+            </motion.button>
           );
         })}
         {user?.role === 'ADMIN' && (
@@ -60,11 +60,11 @@ export default function AppShell({ children }) {
       </nav>
 
       <div className="hs-shell-sidebar-foot">
-        <button className="hs-persona-card" type="button" onClick={() => go('/persona-selection')}>
+        <motion.button className="hs-persona-card" type="button" onClick={() => go('/persona-selection')} whileHover={reduceMotion ? {} : { y: -3, rotateX: -2 }} whileTap={reduceMotion ? {} : { scale: .98 }}>
           <span className="hs-persona-avatar">{user?.name?.charAt(0)?.toUpperCase() || 'H'}</span>
           <span><strong>{user?.name || 'HumSaathi learner'}</strong><small>{persona} portal</small></span>
           <ArrowRightIcon size={16} />
-        </button>
+        </motion.button>
         <p className="hs-shell-motto"><span className="hs-urdu">ہر قدم پر، ہم ساتھی</span><small>With you, at every step.</small></p>
       </div>
     </>
@@ -84,7 +84,7 @@ export default function AppShell({ children }) {
       </AnimatePresence>
 
       <div className="hs-shell-main">
-        <header className="hs-shell-topbar">
+        <motion.header className="hs-shell-topbar" initial={reduceMotion ? false : { opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .38, ease: 'easeOut' }}>
           <div className="hs-shell-topbar-left">
             <button className="hs-shell-menu" type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation"><MenuIcon size={21} /></button>
             <div><span>{persona} portal</span><strong>{navItems.find((item) => location.pathname === item.path)?.label || 'Learning space'}</strong></div>
@@ -93,18 +93,18 @@ export default function AppShell({ children }) {
             <div className="hs-language-switch" aria-label="Language">
               {[['en', 'EN'], ['ur', 'اردو'], ['ur_rm', 'ROM']].map(([code, label]) => <button key={code} className={language === code ? 'is-active' : ''} type="button" onClick={() => updateLanguage(code)}>{label}</button>)}
             </div>
-            <button className="hs-topbar-profile" type="button" onClick={() => go('/settings')} aria-label="Profile settings"><UserIcon size={18} /><span>{user?.name?.split(' ')[0] || 'Profile'}</span></button>
+            <motion.button className="hs-topbar-profile" type="button" onClick={() => go('/settings')} aria-label="Profile settings" whileHover={reduceMotion ? {} : { y: -2, scale: 1.02 }} whileTap={reduceMotion ? {} : { scale: .97 }}><UserIcon size={18} /><span>{user?.name?.split(' ')[0] || 'Profile'}</span></motion.button>
             <button className="hs-signout" type="button" onClick={signOut}>Sign out</button>
           </div>
-        </header>
+        </motion.header>
 
-        <motion.main className="hs-shell-content" id="main" key={location.pathname} initial={reduceMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .3, ease: 'easeOut' }}>
+        <motion.main className="hs-shell-content" id="main" key={location.pathname} style={reduceMotion ? undefined : { transformPerspective: 1400, transformOrigin: '50% 0%' }} initial={reduceMotion ? false : { opacity: 0, y: 18, rotateX: 2.5, scale: .995 }} animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 210, damping: 26, mass: .75 }}>
           {children}
         </motion.main>
       </div>
 
       <nav className="hs-mobile-nav" aria-label="Mobile navigation">
-        {navItems.slice(0, 4).map((item) => { const Icon = item.icon; const active = location.pathname === item.path; return <button key={item.path} className={active ? 'is-active' : ''} type="button" onClick={() => go(item.path)}><Icon size={20} /><span>{item.label}</span></button>; })}
+        {navItems.slice(0, 4).map((item) => { const Icon = item.icon; const active = location.pathname === item.path; return <motion.button key={item.path} className={active ? 'is-active' : ''} type="button" onClick={() => go(item.path)} whileTap={reduceMotion ? {} : { scale: .9, y: 2 }}><Icon size={20} /><span>{item.label}</span></motion.button>; })}
       </nav>
     </div>
   );
