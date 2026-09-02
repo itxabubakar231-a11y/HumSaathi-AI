@@ -44,9 +44,9 @@ The web application will open on `http://localhost:5173` and automatically commu
 
 ## Individual Service Commands
 
-### Unified Backend (`backend-python/`)
+### Unified Backend (`backend/`)
 ```bash
-cd backend-python
+cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
