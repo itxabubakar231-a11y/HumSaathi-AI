@@ -104,6 +104,20 @@ HumSaathi-AI/
 | AI integration | OpenAI-compatible provider client; Gemini-compatible endpoint by default |
 | Deployment | Vercel static frontend and Python serverless API |
 
+## AI reliability and topic grounding
+
+HumSaathi uses provider-generated responses when `AI_API_KEY` is configured; no custom model training or fine-tuning is required for the current implementation. Reliability is enforced at the application layer:
+
+- Practice scenarios are closed-scope. Clear coding, current-affairs, finance, and general-knowledge detours are redirected to General Chat.
+- Scenario prompts are grounded in the selected role, description, objectives, learner persona, language, and recent conversation only.
+- The assistant is instructed not to invent facts, citations, names, dates, prices, schedules, addresses, or medical instructions.
+- Short follow-up questions retain a recent topic anchor, while the context window is bounded to reduce drift from old subjects.
+- English, Urdu script, and Roman Urdu responses pass language validation before they are accepted.
+- If the live provider is unavailable and no verified local response exists, the fallback says that it cannot answer reliably instead of pretending to know.
+- Medication fallbacks never guess a dose or side effect without the medicine name and prescription details.
+
+These controls reduce hallucinations but cannot guarantee that every model response is correct. Time-sensitive claims should be checked against a current authoritative source, and medical, legal, or financial decisions should be confirmed with a qualified professional. The regression suite in `backend-python/test_conversation_grounding.py` covers scope changes, follow-up anchoring, language-safe redirects, bounded history, and unsupported certainty claims.
+
 ## Local development
 
 ### Prerequisites
