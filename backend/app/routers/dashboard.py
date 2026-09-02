@@ -3,11 +3,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
-from app.schemas.dashboard import ParentPinRequest
+from app.schemas.dashboard import ParentPinRequest, ParentChatRequest, ParentPinUpdateRequest
 from app.schemas.common import parse_json, stringify_json
 from app.services.progress_service import get_dashboard_stats, get_user_progress
 from app.services.reward_service import get_user_rewards
 from app.services.ai.activity_recommender import recommend_activity
+from app.services.parent_service import (
+    get_parent_companion_data,
+    handle_parent_ai_chat,
+    update_parent_pin as service_update_parent_pin,
+)
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
@@ -205,7 +210,7 @@ def get_parent_view(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user),
 ):
-    if current_user and current_user.id != user_id:
+    if current_user and current_user.id != user_id and current_user.role != "ADMIN":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied. You cannot view another user's parent dashboard.",
@@ -217,4 +222,82 @@ def get_parent_view(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid PIN")
 
     stats = get_dashboard_stats(db, user.id)
-    return {"parentView": format_parent_view(stats)}
+    companion_data = get_parent_companion_data(db, user.id, user.persona)
+    return {
+        "parentView": format_parent_view(stats),
+        "parentCompanion": companion_data,
+    }
+
+@router.post("/{user_id}/parent/chat")
+async def parent_ai_chat(
+    user_id: str,
+    payload: ParentChatRequest,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
+):
+    if current_user and current_user.id != user_id and current_user.role != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot chat on another user's parent assistant.",
+        )
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    res = await handle_parent_ai_chat(db, user_id, payload.message, payload.history or [])
+    return res
+
+@router.post("/{user_id}/parent/pin")
+def update_pin(
+    user_id: str,
+    payload: ParentPinUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
+):
+    if current_user and current_user.id != user_id and current_user.role != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot modify another user's PIN.",
+        )
+    try:
+        res = service_update_parent_pin(db, user_id, payload.oldPin, payload.newPin)
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/{user_id}/parent/weekly-report")
+def get_weekly_report(
+    user_id: str,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
+):
+    if current_user and current_user.id != user_id and current_user.role != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot view another user's weekly report.",
+        )
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    companion_data = get_parent_companion_data(db, user_id, user.persona)
+    return {"weeklyReport": companion_data.get("weeklyReport", {})}
+
+@router.get("/{user_id}/parent/communication")
+def get_communication_journey(
+    user_id: str,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
+):
+    if current_user and current_user.id != user_id and current_user.role != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You cannot view another user's communication journey.",
+        )
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    companion_data = get_parent_companion_data(db, user_id, user.persona)
+    return {"communicationJourney": companion_data.get("communicationJourney", [])}
+

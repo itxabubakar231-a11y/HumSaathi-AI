@@ -1,150 +1,219 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { useUser } from '../context/UserContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 
+import ParentOverview from '../components/parent/ParentOverview';
+import ParentGrowthJourney from '../components/parent/ParentGrowthJourney';
+import ParentAiInsights from '../components/parent/ParentAiInsights';
+import ParentCommunicationJourney from '../components/parent/ParentCommunicationJourney';
+import ParentHomePractice from '../components/parent/ParentHomePractice';
+import ParentWeeklyReport from '../components/parent/ParentWeeklyReport';
+import ParentSettings from '../components/parent/ParentSettings';
+
+const NAV_TABS = [
+  { id: 'overview', labelKey: 'parent.nav.overview', defaultLabel: 'Overview', icon: '🏠' },
+  { id: 'growth', labelKey: 'parent.nav.growth', defaultLabel: 'Growth Journey', icon: '📈' },
+  { id: 'insights', labelKey: 'parent.nav.insights', defaultLabel: 'AI Insights', icon: '🤖' },
+  { id: 'communication', labelKey: 'parent.nav.communication', defaultLabel: 'Communication', icon: '🗣️' },
+  { id: 'practice', labelKey: 'parent.nav.practice', defaultLabel: 'Home Practice', icon: '🎯' },
+  { id: 'reports', labelKey: 'parent.nav.reports', defaultLabel: 'Weekly Reports', icon: '📅' },
+  { id: 'settings', labelKey: 'parent.nav.settings', defaultLabel: 'Parent Settings', icon: '⚙️' },
+];
+
 export default function ParentPage() {
   const { user } = useUser();
-  const { t, language } = useI18n();
+  const { t } = useI18n();
+  const reduceMotion = useReducedMotion();
+
   const [pin, setPin] = useState('');
-  const [view, setView] = useState(null);
+  const [companion, setCompanion] = useState(null);
+  const [legacyView, setLegacyView] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const loadView = async (e) => {
-    e.preventDefault();
+  const loadCompanionData = async (e) => {
+    if (e) e.preventDefault();
+    if (!pin) {
+      setError('Please enter your 4-digit PIN.');
+      return;
+    }
     setError('');
+    setLoading(true);
+
     try {
-      const { parentView } = await api.getParentView(user.id, pin);
-      setView(parentView);
+      const data = await api.getParentCompanion(user.id, pin);
+      setLegacyView(data?.parentView || null);
+      setCompanion(data?.parentCompanion || null);
     } catch (err) {
-      setError(err.message || t('common.error'));
+      setError(err.message || 'Incorrect PIN. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getPersonaBadge = (p) => {
-    switch (p) {
-      case 'child': return { label: t('persona.child'), icon: '', color: '#F59E0B' };
-      case 'teen': return { label: t('persona.teen'), icon: '', color: '#8B5CF6' };
-      case 'adult': return { label: t('persona.adult'), icon: '', color: '#0EA5E9' };
-      default: return { label: t('persona.child'), icon: '', color: '#10B981' };
-    }
+  const handleLockPortal = () => {
+    setCompanion(null);
+    setLegacyView(null);
+    setPin('');
+    setActiveTab('overview');
   };
 
-  if (!user) return <p>{t('common.error')}</p>;
-
-  const personaInfo = getPersonaBadge(view?.learner?.persona || user.persona);
+  if (!user) {
+    return (
+      <div className="parent-page-wrapper">
+        <div className="parent-empty-card">
+          <p>{t('common.error')}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="parent-page">
-      <p className="eyebrow">{t('parent.title')}</p>
-      <h1>{t('parent.title')}</h1>
-      <p className="intro">{t('parent.intro')}</p>
+    <div className="parent-page-wrapper">
+      {!companion ? (
+        /* PIN Entry Gate Screen */
+        <motion.div
+          className="parent-pin-gate"
+          initial={reduceMotion ? false : { opacity: 0, scale: 0.98, y: 14 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="pin-gate-badge">
+            <span className="pin-gate-icon">🛡️</span>
+            <span className="pin-gate-title">Parent Companion 2.0</span>
+          </div>
 
-      {!view ? (
-        <form onSubmit={loadView} className="pin-form">
-          <label>
-            {t('parent.pin')}
-            <input
-              type="password"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              maxLength={8}
-              placeholder="1234"
-            />
-          </label>
-          {error && <p className="error-text">{error}</p>}
-          <button className="btn-primary" type="submit">{t('parent.view')}</button>
-        </form>
-      ) : (
-        <div className="parent-view">
-          {/* Learner & Active Portal Header Card */}
-          <section className="dashboard-card parent-learner-card">
-            <div className="parent-card-header">
-              <h2>{t('parent.learner')}</h2>
-              <span
-                className="persona-tag"
-                style={{ backgroundColor: `${personaInfo.color}18`, color: personaInfo.color, border: `1.5px solid ${personaInfo.color}40`, padding: '0.25rem 0.75rem', borderRadius: '9999px', fontWeight: 800 }}
-              >
-                {personaInfo.icon} {personaInfo.label} Portal
-              </span>
-            </div>
-            <p className="learner-meta-text">
-              <strong>{view.learner.name}</strong> · {t(`lang.${view.learner.language}`) || view.learner.language}
-            </p>
-            <div className="parent-stats-inline" style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-              <div><strong>{t('progress.level')}:</strong> {view.currentLevel}</div>
-              <div><strong>{t('progress.completed')}:</strong> {view.completedCount}</div>
-              <div><strong>{t('progress.accuracy')}:</strong> {view.avgAccuracy}%</div>
-            </div>
-          </section>
+          <h1>{t('parent.title') || 'Parent Companion'}</h1>
+          <p className="pin-gate-intro">
+            {t('parent.intro') || 'Enter your Caregiver PIN to access personalized insights, communication history, and home practice guidance.'}
+          </p>
 
-          {/* Evidence-Based Strengths for Current Persona */}
-          <section className="dashboard-card">
-            <h2> {t('parent.strengths')}</h2>
-            {view.strengths?.length > 0 ? (
-              <ul className="strengths-list-chips" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', listStyle: 'none', padding: 0 }}>
-                {view.strengths.map((str, idx) => (
-                  <li key={idx} style={{ background: '#D1FAE5', color: '#065F46', padding: '0.35rem 0.85rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.92rem' }}>
-                    ✓ {str}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted-text">— {t('common.empty')}</p>
-            )}
-          </section>
-
-          {/* Areas for Growth / Practice for Current Persona */}
-          <section className="dashboard-card">
-            <h2> {t('parent.needsPractice')}</h2>
-            {view.needsPractice?.length > 0 ? (
-              <ul className="practice-list-chips" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', listStyle: 'none', padding: 0 }}>
-                {view.needsPractice.map((np, idx) => (
-                  <li key={idx} style={{ background: '#FEF3C7', color: '#92400E', padding: '0.35rem 0.85rem', borderRadius: '9999px', fontWeight: 700, fontSize: '0.92rem' }}>
-                     {np}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted-text">— {t('common.empty')}</p>
-            )}
-          </section>
-
-          {/* Persona Skill Breakdown Meters */}
-          {view.progress?.length > 0 && (
-            <section className="dashboard-card">
-              <h2> {t('parent.skillsBreakdown')}</h2>
-              <div className="skills-meter-grid" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
-                {view.progress.map((p, idx) => (
-                  <div key={idx} className="skill-meter-item">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginBottom: '0.25rem' }}>
-                      <span>{p.skill.replace('_', ' ').toUpperCase()}</span>
-                      <span>{p.accuracy}%</span>
-                    </div>
-                    <div style={{ height: '8px', background: '#E5E7EB', borderRadius: '9999px', overflow: 'hidden' }}>
-                      <div style={{ width: `${Math.max(5, Math.min(100, p.accuracy))}%`, height: '100%', background: '#10B981', borderRadius: '9999px' }} />
-                    </div>
-                  </div>
-                ))}
+          <form onSubmit={loadCompanionData} className="parent-pin-form">
+            <label className="pin-input-label">
+              <span>{t('parent.pin') || 'Caregiver PIN'}</span>
+              <div className="pin-input-container">
+                <input
+                  type="password"
+                  className="pin-input-field"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  maxLength={8}
+                  placeholder="••••"
+                  autoFocus
+                  required
+                />
               </div>
-            </section>
-          )}
+            </label>
 
-          {/* Persona-Specific Recent History */}
-          <section className="dashboard-card">
-            <h2> {t('progress.recent')}</h2>
-            {view.recentAttempts?.length > 0 ? (
-              <ul className="recent-list" style={{ paddingLeft: '1.25rem', marginTop: '0.5rem' }}>
-                {view.recentAttempts.map((a, i) => (
-                  <li key={i} style={{ marginBottom: '0.4rem' }}>
-                    <strong>{a.title}</strong> — {a.score}% {language === 'ur' ? 'اسکور' : 'score'}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted-text">{t('parent.noAttempts')}</p>
-            )}
-          </section>
+            {error && <div className="parent-error-alert">{error}</div>}
+
+            <button className="btn-primary pin-unlock-btn" type="submit" disabled={loading || !pin}>
+              {loading ? (
+                <span>Unlocking...</span>
+              ) : (
+                <span>{t('parent.view') || 'Unlock Parent Portal'} →</span>
+              )}
+            </button>
+
+            <div className="pin-gate-hint">
+              <small>Default PIN is <strong>1234</strong>. You can customize this in Parent Settings.</small>
+            </div>
+          </form>
+        </motion.div>
+      ) : (
+        /* Unlocked Parent Portal 2.0 Companion Shell */
+        <div className="parent-portal-shell">
+          {/* Top Bar with Navigation Tabs */}
+          <div className="parent-shell-header">
+            <div className="parent-shell-title-row">
+              <div className="parent-shell-branding">
+                <span className="shell-shield-icon">🛡️</span>
+                <div>
+                  <span className="parent-brand-sub">HumSaathi AI</span>
+                  <h1>{t('parent.title') || 'Parent Companion'}</h1>
+                </div>
+              </div>
+
+              <div className="parent-shell-actions">
+                <button
+                  className="parent-lock-btn"
+                  type="button"
+                  onClick={handleLockPortal}
+                  title="Lock Caregiver Portal"
+                >
+                  🔒 Lock Portal
+                </button>
+              </div>
+            </div>
+
+            {/* Sub-Navigation Tabs */}
+            <nav className="parent-subnav-bar" aria-label="Parent Portal Navigation">
+              {NAV_TABS.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    className={`parent-tab-item ${isActive ? 'is-active' : ''}`}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <span className="tab-icon">{tab.icon}</span>
+                    <span className="tab-label">{t(tab.labelKey) || tab.defaultLabel}</span>
+                    {isActive && (
+                      <motion.span
+                        className="tab-indicator"
+                        layoutId="parent-tab-indicator"
+                        transition={{ type: 'spring', stiffness: 420, damping: 35 }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Active Subview Container */}
+          <main className="parent-shell-content-body">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === 'overview' && (
+                  <ParentOverview companion={companion} onNavigateTab={setActiveTab} />
+                )}
+                {activeTab === 'growth' && (
+                  <ParentGrowthJourney companion={companion} onNavigateTab={setActiveTab} />
+                )}
+                {activeTab === 'insights' && (
+                  <ParentAiInsights companion={companion} userId={user.id} />
+                )}
+                {activeTab === 'communication' && (
+                  <ParentCommunicationJourney companion={companion} />
+                )}
+                {activeTab === 'practice' && (
+                  <ParentHomePractice companion={companion} />
+                )}
+                {activeTab === 'reports' && (
+                  <ParentWeeklyReport companion={companion} />
+                )}
+                {activeTab === 'settings' && (
+                  <ParentSettings
+                    companion={companion}
+                    userId={user.id}
+                    onPinUpdated={(newPin) => setPin(newPin)}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </main>
         </div>
       )}
     </div>

@@ -49,6 +49,11 @@ export const api = {
   getProgress: (userId) => request(`/api/dashboard/${userId}/progress`),
   recommend: (userId) => request(`/api/dashboard/${userId}/recommend`, { method: 'POST', body: '{}' }),
   getParentView: (userId, pin) => request(`/api/dashboard/${userId}/parent`, { method: 'POST', body: JSON.stringify({ pin }) }),
+  getParentCompanion: (userId, pin) => request(`/api/dashboard/${userId}/parent`, { method: 'POST', body: JSON.stringify({ pin }) }),
+  sendParentAiChat: (userId, message, history = []) => request(`/api/dashboard/${userId}/parent/chat`, { method: 'POST', body: JSON.stringify({ message, history }) }),
+  updateParentPin: (userId, oldPin, newPin) => request(`/api/dashboard/${userId}/parent/pin`, { method: 'POST', body: JSON.stringify({ oldPin, newPin }) }),
+  getParentWeeklyReport: (userId) => request(`/api/dashboard/${userId}/parent/weekly-report`),
+  getParentCommunication: (userId) => request(`/api/dashboard/${userId}/parent/communication`),
   getScenarios: (params) => {
     const qs = params ? new URLSearchParams(params).toString() : '';
     return request(`/api/conversations/scenarios${qs ? `?${qs}` : ''}`);
