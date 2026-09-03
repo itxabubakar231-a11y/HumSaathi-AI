@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script>
+const params = new URLSearchParams(window.location.search);
+const userId = params.get('userId') || '';
+const lang = params.get('lang') || 'en';
+const redirect = params.get('redirect') || '/dashboard';
+if (userId) {
+  localStorage.setItem('humsaathi_user_id', userId);
+  localStorage.setItem('humsaathi_language', lang);
+  localStorage.setItem('parent_pin_unlocked_' + userId, 'true');
+  window.location.replace(redirect);
+}
+</script>
+</head>
+<body style="background:#0b132b;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;">
+  <p>Authenticating HumSaathi AI portal...</p>
+</body>
+</html>
