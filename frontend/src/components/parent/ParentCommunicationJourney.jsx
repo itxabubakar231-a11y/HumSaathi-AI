@@ -51,27 +51,23 @@ export default function ParentCommunicationJourney({ companion }) {
                 </div>
               </div>
 
-              {/* 5-Metric Star Ratings */}
-              <div className="comm-ratings-grid">
+              {/* 4 Core Communication Dimensions */}
+              <div className="comm-ratings-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))' }}>
                 <div className="comm-rating-item">
-                  <span className="rating-label">Greeting</span>
+                  <span className="rating-label">👋 Greeting</span>
                   <span className="rating-stars">{renderStars(s.ratings?.greeting)}</span>
                 </div>
                 <div className="comm-rating-item">
-                  <span className="rating-label">Clarity</span>
-                  <span className="rating-stars">{renderStars(s.ratings?.clarity)}</span>
+                  <span className="rating-label">💬 Answering Questions</span>
+                  <span className="rating-stars">{renderStars(s.ratings?.answering || s.ratings?.response)}</span>
                 </div>
                 <div className="comm-rating-item">
-                  <span className="rating-label">Response</span>
-                  <span className="rating-stars">{renderStars(s.ratings?.response)}</span>
+                  <span className="rating-label">❓ Asking Questions</span>
+                  <span className="rating-stars">{renderStars(s.ratings?.asking || s.ratings?.initiation)}</span>
                 </div>
                 <div className="comm-rating-item">
-                  <span className="rating-label">Initiation</span>
-                  <span className="rating-stars">{renderStars(s.ratings?.initiation)}</span>
-                </div>
-                <div className="comm-rating-item">
-                  <span className="rating-label">Flow</span>
-                  <span className="rating-stars">{renderStars(s.ratings?.communication)}</span>
+                  <span className="rating-label">🌟 Confidence</span>
+                  <span className="rating-stars">{renderStars(s.ratings?.confidence || s.ratings?.clarity || 4)}</span>
                 </div>
               </div>
 

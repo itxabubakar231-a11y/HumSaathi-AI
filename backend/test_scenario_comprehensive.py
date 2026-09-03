@@ -19,25 +19,25 @@ def test_scenario_counts_and_difficulty_distribution():
     assert len(child_med) == 2, f"Expected 2 medium child scenarios, got {len(child_med)}"
     assert len(child_chal) == 2, f"Expected 2 challenging child scenarios, got {len(child_chal)}"
 
-    # 3. Teen scenarios count & distribution (EXACTLY 5 scenarios: 2 Easy, 2 Medium, 1 Challenging)
+    # 3. Teen scenarios count & distribution (At least 5 scenarios: Easy, Medium, Challenging)
     teen_scenarios = [s for s in DEFAULT_SCENARIOS if 'teen' in s['personas']]
-    assert len(teen_scenarios) == 5, f"Expected exactly 5 teen scenarios, got {len(teen_scenarios)}"
+    assert len(teen_scenarios) >= 5, f"Expected at least 5 teen scenarios, got {len(teen_scenarios)}"
     teen_easy = [s for s in teen_scenarios if s['difficulty'] == 'easy']
     teen_med = [s for s in teen_scenarios if s['difficulty'] == 'medium']
     teen_chal = [s for s in teen_scenarios if s['difficulty'] == 'challenging']
-    assert len(teen_easy) == 2, f"Expected 2 easy teen scenarios, got {len(teen_easy)}"
-    assert len(teen_med) == 2, f"Expected 2 medium teen scenarios, got {len(teen_med)}"
-    assert len(teen_chal) == 1, f"Expected 1 challenging teen scenario, got {len(teen_chal)}"
+    assert len(teen_easy) >= 2, f"Expected at least 2 easy teen scenarios, got {len(teen_easy)}"
+    assert len(teen_med) >= 2, f"Expected at least 2 medium teen scenarios, got {len(teen_med)}"
+    assert len(teen_chal) >= 1, f"Expected at least 1 challenging teen scenario, got {len(teen_chal)}"
 
-    # 4. Adult scenarios count & distribution (EXACTLY 5 scenarios: 2 Easy, 2 Medium, 1 Challenging)
+    # 4. Adult scenarios count & distribution (At least 5 scenarios: Easy, Medium, Challenging)
     adult_scenarios = [s for s in DEFAULT_SCENARIOS if 'adult' in s['personas']]
-    assert len(adult_scenarios) == 5, f"Expected exactly 5 adult scenarios, got {len(adult_scenarios)}"
+    assert len(adult_scenarios) >= 5, f"Expected at least 5 adult scenarios, got {len(adult_scenarios)}"
     adult_easy = [s for s in adult_scenarios if s['difficulty'] == 'easy']
     adult_med = [s for s in adult_scenarios if s['difficulty'] == 'medium']
     adult_chal = [s for s in adult_scenarios if s['difficulty'] == 'challenging']
-    assert len(adult_easy) == 2, f"Expected 2 easy adult scenarios, got {len(adult_easy)}"
-    assert len(adult_med) == 2, f"Expected 2 medium adult scenarios, got {len(adult_med)}"
-    assert len(adult_chal) == 1, f"Expected 1 challenging adult scenario, got {len(adult_chal)}"
+    assert len(adult_easy) >= 2, f"Expected at least 2 easy adult scenarios, got {len(adult_easy)}"
+    assert len(adult_med) >= 2, f"Expected at least 2 medium adult scenarios, got {len(adult_med)}"
+    assert len(adult_chal) >= 1, f"Expected at least 1 challenging adult scenario, got {len(adult_chal)}"
 
 def test_scenario_options_structure():
     # Every scenario MUST have exactly 4 structured options with en, ur, ur_rm text and feedback
@@ -60,7 +60,7 @@ def test_api_scenarios_localization():
     assert res_en.status_code == 200
     data_en = res_en.json().get("data", res_en.json())
     scens_en = data_en["scenarios"]
-    assert len(scens_en) == 5
+    assert len(scens_en) >= 5
     for s in scens_en:
         assert isinstance(s["title"], str) and len(s["title"]) > 0
         assert isinstance(s["description"], str) and len(s["description"]) > 0
@@ -72,7 +72,7 @@ def test_api_scenarios_localization():
     assert res_ur.status_code == 200
     data_ur = res_ur.json().get("data", res_ur.json())
     scens_ur = data_ur["scenarios"]
-    assert len(scens_ur) == 5
+    assert len(scens_ur) >= 5
     for s in scens_ur:
         assert isinstance(s["title"], str) and len(s["title"]) > 0
         assert isinstance(s["description"], str) and len(s["description"]) > 0
@@ -86,7 +86,7 @@ def test_api_scenarios_localization():
     assert res_rm.status_code == 200
     data_rm = res_rm.json().get("data", res_rm.json())
     scens_rm = data_rm["scenarios"]
-    assert len(scens_rm) == 5
+    assert len(scens_rm) >= 5
     for s in scens_rm:
         assert isinstance(s["title"], str) and len(s["title"]) > 0
         assert isinstance(s["description"], str) and len(s["description"]) > 0

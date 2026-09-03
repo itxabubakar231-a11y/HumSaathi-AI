@@ -90,14 +90,14 @@ CHILD_SKILLS = {
 TEEN_SKILLS = {
     'teen_reading_vocab', 'reading_vocabulary', 'reading_vocab',
     'teen_problem_solving', 'problem_solving',
-    'teen_communication', 'teen_social_comm', 'communication', 'social_comm',
+    'teen_communication', 'teen_social_comm', 'communication', 'social_comm', 'conversation',
     'teen_decision_making', 'decision_making'
 }
 
 ADULT_SKILLS = {
     'adult_functional_reading', 'functional_reading',
     'adult_problem_solving', 'workplace_problem_solving', 'everyday_problem_solving', 'problem_solving',
-    'adult_everyday_comm', 'adult_workplace_comm', 'everyday_communication', 'workplace_communication',
+    'adult_everyday_comm', 'adult_workplace_comm', 'everyday_communication', 'workplace_communication', 'communication', 'conversation',
     'adult_decision_making', 'independent_decision_making'
 }
 
@@ -201,11 +201,71 @@ def get_dashboard_stats(db: Session, user_id: str, persona: Optional[str] = None
             .first()
         )
 
-    completed_count = len(attempts_records)
+    # Query completed conversation sessions for this user & persona
+    from app.models.conversation import ConversationSession
+    from datetime import datetime, timedelta
+
+    all_sessions = (
+        db.query(ConversationSession)
+        .filter(ConversationSession.userId == user_id, ConversationSession.completed == True)
+        .all()
+    )
+
+    # Filter sessions by persona
+    persona_sessions = []
+    for s in all_sessions:
+        scen_personas = []
+        if s.scenario and s.scenario.personas:
+            p_val = s.scenario.personas
+            scen_personas = parse_json(p_val, []) if isinstance(p_val, str) else p_val
+        elif s.scenarioId:
+            # Fallback check from ALL_SCENARIOS
+            from app.data.scenarios import ALL_SCENARIOS
+            sc = next((x for x in ALL_SCENARIOS if x["id"] == s.scenarioId), None)
+            if sc:
+                scen_personas = sc.get("personas", [])
+        if active_persona in scen_personas or not scen_personas:
+            persona_sessions.append(s)
+
+    # Real Activity Dates calculation for streaks
+    active_dates = set()
+    for a in attempts_records:
+        if a.completedAt:
+            active_dates.add(a.completedAt.date())
+        elif a.createdAt:
+            active_dates.add(a.createdAt.date())
+
+    for s in persona_sessions:
+        if s.completedAt:
+            active_dates.add(s.completedAt.date())
+        elif s.createdAt:
+            active_dates.add(s.createdAt.date())
+
+    today = datetime.utcnow().date()
+    yesterday = today - timedelta(days=1)
+    current_streak = 0
+    check_date = today if today in active_dates else (yesterday if yesterday in active_dates else None)
+    while check_date and check_date in active_dates:
+        current_streak += 1
+        check_date -= timedelta(days=1)
+
+    start_of_week = today - timedelta(days=today.weekday())
+    weekly_activity_days = []
+    for i in range(7):
+        d = start_of_week + timedelta(days=i)
+        if d in active_dates:
+            weekly_activity_days.append(i)
+
+    today_attempts = sum(1 for a in attempts_records if (a.completedAt and a.completedAt.date() == today) or (not a.completedAt and a.createdAt and a.createdAt.date() == today))
+    today_sessions = sum(1 for s in persona_sessions if (s.completedAt and s.completedAt.date() == today) or (not s.completedAt and s.createdAt and s.createdAt.date() == today))
+    today_completed_count = today_attempts + today_sessions
+
+    completed_count = len(attempts_records) + len(persona_sessions)
+    total_score_sum = sum(a.score for a in attempts_records)
     avg_accuracy = (
-        sum(a.score for a in attempts_records) / completed_count
-        if completed_count > 0
-        else 0.0
+        (total_score_sum / len(attempts_records))
+        if len(attempts_records) > 0
+        else (progress_records[0].accuracy if progress_records else 0.0)
     )
 
     practiced = [p for p in progress_records if p.attempts > 0]
@@ -231,6 +291,9 @@ def get_dashboard_stats(db: Session, user_id: str, persona: Optional[str] = None
         'progress': progress_records,
         'attempts': attempts_records[:10],
         'completedCount': completed_count,
+        'todayCompletedCount': today_completed_count,
+        'currentStreak': current_streak,
+        'weeklyActivityDays': weekly_activity_days,
         'avgAccuracy': avg_accuracy,
         'strongest': strongest,
         'weakest': weakest,

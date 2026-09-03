@@ -117,11 +117,11 @@ export default function FeedbackPage() {
   }
 
   const scores = [
-    { label: t('evaluation.clarity'), value: evaluation?.clarity || 0 },
-    { label: t('evaluation.relevance'), value: evaluation?.relevance || 0 },
-    { label: t('evaluation.appropriateness'), value: evaluation?.appropriateness || 0 },
-    { label: t('evaluation.communication'), value: evaluation?.communication || 0 },
-    { label: t('evaluation.conversationFlow'), value: evaluation?.conversationFlow || 0 },
+    { label: t('evaluation.clarity') || 'Clarity', value: evaluation?.clarity || 0, icon: '🎯' },
+    { label: t('evaluation.relevance') || 'Relevance', value: evaluation?.relevance || 0, icon: '💡' },
+    { label: 'Confidence', value: evaluation?.confidence || Math.round(((evaluation?.appropriateness || 80) + (evaluation?.conversationFlow || 80)) / 2), icon: '🌟' },
+    { label: t('evaluation.communication') || 'Expression', value: evaluation?.communication || 0, icon: '🗣️' },
+    { label: t('evaluation.conversationFlow') || 'Flow', value: evaluation?.conversationFlow || 0, icon: '🌊' },
   ];
 
   const scenarioTitle = getLocalizedText(session?.scenario?.title, language, t('scenarios.title'));

@@ -34,10 +34,10 @@ export default function DashboardPage() {
     ]).then(([dash, assessment, rec, acts]) => {
       setDashboard(dash?.dashboard || { completedCount: 0, avgAccuracy: 0, progress: [], recentAttempts: [], assessmentSummary: null });
       setActivities(acts?.activities || []);
-      if (!assessment?.assessment) {
-        setRecommendation(null);
-      } else if (rec?.recommendation) {
+      if (rec?.recommendation) {
         setRecommendation(rec.recommendation);
+      } else {
+        setRecommendation(null);
       }
     }).catch((err) => {
       console.error('Dashboard error:', err);
@@ -50,8 +50,18 @@ export default function DashboardPage() {
   const langLabel = LANGUAGES.find((l) => l.id === user?.language);
 
   const startRecommended = () => {
-    if (recommendation?.activityId) {
-      navigate(`/activity/${recommendation.activityId}`, { state: { recommendation } });
+    if (recommendation?.scenarioId) {
+      navigate('/scenarios');
+    } else if (recommendation?.activityId) {
+      if (recommendation.activityId.startsWith('scenario_')) {
+        navigate('/scenarios');
+      } else if (recommendation.activityId.startsWith('teen_') || recommendation.activityId.startsWith('adult_')) {
+        navigate(`/skill/${recommendation.activityId}`);
+      } else {
+        navigate(`/activity/${recommendation.activityId}`, { state: { recommendation } });
+      }
+    } else {
+      navigate('/scenarios');
     }
   };
 

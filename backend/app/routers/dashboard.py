@@ -64,6 +64,9 @@ def format_dashboard(stats: Dict[str, Any], rewards: Optional[Dict[str, Any]] = 
         "language": user.language,
         "currentLevel": stats.get("currentLevel", "beginner"),
         "completedCount": stats.get("completedCount", 0),
+        "todayCompletedCount": stats.get("todayCompletedCount", 0),
+        "currentStreak": stats.get("currentStreak", 0),
+        "weeklyActivityDays": stats.get("weeklyActivityDays", []),
         "avgAccuracy": round(stats.get("avgAccuracy", 0) * 100),
         "strengths": [
             {

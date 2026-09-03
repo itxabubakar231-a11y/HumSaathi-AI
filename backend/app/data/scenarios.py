@@ -2,6 +2,7 @@ import json
 
 GENERAL_CHAT_SCENARIO = {
     "id": "scenario_general_chat",
+    "category": "general",
     "title": {
         "en": "HumSaathi AI Assistant & General Chat",
         "ur": "ہم ساتھی اے آئی اسسٹنٹ اور عمومی گفتگو",
@@ -114,6 +115,7 @@ DEFAULT_SCENARIOS = [
     # ==========================================
     {
         "id": "scenario_teacher_help",
+        "category": "peer_school",
         "title": {
             "en": "Asking a teacher for help",
             "ur": "استاد سے مدد طلب کرنا",
@@ -220,6 +222,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_talking_friend",
+        "category": "peer_school",
         "title": {
             "en": "Talking to a friend",
             "ur": "دوست سے بات چیت",
@@ -326,6 +329,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_teacher_confused",
+        "category": "peer_school",
         "title": {
             "en": "Telling a teacher something is not understood",
             "ur": "استاد کو بتانا کہ بات سمجھ نہیں آئی",
@@ -432,6 +436,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_shop_buying",
+        "category": "everyday",
         "title": {
             "en": "Buying something from a shop",
             "ur": "دکان سے خریداری کرنا",
@@ -538,6 +543,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_directions_help",
+        "category": "everyday",
         "title": {
             "en": "Asking someone for help/directions",
             "ur": "کسی سے راستہ یا مدد پوچھنا",
@@ -644,6 +650,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_child_lost_item",
+        "category": "peer_school",
         "title": {
             "en": "Asking for a Lost Item at School",
             "ur": "اسکول میں گمشدہ چیز کے بارے میں پوچھنا",
@@ -750,6 +757,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_new_person",
+        "category": "peer_school",
         "title": {
             "en": "Meeting someone new",
             "ur": "نئے شخص سے تعارف",
@@ -860,6 +868,7 @@ DEFAULT_SCENARIOS = [
     # ==========================================
     {
         "id": "scenario_group_discussion",
+        "category": "peer_school",
         "title": {
             "en": "Joining a Group Discussion",
             "ur": "گروہی گفتگو میں شامل ہونا",
@@ -966,6 +975,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_teen_express_pref",
+        "category": "peer_school",
         "title": {
             "en": "Expressing Preferences in a Social Group",
             "ur": "دوستوں کے گروپ میں اپنی رائے اور پسند بتانا",
@@ -1072,6 +1082,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_teen_teacher_extension",
+        "category": "peer_school",
         "title": {
             "en": "Requesting an Assignment Extension",
             "ur": "اسائنمنٹ کی تاریخ میں توسیع کی درخواست",
@@ -1181,6 +1192,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_teen_peer_dispute",
+        "category": "peer_school",
         "title": {
             "en": "Resolving a Team Project Disagreement",
             "ur": "ٹیم پروجیکٹ میں اختلاف رائے حل کرنا",
@@ -1291,6 +1303,7 @@ DEFAULT_SCENARIOS = [
     # ==========================================
     {
         "id": "scenario_adult_pharmacy",
+        "category": "everyday",
         "title": {
             "en": "Speaking to a Pharmacist About Medication",
             "ur": "فارماسسٹ سے ادویات کے بارے میں معلومات لینا",
@@ -1397,6 +1410,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_adult_doctor_appointment",
+        "category": "everyday",
         "title": {
             "en": "Booking & Rescheduling a Medical Appointment",
             "ur": "ڈاکٹر کے ساتھ ملاقات کا وقت طے کرنا",
@@ -1503,6 +1517,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_manager_clarification",
+        "category": "workplace",
         "title": {
             "en": "Asking Manager for Task Clarification",
             "ur": "مینیجر سے کام کی تفصیلات پر رہنمائی لینا",
@@ -1609,6 +1624,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_adult_colleague_shift",
+        "category": "workplace",
         "title": {
             "en": "Requesting a Shift Swap with a Coworker",
             "ur": "ساتھی ملازم سے شفٹ تبدیل کرنے کی درخواست",
@@ -1715,6 +1731,7 @@ DEFAULT_SCENARIOS = [
     },
     {
         "id": "scenario_adult_customer_support",
+        "category": "everyday",
         "title": {
             "en": "Calling Customer Support About Billing Discrepancy",
             "ur": "بلنگ کی غلطی پر کسٹمر سپورٹ سے رابطہ کرنا",
@@ -1818,8 +1835,1084 @@ DEFAULT_SCENARIOS = [
                 }
             }
         ]
+    },
+# ==========================================
+    # Additional Adult Workplace & Everyday Scenarios
+    # ==========================================
+    {
+        "id": "scenario_adult_job_interview",
+        "title": {
+            "en": "Job Interview: Answering Questions & Sharing Strengths",
+            "ur": "ملازمت کا انٹرویو: سوالات کے جوابات اور صلاحیتوں کا اظہار",
+            "ur_rm": "Job Interview: Sawalat ke jawabat aur strengths share karna"
+        },
+        "description": {
+            "en": "Practice answering common job interview questions with calm confidence, highlighting your skills and enthusiasm.",
+            "ur": "پرسکون اعتماد کے ساتھ ملازمت کے انٹرویو کے سوالات کے جوابات دینے اور اپنی مہارتیں بیان کرنے کی مشق کریں۔",
+            "ur_rm": "Confidence ke sath job interview questions answer karne aur skills highlight karne ki practice karein."
+        },
+        "aiRole": {
+            "en": "Hiring Manager",
+            "ur": "بھرتی مینیجر (انٹرویو لینے والا)",
+            "ur_rm": "Hiring Manager"
+        },
+        "personas": ["adult"],
+        "languages": ["en", "ur", "ur_rm"],
+        "difficulty": "medium",
+        "category": "workplace",
+        "objectives": {
+            "en": [
+                "Greet the interviewer professionally",
+                "Answer questions about your background concisely",
+                "Highlight one key strength and ask a thoughtful question"
+            ],
+            "ur": [
+                "انٹرویو لینے والے کو پیشہ ورانہ انداز میں سلام کریں",
+                "اپنے تجربے سے متعلق سوالات کا جامع جواب دیں",
+                "اپنی ایک اہم صلاحیت واضح کریں اور متعلقہ سوال پوچھیں"
+            ],
+            "ur_rm": [
+                "Interviewer ko professionally greet karein",
+                "Background aur experience ka concise jawab dein",
+                "Apni aik key strength highlight karein"
+            ]
+        },
+        "context": "You are a professional, courteous hiring manager interviewing a candidate for an administrative and support role. Maintain an encouraging yet realistic workplace interview tone.",
+        "initialPrompt": {
+            "en": "Good morning. Thank you for joining us today! To begin, could you tell me a little bit about yourself and why you are interested in this role?",
+            "ur": "صبح بخیر! آج ہمارے ساتھ شامل ہونے کا شکریہ۔ شروع کرنے کے لیے کیا آپ ہمیں اپنے بارے میں اور اس ملازمت میں دلچسپی کی وجہ بتا سکتے ہیں؟",
+            "ur_rm": "Good morning! Aaj humein join karne ka shukriya. Shuru karne ke liye kya aap apne bare mein aur is role mein interest ki wajah bata sakte hain?"
+        },
+        "options": [
+            {
+                "id": "opt_ji_1",
+                "type": "best",
+                "score": 100,
+                "text": {
+                    "en": "Good morning! I have experience in organized teamwork and attention to detail. I'm excited about this role because I enjoy structured problem-solving and helping team members succeed.",
+                    "ur": "صبح بخیر! مجھے منظم ٹیم ورک اور باریک بینی سے کام کرنے کا تجربہ ہے۔ میں اس ملازمت کے لیے پُرجوش ہوں کیونکہ مجھے مسائل حل کرنا اور ٹیم کا ہاتھ بٹانا پسند ہے۔",
+                    "ur_rm": "Good morning! Mujhe organized teamwork aur detail-oriented tasks ka experience hai. Main is role ke liye excited hoon kyunki mujhe problem-solving pasand hai."
+                },
+                "feedback": {
+                    "en": "Polite, focused, and directly connects your personal strengths to the role.",
+                    "ur": "شائستہ، بااعتماد اور ذاتی صلاحیتوں کا ملازمت سے بہترین ربط۔",
+                    "ur_rm": "Polite greeting aur strong, relevant strength statement."
+                }
+            },
+            {
+                "id": "opt_ji_2",
+                "type": "weaker",
+                "score": 75,
+                "text": {
+                    "en": "I need a job right now, and this one looked okay on the job board.",
+                    "ur": "مجھے اس وقت نوکری کی ضرورت تھی، اور یہ اشتہار اچھا لگا تھا۔",
+                    "ur_rm": "Mujhe job ki zaroorat thi is liye apply kiya."
+                },
+                "feedback": {
+                    "en": "Honest, but focuses on personal financial need rather than how your skills fit the company.",
+                    "ur": "سچائی ہے مگر ادارے کے مفاد اور اپنی صلاحیتوں کے بجائے صرف اپنی ضرورت پر توجہ ہے۔",
+                    "ur_rm": "Thora professional tone aur skills ka zikr hona behtar hota."
+                }
+            },
+            {
+                "id": "opt_ji_3",
+                "type": "inappropriate",
+                "score": 40,
+                "text": {
+                    "en": "My last boss was impossible to work with, so I had to leave immediately.",
+                    "ur": "میرا پچھلا باس بالکل کام کے قابل نہیں تھا، اس لیے مجھے چھوڑنا پڑا۔",
+                    "ur_rm": "Mera purana boss bohot bura tha is liye chorna para."
+                },
+                "feedback": {
+                    "en": "Criticizing past employers in an interview creates a negative impression.",
+                    "ur": "سابقہ ملازمین یا مالکان پر تنقید انٹرویو میں منفی تاثر قائم کرتی ہے۔",
+                    "ur_rm": "Past employers par negative comment interview mein avoid karein."
+                }
+            },
+            {
+                "id": "opt_ji_4",
+                "type": "incorrect",
+                "score": 15,
+                "text": {
+                    "en": "I don't really have anything to say. You can just read my resume.",
+                    "ur": "میرے پاس بتانے کو کچھ نہیں ہے، آپ میری سی وی دیکھ سکتے ہیں۔",
+                    "ur_rm": "Mere paas kuch kehne ko nahi hai, CV dekh lein."
+                },
+                "feedback": {
+                    "en": "Interviewers expect verbal engagement and personal communication.",
+                    "ur": "انٹرویو لینے والا زبانی گفتگو اور دلچسپی کا خواہشمند ہوتا ہے۔",
+                    "ur_rm": "Direct refusal to speak creates poor engagement."
+                }
+            }
+        ]
+    },
+    {
+        "id": "scenario_adult_workplace_meeting",
+        "title": {
+            "en": "Active Participation in a Workplace Meeting",
+            "ur": "دفتری میٹنگ میں فعال اور مثبت شرکت",
+            "ur_rm": "Workplace meeting mein active aur positive participation"
+        },
+        "description": {
+            "en": "Practice contributing an update, asking for clarification on agenda points, and confirming next steps in a team meeting.",
+            "ur": "ٹیم میٹنگ میں اپنے کام کی پیشرفت شیئر کرنے اور آئندہ اقدامات کی تصدیق کرنے کی مشق کریں۔",
+            "ur_rm": "Team meeting mein update share karne aur next steps clarify karne ki practice karein."
+        },
+        "aiRole": {
+            "en": "Meeting Facilitator",
+            "ur": "میٹنگ انچارج",
+            "ur_rm": "Meeting Facilitator"
+        },
+        "personas": ["adult"],
+        "languages": ["en", "ur", "ur_rm"],
+        "difficulty": "medium",
+        "category": "workplace",
+        "objectives": {
+            "en": [
+                "Provide a clear status update on your assigned task",
+                "Confirm deadlines and expectations respectfully",
+                "Offer assistance or ask for necessary resources"
+            ],
+            "ur": [
+                "سونپے گئے کام کی واضح پیشرفت پیش کریں",
+                "وقت کی پابندی اور اہداف کی تصدیق کریں",
+                "ضروری وسائل یا رہنمائی طلب کریں"
+            ],
+            "ur_rm": [
+                "Task ki clear status update dein",
+                "Deadlines confirm karein",
+                "Required support ya resources mention karein"
+            ]
+        },
+        "context": "You are chairing a weekly project team meeting. You invite each team member to report on their progress and surface any blockers.",
+        "initialPrompt": {
+            "en": "Thanks for being here everyone. Let's do a quick round of updates. How are things progressing with your assigned weekly deliverables?",
+            "ur": "تمام احباب کا شکریہ۔ آئیے جلدی سے کام کی پیشرفت کا جائزہ لیں۔ اس ہفتے کے سونپے گئے کاموں کی کیا صورتحال ہے؟",
+            "ur_rm": "Thanks everyone for joining. Quick round of updates karte hain. Is week ke assigned tasks ki kya progress hai?"
+        },
+        "options": [
+            {
+                "id": "opt_wm_1",
+                "type": "best",
+                "score": 100,
+                "text": {
+                    "en": "I've completed the preliminary documentation and sent it for review. If approved by Thursday, I will finalize the reports on Friday as scheduled.",
+                    "ur": "میں نے ابتدائی دستاویزات مکمل کر کے نظرثانی کے لیے بھیج دی ہیں۔ جمعرات تک منظوری ملنے پر جمعہ کو حتمی رپورٹ تیار ہو جائے گی۔",
+                    "ur_rm": "Preliminary documentation complete ho chuki hai. Thursday tak approval milne par Friday ko final report ready hogi."
+                },
+                "feedback": {
+                    "en": "Crisp, factual update with a clear timeline and dependencies stated.",
+                    "ur": "بہترین، واضح اور وقت کے تعین کے ساتھ پیشرفت کا جامع اظہار۔",
+                    "ur_rm": "Clear status update with realistic timeline and dependency."
+                }
+            },
+            {
+                "id": "opt_wm_2",
+                "type": "weaker",
+                "score": 70,
+                "text": {
+                    "en": "I'm still working on it. It will be done whenever I finish.",
+                    "ur": "میں ابھی کام کر رہا ہوں۔ جب مکمل ہوگا تب مل جائے گا۔",
+                    "ur_rm": "Main kaam kar raha hoon, jab khatam hoga de doonga."
+                },
+                "feedback": {
+                    "en": "Lacks specific progress markers or expected completion timelines.",
+                    "ur": "پیشرفت کی تفصیل اور متوقع وقت کی وضاحت موجود نہیں۔",
+                    "ur_rm": "Vague timeline makes it hard for team coordination."
+                }
+            },
+            {
+                "id": "opt_wm_3",
+                "type": "inappropriate",
+                "score": 35,
+                "text": {
+                    "en": "Why are we having so many meetings? This is wasting my time.",
+                    "ur": "اتنی میٹنگز کیوں ہوتی ہیں؟ یہ میرے وقت کا ضیاع ہے۔",
+                    "ur_rm": "Itni meetings kyun hoti hain? Time waste ho raha hai."
+                },
+                "feedback": {
+                    "en": "Constructive feedback on meeting frequency is best handled separately with leadership.",
+                    "ur": "میٹنگ کے طریقہ کار پر بات الگ سے مینیجر کے ساتھ شائستگی سے کرنی چاہیے۔",
+                    "ur_rm": "Disruptive in a group status update."
+                }
+            },
+            {
+                "id": "opt_wm_4",
+                "type": "incorrect",
+                "score": 10,
+                "text": {
+                    "en": "[Say nothing and remain silent on mute]",
+                    "ur": "[خاموش رہیں اور مائیک بند رکھیں]",
+                    "ur_rm": "[Khamosh rahein aur jawab na dein]"
+                },
+                "feedback": {
+                    "en": "Active participation requires speaking up when your status is called.",
+                    "ur": "میٹنگ میں باری آنے پر جواب دینا پیشہ ورانہ ذمہ داری ہے۔",
+                    "ur_rm": "Failing to acknowledge questions halts meeting flow."
+                }
+            }
+        ]
+    },
+    {
+        "id": "scenario_adult_workplace_disagreement",
+        "title": {
+            "en": "Resolving a Workplace Disagreement Professionally",
+            "ur": "دفتر میں اختلاف رائے کا پیشہ ورانہ اور پرسکون حل",
+            "ur_rm": "Workplace disagreement ko professionally aur calm tareeqay se resolve karna"
+        },
+        "description": {
+            "en": "Practice de-escalating a disagreement with a colleague over project responsibilities while staying calm and constructive.",
+            "ur": "منصوبے کی ذمہ داریوں پر ساتھی کے ساتھ اختلاف کو پرسکون اور مثبت انداز میں حل کرنے کی مشق کریں۔",
+            "ur_rm": "Project responsibilities par colleague ke sath dispute ko calmly aur constructively solve karein."
+        },
+        "aiRole": {
+            "en": "Project Colleague",
+            "ur": "دفتری ساتھی",
+            "ur_rm": "Project Colleague"
+        },
+        "personas": ["adult"],
+        "languages": ["en", "ur", "ur_rm"],
+        "difficulty": "challenging",
+        "category": "workplace",
+        "objectives": {
+            "en": [
+                "Acknowledge the colleague's perspective calmly",
+                "Express your point of view without assigning blame",
+                "Propose a shared compromise or manager alignment"
+            ],
+            "ur": [
+                "ساتھی کے نقطہ نظر کو پرسکون انداز میں تسلیم کریں",
+                "بغیر الزام تراشی کے اپنا مؤقف بیان کریں",
+                "ایک باہمی قابل قبول حل یا مینیجر سے رہنمائی کی تجویز دیں"
+            ],
+            "ur_rm": [
+                "Colleague ka point of view calmly acknowledge karein",
+                "Blame ke baghair apna perspective explain karein",
+                "Compromise ya manager alignment propose karein"
+            ]
+        },
+        "context": "You are a coworker who feels that the recent division of work on a shared presentation is unbalanced. You express frustration but are open to discussion.",
+        "initialPrompt": {
+            "en": "I looked at the slide breakdown for tomorrow's client presentation. You assigned me 15 slides and kept only 5 for yourself. That doesn't seem fair to me at all.",
+            "ur": "میں نے کل کی کلائنٹ پریزنٹیشن کے سلائیڈز دیکھے ہیں۔ آپ نے مجھے 15 سلائیڈز دی ہیں اور اپنے پاس صرف 5 رکھی ہیں۔ یہ بالکل منصفانہ نہیں لگتا۔",
+            "ur_rm": "Main ne kal ki presentation dekhi hai. Aap ne mujhe 15 slides di hain aur apne paas sirf 5. Yeh fair nahi lagta."
+        },
+        "options": [
+            {
+                "id": "opt_wd_1",
+                "type": "best",
+                "score": 100,
+                "text": {
+                    "en": "I understand your concern. The slides I took contain the deep technical diagrams, but let's rebalance them right now so we both have an equal number of slides.",
+                    "ur": "میں آپ کی بات سمجھ سکتا ہوں۔ میرے پاس پیچیدہ تکنیکی ڈایاگرامز تھے، مگر آئیے ابھی مل کر تقسیم متوازن کر لیتے ہیں تاکہ دونوں پر یکساں کام ہو۔",
+                    "ur_rm": "Main aap ki baat samajhta hoon. Aaiye mil kar slides rebalance kar lete hain taake equal workload rahe."
+                },
+                "feedback": {
+                    "en": "De-escalates tension, validates the coworker's feeling, and offers an immediate practical solution.",
+                    "ur": "تناؤ کم کرتا ہے، ساتھی کے احساسات کی قدر کرتا ہے اور فوری حل پیش کرتا ہے۔",
+                    "ur_rm": "Calm, empathetic, and action-oriented compromise."
+                }
+            },
+            {
+                "id": "opt_wd_2",
+                "type": "weaker",
+                "score": 65,
+                "text": {
+                    "en": "Well, you type faster than me, so I thought it made sense.",
+                    "ur": "دراصل آپ مجھ سے تیز ٹائپ کرتے ہیں، اس لیے میں نے ایسا سوچا۔",
+                    "ur_rm": "Aap typing fast karte hain is liye socha ke theek hoga."
+                },
+                "feedback": {
+                    "en": "Defensive justification that still leaves the coworker feeling overburdened.",
+                    "ur": "وضاحت دی گئی مگر ساتھی کے بوجھ اور انصاف کا مسئلہ حل نہیں ہوا۔",
+                    "ur_rm": "Defensive reason without offering a workload adjustment."
+                }
+            },
+            {
+                "id": "opt_wd_3",
+                "type": "inappropriate",
+                "score": 30,
+                "text": {
+                    "en": "If you can't handle a few slides, maybe you shouldn't be on this project.",
+                    "ur": "اگر آپ چند سلائیڈز نہیں بنا سکتے تو شاید آپ کو اس منصوبے میں نہیں ہونا چاہیے۔",
+                    "ur_rm": "Agar aap slides nahi bana sakte toh project chor dein."
+                },
+                "feedback": {
+                    "en": "Personal attacks damage workplace relationships and lead to formal conflict.",
+                    "ur": "ذاتی حملے کام کی جگہ کے ماحول کو خراب اور تنازعے کو شدید بناتے ہیں۔",
+                    "ur_rm": "Hostile attack severely harms professional collaboration."
+                }
+            },
+            {
+                "id": "opt_wd_4",
+                "type": "incorrect",
+                "score": 20,
+                "text": {
+                    "en": "Fine, do whatever you want. I won't do any slides at all.",
+                    "ur": "ٹھیک ہے، جو مرضی کریں، میں کوئی کام نہیں کروں گا۔",
+                    "ur_rm": "Theek hai, main koi kaam nahi karoon ga."
+                },
+                "feedback": {
+                    "en": "Passive aggression leaves the deliverable incomplete and risks both employees' performance.",
+                    "ur": "کام چھوڑ دینے کی دھمکی نقصان دہ اور غیر پیشہ ورانہ ہے۔",
+                    "ur_rm": "Passive aggressive withdrawal risks project failure."
+                }
+            }
+        ]
+    },
+    {
+        "id": "scenario_adult_prof_intro",
+        "title": {
+            "en": "Professional Introduction & Team Networking",
+            "ur": "پیشہ ورانہ تعارف اور ٹیم سے رابطہ کاری",
+            "ur_rm": "Professional introduction aur team networking"
+        },
+        "description": {
+            "en": "Practice introducing yourself clearly to a new coworker or partner, explaining your role and opening a friendly dialogue.",
+            "ur": "نئے دفتری ساتھی کے سامنے اپنا شائستہ اور جامع تعارف کروانے اور گفتگو شروع کرنے کی مشق کریں۔",
+            "ur_rm": "New colleague ko professional aur friendly introduction dene ki practice karein."
+        },
+        "aiRole": {
+            "en": "New Team Colleague",
+            "ur": "نیا دفتری ساتھی",
+            "ur_rm": "New Team Colleague"
+        },
+        "personas": ["adult"],
+        "languages": ["en", "ur", "ur_rm"],
+        "difficulty": "easy",
+        "category": "workplace",
+        "objectives": {
+            "en": [
+                "State your name and role clearly",
+                "Mention one area where you collaborate",
+                "Ask an open question to learn about their background"
+            ],
+            "ur": [
+                "اپنا نام اور عہدہ واضح طور پر بتائیں",
+                "وہ شعبہ بتائیں جہاں آپ مل کر کام کریں گے",
+                "ان کا شعبہ جاننے کے لیے ایک شائستہ سوال پوچھیں"
+            ],
+            "ur_rm": [
+                "Name aur role clearly state karein",
+                "Collaboration area mention karein",
+                "Unke background ke bare mein open question poochein"
+            ]
+        },
+        "context": "You are a new employee joining the floor. A teammate walks up to your desk to introduce themselves.",
+        "initialPrompt": {
+            "en": "Hi there! I don't think we've officially met yet. Welcome to the team! Which department or project are you working on?",
+            "ur": "ہیلو! میرا خیال ہے ہمارا باضابطہ تعارف نہیں ہوا۔ ٹیم میں خوش آمدید! آپ کس شعبے یا پروجیکٹ پر کام کر رہے ہیں؟",
+            "ur_rm": "Hi there! Official introduction nahi hua shayad. Welcome to the team! Aap kis department par kaam kar rahe hain?"
+        },
+        "options": [
+            {
+                "id": "opt_pi_1",
+                "type": "best",
+                "score": 100,
+                "text": {
+                    "en": "Hello! I'm glad to meet you. I've joined the operations and support team. I'll be helping with workflow and reporting. How long have you been with the team?",
+                    "ur": "ہیلو! آپ سے مل کر خوشی ہوئی۔ میں آپریشنز اور سپورٹ ٹیم میں شامل ہوا ہوں۔ میں رپورٹس اور کام کے بہاؤ میں مدد کروں گا۔ آپ کتنے عرصے سے یہاں ہیں؟",
+                    "ur_rm": "Hello! Nice to meet you. Main operations aur support team mein hoon. Reports aur workflow manage karoon ga. Aap kitne arse se yahan hain?"
+                },
+                "feedback": {
+                    "en": "Warm, professional, states your role clearly, and shows reciprocal interest.",
+                    "ur": "گرم جوش، باوقار انداز، عہدے کی وضاحت اور ساتھی سے متعلق شائستہ سوال۔",
+                    "ur_rm": "Warm greeting, clear role definition, and engaging question."
+                }
+            },
+            {
+                "id": "opt_pi_2",
+                "type": "weaker",
+                "score": 75,
+                "text": {
+                    "en": "Hi. I work here now. Just doing computer work.",
+                    "ur": "ہیلو، میں اب یہاں کام کرتا ہوں۔ بس کمپیوٹر کا کام ہے۔",
+                    "ur_rm": "Hi. Main yahan kaam karta hoon. Computer work hai."
+                },
+                "feedback": {
+                    "en": "Polite, but brief and gives the colleague very little context about what you actually do.",
+                    "ur": "شائستہ ہے مگر بہت مختصر اور غیر واضح ہے۔",
+                    "ur_rm": "Too brief, gives little helpful context."
+                }
+            },
+            {
+                "id": "opt_pi_3",
+                "type": "inappropriate",
+                "score": 40,
+                "text": {
+                    "en": "I'm busy right now, don't interrupt me.",
+                    "ur": "میں ابھی مصروف ہوں، مجھے تنگ نہ کریں۔",
+                    "ur_rm": "Main busy hoon, abhi baat mat karein."
+                },
+                "feedback": {
+                    "en": "A cold brush-off creates an unapproachable reputation from day one.",
+                    "ur": "سرد مہری کا مظاہرہ شروع سے ہی دفتری تعلقات کو بگاڑ سکتا ہے۔",
+                    "ur_rm": "Cold response damages initial networking."
+                }
+            },
+            {
+                "id": "opt_pi_4",
+                "type": "incorrect",
+                "score": 20,
+                "text": {
+                    "en": "Who wants to know? Are you inspecting me?",
+                    "ur": "کون پوچھ رہا ہے؟ کیا آپ میری تفتیش کر رہے ہیں؟",
+                    "ur_rm": "Kyun pooch rahe hain? Kya inspection hai?"
+                },
+                "feedback": {
+                    "en": "Overly suspicious response to a standard friendly workplace greeting.",
+                    "ur": "عام تعارفی جملے پر شک و شبہ کا اظہار مناسب نہیں۔",
+                    "ur_rm": "Suspicious tone causes immediate discomfort."
+                }
+            }
+        ]
+    },
+    {
+        "id": "scenario_adult_bank_inquiry",
+        "title": {
+            "en": "Bank Service: Account Inquiry & Debit Card Clarification",
+            "ur": "بینک سروس: اکاؤنٹ اور ڈیبٹ کارڈ سے متعلق رہنمائی",
+            "ur_rm": "Bank service: Account aur debit card guidance"
+        },
+        "description": {
+            "en": "Practice approaching a bank customer representative, asking about a card status, and clarifying fee structures.",
+            "ur": "بینک افسر کے پاس جا کر اپنے کارڈ کی حالت جاننے اور چارجز کی وضاحت طلب کرنے کی مشق کریں۔",
+            "ur_rm": "Bank representative se card status aur fees verify karne ki practical conversation."
+        },
+        "aiRole": {
+            "en": "Bank Customer Representative",
+            "ur": "بینک کسٹمر سروس نمائندہ",
+            "ur_rm": "Bank Representative"
+        },
+        "personas": ["adult"],
+        "languages": ["en", "ur", "ur_rm"],
+        "difficulty": "easy",
+        "category": "everyday",
+        "objectives": {
+            "en": [
+                "Politely state your purpose for visiting the bank",
+                "Provide necessary identification or account reference",
+                "Ask clear questions about card activation or fees"
+            ],
+            "ur": [
+                "بینک آنے کا مقصد شائستگی سے بتائیں",
+                "ضروری شناختی معلومات یا اکاؤنٹ نمبر پیش کریں",
+                "کارڈ ایکٹیویشن اور فیس سے متعلق واضح سوال پوچھیں"
+            ],
+            "ur_rm": [
+                "Bank visit ka purpose politely explain karein",
+                "Account number ya ID verify karein",
+                "Card activation aur charges par clarification lein"
+            ]
+        },
+        "context": "You are a customer service officer at a retail bank branch. A customer approaches your desk.",
+        "initialPrompt": {
+            "en": "Good afternoon! Welcome to First National Bank. How can I assist you with your account today?",
+            "ur": "سہ پہر بخیر! فرسٹ نیشنل بینک میں خوش آمدید۔ آج میں آپ کے اکاؤنٹ کے سلسلے میں کیا مدد کر سکتا ہوں؟",
+            "ur_rm": "Good afternoon! Bank mein khush aamdeed. Main aap ke account ke silsile mein kya madad kar sakta hoon?"
+        },
+        "options": [
+            {
+                "id": "opt_bi_1",
+                "type": "best",
+                "score": 100,
+                "text": {
+                    "en": "Good afternoon. I received a new debit card in the mail, and I need help activating it. Could you also confirm if there are any monthly maintenance fees?",
+                    "ur": "سہ پہر بخیر۔ مجھے ڈاک کے ذریعے نیا ڈیبٹ کارڈ موصول ہوا ہے اور مجھے اسے فعال کرنے میں مدد چاہیے۔ کیا آپ تصدیق کر سکتے ہیں کہ آیا اس پر ماہانہ فیس ہے؟",
+                    "ur_rm": "Good afternoon. Mujhe mail mein naya debit card mila hai, activate karwana hai. Kya aap confirm kar sakte hain ke koi monthly fee hai?"
+                },
+                "feedback": {
+                    "en": "Clear, specific, and asks pertinent financial questions upfront.",
+                    "ur": "واضح، شائستہ اور ضروری مالیاتی سوالات کا بروقت استفسار۔",
+                    "ur_rm": "Clear statement of purpose with relevant follow-up question."
+                }
+            },
+            {
+                "id": "opt_bi_2",
+                "type": "weaker",
+                "score": 70,
+                "text": {
+                    "en": "My card isn't working. Do something with it.",
+                    "ur": "میرا کارڈ کام نہیں کر رہا۔ اس کا کچھ کریں۔",
+                    "ur_rm": "Mera card kaam nahi kar raha, theek karein."
+                },
+                "feedback": {
+                    "en": "Direct, but lacks greeting and doesn't explain what card or problem occurred.",
+                    "ur": "سلام غائب ہے اور مسئلے کی تفصیل بیان نہیں کی گئی۔",
+                    "ur_rm": "Missing greeting and specific context of the card problem."
+                }
+            },
+            {
+                "id": "opt_bi_3",
+                "type": "inappropriate",
+                "score": 35,
+                "text": {
+                    "en": "Banks always rip people off with hidden fees, admit it!",
+                    "ur": "بینک ہمیشہ خفیہ فیسوں سے لوگوں کو لوٹتے ہیں، اعتراف کریں!",
+                    "ur_rm": "Bank hamesha hidden fees se loot-te hain!"
+                },
+                "feedback": {
+                    "en": "Hostility toward front-desk staff obstructs productive assistance.",
+                    "ur": "غصہ دکھانے سے آپ کا جائز کام بھی تاخیر کا شکار ہو جاتا ہے۔",
+                    "ur_rm": "Aggressive tone delays practical help."
+                }
+            },
+            {
+                "id": "opt_bi_4",
+                "type": "incorrect",
+                "score": 15,
+                "text": {
+                    "en": "Give me someone's money right now.",
+                    "ur": "مجھے ابھی کسی کے پیسے نکال کر دیں۔",
+                    "ur_rm": "Mujhe abhi kisi ke paise nikaal kar dein."
+                },
+                "feedback": {
+                    "en": "Demanding unauthorized funds triggers bank security protocols.",
+                    "ur": "غیر قانونی مالیاتی مطالبہ سیکیورٹی الرٹ کا سبب بنتا ہے۔",
+                    "ur_rm": "Unauthorized demand creates security alarm."
+                }
+            }
+        ]
+    },
+    {
+        "id": "scenario_adult_restaurant_order",
+        "title": {
+            "en": "Restaurant Dining: Ordering Food & Asking Dietary Information",
+            "ur": "ریستوران: کھانا آرڈر کرنا اور اجزاء کی وضاحت طلب کرنا",
+            "ur_rm": "Restaurant: Khana order karna aur dietary info poochna"
+        },
+        "description": {
+            "en": "Practice placing an order at a casual restaurant, asking about ingredients, and requesting the bill politely.",
+            "ur": "ریستوران میں کھانا آرڈر کرنے، اجزاء کی معلومات لینے اور بل طلب کرنے کی مشق کریں۔",
+            "ur_rm": "Restaurant mein order place karne aur dietary questions poochne ki practical practice."
+        },
+        "aiRole": {
+            "en": "Restaurant Server",
+            "ur": "ریستوران کا ویٹر",
+            "ur_rm": "Restaurant Server"
+        },
+        "personas": ["adult"],
+        "languages": ["en", "ur", "ur_rm"],
+        "difficulty": "easy",
+        "category": "everyday",
+        "objectives": {
+            "en": [
+                "Review the menu choices and state your order clearly",
+                "Ask a dietary question (e.g. allergies, vegetarian options, spice level)",
+                "Thank the server and request the check when finished"
+            ],
+            "ur": [
+                "مینو دیکھ کر اپنا آرڈر واضح انداز میں بتائیں",
+                "کھانے کے اجزاء (الرجی یا مصالحے) سے متعلق دریافت کریں",
+                "ویٹر کا شکریہ ادا کریں اور فارغ ہو کر بل مانگیں"
+            ],
+            "ur_rm": [
+                "Menu se apna order clearly specify karein",
+                "Dietary ya spice level question poochein",
+                "Server ka shukriya ada karein"
+            ]
+        },
+        "context": "You are a friendly server at a neighborhood cafe and grill. You come to take a customer's order.",
+        "initialPrompt": {
+            "en": "Hi, welcome! Are you ready to order, or would you like a few more minutes to look over the menu?",
+            "ur": "خوش آمدید! کیا آپ آرڈر دینے کے لیے تیار ہیں یا مینو دیکھنے کے لیے مزید وقت درکار ہے؟",
+            "ur_rm": "Welcome! Kya aap order ke liye ready hain ya thora time chahiye menu dekhne ke liye?"
+        },
+        "options": [
+            {
+                "id": "opt_ro_1",
+                "type": "best",
+                "score": 100,
+                "text": {
+                    "en": "I'm ready, thank you! I would like the grilled chicken sandwich with a side salad. Could you please make sure there are no nuts in the dressing?",
+                    "ur": "میں تیار ہوں، شکریہ! مجھے گرلڈ چکن سینڈوچ اور سلاد چاہیے۔ کیا آپ یقینی بنا سکتے ہیں کہ ڈریسنگ میں خشک میوہ جات نہ ہوں؟",
+                    "ur_rm": "Ready hoon, thanks! Chicken sandwich aur side salad chahiye. Please ensure karein ke salad dressing mein nuts na hon."
+                },
+                "feedback": {
+                    "en": "Polite, specifies the exact entree and side, and clearly communicates dietary preferences.",
+                    "ur": "شائستہ، مکمل آرڈر کی وضاحت اور الرجی کی بروقت نشاندہی۔",
+                    "ur_rm": "Polite, specific order with clear dietary instruction."
+                }
+            },
+            {
+                "id": "opt_ro_2",
+                "type": "weaker",
+                "score": 75,
+                "text": {
+                    "en": "Bring me chicken food. Make it fast.",
+                    "ur": "چکن کا کوئی کھانا لائیں۔ جلدی کریں۔",
+                    "ur_rm": "Chicken ka khana le aao jaldi."
+                },
+                "feedback": {
+                    "en": "Too vague and demanding. Specifying the exact item helps the kitchen.",
+                    "ur": "مبہم اور جلد بازی والا انداز جس سے غلط چیز آ سکتی ہے۔",
+                    "ur_rm": "Vague order without item name or courtesy."
+                }
+            },
+            {
+                "id": "opt_ro_3",
+                "type": "inappropriate",
+                "score": 40,
+                "text": {
+                    "en": "Your menu is way too expensive for regular food.",
+                    "ur": "آپ کے مینو کے ریٹ عام کھانے کے حساب سے بہت زیادہ ہیں۔",
+                    "ur_rm": "Aap ka menu bohot mehanga hai."
+                },
+                "feedback": {
+                    "en": "Servers do not set menu prices; review prices before seating.",
+                    "ur": "ویٹر قیمتیں طے نہیں کرتے، یہ بات آرڈر کے وقت مناسب نہیں۔",
+                    "ur_rm": "Complaining to the server about prices creates awkwardness."
+                }
+            },
+            {
+                "id": "opt_ro_4",
+                "type": "incorrect",
+                "score": 20,
+                "text": {
+                    "en": "I'll eat whatever you have left over in the garbage.",
+                    "ur": "بچا کھچا کچھ بھی دے دیں۔",
+                    "ur_rm": "Bacha kucha kuch bhi de dein."
+                },
+                "feedback": {
+                    "en": "Disrespectful to yourself and the staff.",
+                    "ur": "غیر سنجیدہ اور غیر مناسب جملہ۔",
+                    "ur_rm": "Inappropriate and non-constructive dialogue."
+                }
+            }
+        ]
+    },
+    {
+        "id": "scenario_adult_transit_delay",
+        "title": {
+            "en": "Practical Problem Solving: Cancelled Bus & Workplace Notification",
+            "ur": "عملی مسئلہ حل کرنا: بس منسوخی اور مینیجر کو بروقت اطلاع",
+            "ur_rm": "Problem solving: Cancelled bus aur manager ko timely notice"
+        },
+        "description": {
+            "en": "Practical real-world challenge: Your scheduled morning bus was cancelled. Practice notifying your supervisor and deciding on an alternative commute.",
+            "ur": "حقیقی مسئلہ: صبح کی بس منسوخ ہو گئی۔ مینیجر کو بروقت آگاہ کرنے اور متبادل راستے کا انتخاب کرنے کی مشق کریں۔",
+            "ur_rm": "Morning bus cancel ho gayi. Supervisor ko notify karne aur alternative commute plan karne ki practice."
+        },
+        "aiRole": {
+            "en": "Workplace Supervisor",
+            "ur": "دفتری نگران (سپروائزر)",
+            "ur_rm": "Workplace Supervisor"
+        },
+        "personas": ["adult"],
+        "languages": ["en", "ur", "ur_rm"],
+        "difficulty": "medium",
+        "category": "problem_solving",
+        "objectives": {
+            "en": [
+                "Proactively notify your supervisor before your shift begins",
+                "Explain the transit cancellation factually",
+                "Provide an updated estimated arrival time and commit to making up work"
+            ],
+            "ur": [
+                "شفٹ شروع ہونے سے پہلے سپروائزر کو خود اطلاع دیں",
+                "بس کی منسوخی کی حقیقت پسندانہ وجہ بیان کریں",
+                "پہنچنے کا متوقع وقت بتائیں اور کام پورا کرنے کی یقین دہانی کرائیں"
+            ],
+            "ur_rm": [
+                "Shift start hone se pehle proactively inform karein",
+                "Transit cancellation factually explain karein",
+                "Updated ETA dein aur task handover ensure karein"
+            ]
+        },
+        "context": "You are a workplace shift supervisor. An employee calls or messages you 20 minutes before their scheduled morning shift.",
+        "initialPrompt": {
+            "en": "Good morning. I see you're calling. Is everything okay regarding your 9:00 AM shift?",
+            "ur": "صبح بخیر۔ میں نے دیکھا کہ آپ کی کال آ رہی ہے۔ کیا صبح نو بجے کی شفٹ کے حوالے سے سب خیریت ہے؟",
+            "ur_rm": "Good morning. Aap ki call ayi hai, kya 9:00 AM shift ke bare mein sab theek hai?"
+        },
+        "options": [
+            {
+                "id": "opt_td_1",
+                "type": "best",
+                "score": 100,
+                "text": {
+                    "en": "Good morning. The Route 4 bus was just cancelled due to mechanical failure. I'm taking the next train and expect to arrive around 9:25 AM. I will stay 30 minutes late today to complete all tasks.",
+                    "ur": "صبح بخیر۔ تکنیکی خرابی کی وجہ سے بس روٹ 4 منسوخ ہو گئی ہے۔ میں اگلی ٹرین لے رہا ہوں اور 9:25 تک پہنچ جاؤں گا۔ میں آج تمام کام مکمل کرنے کے لیے 30 منٹ اضافی رکوں گا۔",
+                    "ur_rm": "Good morning. Route 4 bus cancel ho gayi hai. Main train le raha hoon aur 9:25 AM tak pohanch jaoon ga. Main 30 min extra ruk kar kaam poora karoon ga."
+                },
+                "feedback": {
+                    "en": "Professional, responsible, explains the cause, provides an exact ETA, and offers a proactive solution.",
+                    "ur": "ذمہ دارانہ انداز، وجہ کی وضاحت، متوقع وقت کی نشاندہی اور کام کی تلافی کی پیشکش۔",
+                    "ur_rm": "Proactive notification with realistic ETA and solution."
+                }
+            },
+            {
+                "id": "opt_td_2",
+                "type": "weaker",
+                "score": 65,
+                "text": {
+                    "en": "The bus broke down. I don't know when I'll show up.",
+                    "ur": "بس خراب ہو گئی۔ پتہ نہیں میں کب آؤں گا۔",
+                    "ur_rm": "Bus kharab ho gayi, pata nahi kab aaoon ga."
+                },
+                "feedback": {
+                    "en": "Informing is good, but uncertainty leaves the team unable to plan shift coverage.",
+                    "ur": "اطلاع تو دی گئی مگر غیریقینی وقت کی وجہ سے ٹیم کام کا انتظام نہیں کر سکتی۔",
+                    "ur_rm": "Lacks an estimated arrival time or action plan."
+                }
+            },
+            {
+                "id": "opt_td_3",
+                "type": "inappropriate",
+                "score": 30,
+                "text": {
+                    "en": "Public transit is garbage in this city, so don't expect me today.",
+                    "ur": "اس شہر کی پبلک ٹرانسپورٹ بیکار ہے، اس لیے آج میرا انتظار نہ کریں۔",
+                    "ur_rm": "Public transport kharab hai, main aaj nahi aa raha."
+                },
+                "feedback": {
+                    "en": "Unilaterally taking the day off over a delay harms reliability and employment standing.",
+                    "ur": "چھوٹی تاخیر پر بغیر کوشش کے چھٹی کر لینا غیر ذمہ دارانہ ہے۔",
+                    "ur_rm": "Giving up without seeking backup transit harms professional standing."
+                }
+            },
+            {
+                "id": "opt_td_4",
+                "type": "incorrect",
+                "score": 10,
+                "text": {
+                    "en": "[Don't notify anyone and just show up 2 hours late without explanation]",
+                    "ur": "[کسی کو کچھ نہ بتائیں اور 2 گھنٹے دیر سے بغیر وضاحت پہنچیں]",
+                    "ur_rm": "[Koi notice na dein aur 2 hours late pohanchein]"
+                },
+                "feedback": {
+                    "en": "Unexcused no-shows violate basic workplace policy.",
+                    "ur": "بغیر بتائے غیر حاضر ہونا یا تاخیر کرنا ملازمت کی پالیسی کے خلاف ہے۔",
+                    "ur_rm": "No-call no-show leads to disciplinary action."
+                }
+            }
+        ]
+    },
+    {
+        "id": "scenario_adult_confusing_email",
+        "title": {
+            "en": "Practical Problem Solving: Clarifying an Unclear Workplace Email",
+            "ur": "عملی مسئلہ حل کرنا: مبہم ای میل کی باادب وضاحت طلب کرنا",
+            "ur_rm": "Problem solving: Unclear email ki polite clarification lena"
+        },
+        "description": {
+            "en": "You received an email from your project lead with ambiguous instructions. Practice asking for specific clarification politely without sounding critical.",
+            "ur": "پروجیکٹ لیڈ سے موصول ہونے والی غیر واضح ای میل پر شائستہ اور درست وضاحت طلب کرنے کی مشق کریں۔",
+            "ur_rm": "Ambiguous instructions wali email par polite clarification lene ki practice."
+        },
+        "aiRole": {
+            "en": "Project Lead",
+            "ur": "پروجیکٹ انچارج",
+            "ur_rm": "Project Lead"
+        },
+        "personas": ["adult"],
+        "languages": ["en", "ur", "ur_rm"],
+        "difficulty": "medium",
+        "category": "problem_solving",
+        "objectives": {
+            "en": [
+                "Reference the specific email or subject line",
+                "Identify precisely which detail is ambiguous",
+                "Propose your understanding and ask for quick confirmation"
+            ],
+            "ur": [
+                "متعلقہ ای میل یا عنوان کا حوالہ دیں",
+                "واضح کریں کہ کس نکتے میں رہنمائی درکار ہے",
+                "اپنی سمجھ بیان کر کے حتمی توثیق مانگیں"
+            ],
+            "ur_rm": [
+                "Subject line ya email quote karein",
+                "Ambiguous point highlight karein",
+                "Apni understanding share kar ke confirm karein"
+            ]
+        },
+        "context": "You are a busy project supervisor. You sent a brief email asking for 'the numbers by end of day'. A team member approaches you to clarify.",
+        "initialPrompt": {
+            "en": "Hi. Did you get my note about submitting the numbers by 5 PM? Do you have any questions before you wrap that up?",
+            "ur": "ہیلو۔ کیا آپ کو شام 5 بجے تک نمبرز جمع کرانے کی ای میل مل گئی تھی؟ کام ختم کرنے سے پہلے کوئی سوال ہے؟",
+            "ur_rm": "Hi. Kya aap ko 5 PM tak numbers submit karne ki email mil gayi thi? Koi question hai?"
+        },
+        "options": [
+            {
+                "id": "opt_ce_1",
+                "type": "best",
+                "score": 100,
+                "text": {
+                    "en": "Yes, thank you! I wanted to confirm whether you need the monthly sales totals or the detailed regional breakdown for the report?",
+                    "ur": "جی شکریہ! میں تصدیق کرنا چاہتا تھا کہ آیا آپ کو ماہانہ فروخت کا مجموعہ درکار ہے یا علاقے وار تفصیلی رپورٹ؟",
+                    "ur_rm": "Yes thanks! Main confirm karna chahta tha ke monthly total sales chahiye ya detailed regional breakdown?"
+                },
+                "feedback": {
+                    "en": "Courteous, specific, and gives two distinct options so the lead can reply in seconds.",
+                    "ur": "باادب، مخصوص اور واضح دو راستے پیش کیے گئے جن کا جواب ایک لمحے میں دیا جا سکتا ہے۔",
+                    "ur_rm": "Polite and structured clarification with concrete options."
+                }
+            },
+            {
+                "id": "opt_ce_2",
+                "type": "weaker",
+                "score": 65,
+                "text": {
+                    "en": "Your email didn't make any sense, so I haven't started.",
+                    "ur": "آپ کی ای میل سمجھ نہیں آئی تھی اس لیے میں نے شروع نہیں کیا۔",
+                    "ur_rm": "Aap ki email samajh nahi ayi is liye start nahi kiya."
+                },
+                "feedback": {
+                    "en": "Blunt phrasing puts the supervisor on the defensive and confesses to an avoidable delay.",
+                    "ur": "سخت لہجہ ہے جس سے وقت کا ضیاع ظاہر ہوتا ہے۔",
+                    "ur_rm": "Blunt tone sounds accusatory and highlights delayed action."
+                }
+            },
+            {
+                "id": "opt_ce_3",
+                "type": "inappropriate",
+                "score": 35,
+                "text": {
+                    "en": "You always write confusing instructions. Learn to communicate better.",
+                    "ur": "آپ ہمیشہ الجھی ہوئی ہدایات لکھتے ہیں، ای میل لکھنا سیکھیں۔",
+                    "ur_rm": "Aap hamesha confusing likhte hain, sahi likhna seekhein."
+                },
+                "feedback": {
+                    "en": "Directly insulting a supervisor is a serious workplace infraction.",
+                    "ur": "نگران کی توہین کرنا دفتری نظم و ضبط کی سنگین خلاف ورزی ہے۔",
+                    "ur_rm": "Insulting your lead damages your career."
+                }
+            },
+            {
+                "id": "opt_ce_4",
+                "type": "incorrect",
+                "score": 20,
+                "text": {
+                    "en": "I'll just guess what you meant and send random numbers.",
+                    "ur": "میں تکہ لگا کر کوئی بھی نمبرز بھیج دوں گا۔",
+                    "ur_rm": "Main guess kar ke kuch bhi bhej doonga."
+                },
+                "feedback": {
+                    "en": "Guessing critical work data risks business errors.",
+                    "ur": "اہم دفتری اعداد و شمار میں تکہ لگانا سنگین نقصان کا باعث بنتا ہے۔",
+                    "ur_rm": "Submitting unverified data risks costly errors."
+                }
+            }
+        ]
+    },
+
+    # ==========================================
+    # Additional Teen Scenarios
+    # ==========================================
+    {
+        "id": "scenario_teen_need_help",
+        "title": {
+            "en": "Expressing Confusion & Saying 'I Need Help'",
+            "ur": "الجھن کا اظہار اور 'مجھے مدد درکار ہے' شائستگی سے کہنا",
+            "ur_rm": "Confusion express karna aur 'Mujhe help chahiye' politely kehna"
+        },
+        "description": {
+            "en": "Practice overcoming hesitation when you don't understand a concept, asking for help politely from a teacher or classmate.",
+            "ur": "کسی سبق میں الجھن ہونے پر ہچکچاہٹ پر قابو پانے اور استاد یا ہم جماعت سے شائستگی سے مدد مانگنے کی مشق کریں۔",
+            "ur_rm": "Concept samajh na aane par teacher ya classmate se politely help maangne ki practice."
+        },
+        "aiRole": {
+            "en": "Study Partner / Classmate",
+            "ur": "ہم جماعت / پڑھائی کا ساتھی",
+            "ur_rm": "Study Partner"
+        },
+        "personas": ["teen"],
+        "languages": ["en", "ur", "ur_rm"],
+        "difficulty": "easy",
+        "category": "peer_school",
+        "objectives": {
+            "en": [
+                "Acknowledge what part you find confusing without embarrassment",
+                "Ask a specific clarifying question",
+                "Thank the peer for taking time to explain"
+            ],
+            "ur": [
+                "بغیر جھجھک کے بتائیں کہ کون سا حصہ سمجھ نہیں آیا",
+                "ایک مخصوص وضاحتی سوال پوچھیں",
+                "سمجھانے پر ساتھی کا شکریہ ادا کریں"
+            ],
+            "ur_rm": [
+                "Confusion wala part bina hesitation explain karein",
+                "Specific question poochein",
+                "Peer ka shukriya ada karein"
+            ]
+        },
+        "context": "You are a friendly high school study partner working together on a biology assignment in the library.",
+        "initialPrompt": {
+            "en": "Hey! We're halfway through question 4 on cellular respiration. How are your notes looking so far?",
+            "ur": "ہیلو! ہم سوال نمبر 4 کے آدھے حصے پر پہنچ چکے ہیں۔ آپ کے نوٹس کیسے بن رہے ہیں؟",
+            "ur_rm": "Hey! Hum question 4 par hain. Aap ke notes kaise ja rahe hain ab tak?"
+        },
+        "options": [
+            {
+                "id": "opt_tnh_1",
+                "type": "best",
+                "score": 100,
+                "text": {
+                    "en": "To be honest, I'm a bit confused about the second step. Could we pause and walk through that part together?",
+                    "ur": "سچ کہوں تو مجھے دوسرے مرحلے پر کچھ الجھن ہو رہی ہے۔ کیا ہم تھوڑی دیر رک کر اس حصے کو مل کر دہرا سکتے ہیں؟",
+                    "ur_rm": "Honestly mujhe second step mein thori confusion hai. Kya hum pause kar ke woh part saath dekh sakte hain?"
+                },
+                "feedback": {
+                    "en": "Honest, calm, identifies where help is needed, and suggests a collaborative way forward.",
+                    "ur": "سچائی، پرسکون انداز اور مل کر حل نکالنے کی بہترین تجویز۔",
+                    "ur_rm": "Great honest communication that invites friendly collaboration."
+                }
+            },
+            {
+                "id": "opt_tnh_2",
+                "type": "weaker",
+                "score": 70,
+                "text": {
+                    "en": "Yeah, sure, whatever. I'm fine.",
+                    "ur": "ہاں ہاں ٹھیک ہے، سب ٹھیک ہے۔",
+                    "ur_rm": "Haan theek hai sab, koi issue nahi."
+                },
+                "feedback": {
+                    "en": "Hiding confusion leads to falling behind on the assignment.",
+                    "ur": "الجھن چھپانے سے کام ادھورا رہ جانے کا خدشہ رہتا ہے۔",
+                    "ur_rm": "Pretending you understand prevents you from getting helpful guidance."
+                }
+            },
+            {
+                "id": "opt_tnh_3",
+                "type": "inappropriate",
+                "score": 40,
+                "text": {
+                    "en": "This subject is totally stupid and so is this assignment.",
+                    "ur": "یہ مضمون بالکل بیکار ہے اور یہ کام بھی۔",
+                    "ur_rm": "Yeh subject bilkul bekar hai."
+                },
+                "feedback": {
+                    "en": "Venting frustration doesn't help you understand the material.",
+                    "ur": "غصہ نکالنے سے پڑھائی میں مدد نہیں ملتی۔",
+                    "ur_rm": "Venting frustration discourages your study partner."
+                }
+            },
+            {
+                "id": "opt_tnh_4",
+                "type": "incorrect",
+                "score": 15,
+                "text": {
+                    "en": "Just do all my questions for me while I sleep.",
+                    "ur": "بس میرے سارے سوالات خود کر دیں اور میں سو جاتا ہوں۔",
+                    "ur_rm": "Aap mere liye saara kaam kar dein."
+                },
+                "feedback": {
+                    "en": "Asking others to do your homework is unfair to them and stops your own learning.",
+                    "ur": "اپنا کام دوسروں سے کروانا غیر منصفانہ ہے۔",
+                    "ur_rm": "Unfair demand that halts your personal growth."
+                }
+            }
+        ]
+    },
+    {
+        "id": "scenario_teen_intro_club",
+        "title": {
+            "en": "Introducing Yourself at a School Club or Activity",
+            "ur": "اسکول کلب یا سرگرمی میں اپنا دوستانہ تعارف کروانا",
+            "ur_rm": "School club ya activity mein friendly introduction dena"
+        },
+        "description": {
+            "en": "Practice introducing yourself when joining an after-school club (like robotics, art, or debate), expressing your interest and making a friend.",
+            "ur": "کسی اسکول کلب (جیسے روبوٹکس، آرٹ یا مباحثہ) میں پہلی بار جاتے ہوئے پرسکون تعارف کروانے کی مشق کریں۔",
+            "ur_rm": "After-school club join karte waqt apna friendly introduction dene ki practice."
+        },
+        "aiRole": {
+            "en": "School Club Leader",
+            "ur": "اسکول کلب کا صدر / لیڈر",
+            "ur_rm": "Club Leader"
+        },
+        "personas": ["teen"],
+        "languages": ["en", "ur", "ur_rm"],
+        "difficulty": "easy",
+        "category": "peer_school",
+        "objectives": {
+            "en": [
+                "Introduce your name and grade politely",
+                "Mention what sparked your interest in the club",
+                "Ask how newcomers can participate today"
+            ],
+            "ur": [
+                "شائستگی سے اپنا نام اور کلاس بتائیں",
+                "بتائیں کہ آپ کو اس کلب میں کیا چیز پسند آئی",
+                "پوچھیں کہ نئے ارکان آج کیسے شامل ہو سکتے ہیں"
+            ],
+            "ur_rm": [
+                "Name aur grade politely state karein",
+                "Club mein interest share karein",
+                "Newcomers ke participate karne ka tarika poochein"
+            ]
+        },
+        "context": "You are the student president of the school technology and creative arts club. A new student attends their very first meeting.",
+        "initialPrompt": {
+            "en": "Hi! Welcome to our after-school club meeting. We always love seeing new faces. What's your name, and what made you want to check us out today?",
+            "ur": "ہیلو! ہمارے اسکول کلب کے اجلاس میں خوش آمدید۔ ہمیں نئے ساتھیوں کو دیکھ کر بہت خوشی ہوتی ہے۔ آپ کا نام کیا ہے اور آج آپ کیا سیکھنا چاہتے ہیں؟",
+            "ur_rm": "Hi! Club meeting mein welcome! Aap ka name kya hai aur aaj kya cheez dekhne ka irada hai?"
+        },
+        "options": [
+            {
+                "id": "opt_tic_1",
+                "type": "best",
+                "score": 100,
+                "text": {
+                    "en": "Hi! My name is Ali, and I'm in 10th grade. I've always wanted to learn more about creative coding and robotics. What are you working on today?",
+                    "ur": "ہیلو! میرا نام علی ہے اور میں دسویں جماعت میں ہوں۔ میں ہمیشہ سے کوڈنگ اور روبوٹکس کے بارے میں مزید جاننا چاہتا تھا۔ آج آپ کس چیز پر کام کر رہے ہیں؟",
+                    "ur_rm": "Hi! Mera name Ali hai aur main 10th grade mein hoon. Coding aur robotics explore karna chahta hoon. Aaj kis project par kaam hai?"
+                },
+                "feedback": {
+                    "en": "Friendly, respectful, introduces name and grade, and asks an engaging follow-up question.",
+                    "ur": "دوستانہ، شائستہ، نام اور جماعت کا تعارف اور مثبت سوال۔",
+                    "ur_rm": "Warm, engaging, and sets a great first impression."
+                }
+            },
+            {
+                "id": "opt_tic_2",
+                "type": "weaker",
+                "score": 70,
+                "text": {
+                    "en": "I'm just standing here. My friend told me to come.",
+                    "ur": "میں بس یہاں کھڑا ہوں۔ میرے دوست نے آنے کو کہا تھا۔",
+                    "ur_rm": "Main bas aise hi aya hoon, friend ne bola tha."
+                },
+                "feedback": {
+                    "en": "A bit passive, but honest. Sharing what you might like about the club makes connecting easier.",
+                    "ur": "تھوڑا غیر فعال ہے مگر سچ۔ اپنی کسی دلچسپی کا ذکر کرنا دوستی میں مددگار ہوتا ہے۔",
+                    "ur_rm": "A bit distant, mentioning your interest makes joining easier."
+                }
+            },
+            {
+                "id": "opt_tic_3",
+                "type": "inappropriate",
+                "score": 35,
+                "text": {
+                    "en": "This looks super nerdy. I bet you guys have no fun.",
+                    "ur": "یہ بہت عجیب اور خشک لگتا ہے۔ آپ لوگ کوئی مزہ نہیں کرتے ہوں گے۔",
+                    "ur_rm": "Yeh bohot boring lag raha hai."
+                },
+                "feedback": {
+                    "en": "Teasing or mocking club activities alienates other students.",
+                    "ur": "کلب کی سرگرمیوں کا مذاق اڑانا ساتھیوں کو بیزار کرتا ہے۔",
+                    "ur_rm": "Mocking the group makes other students feel uncomfortable."
+                }
+            },
+            {
+                "id": "opt_tic_4",
+                "type": "incorrect",
+                "score": 10,
+                "text": {
+                    "en": "[Turn around and walk away without responding]",
+                    "ur": "[بغیر جواب دیے مڑ کر چلے جائیں]",
+                    "ur_rm": "[Bina jawab diye chale jayein]"
+                },
+                "feedback": {
+                    "en": "Walking away when someone greets you politely shuts down potential friendships.",
+                    "ur": "کسی کے سلام کا جواب دیے بغیر مڑ جانا تعلق قائم کرنے میں رکاوٹ ہے۔",
+                    "ur_rm": "Walking away avoids a chance to make new friends."
+                }
+            }
+        ]
     }
 ]
 
 ALL_SCENARIOS = [GENERAL_CHAT_SCENARIO] + DEFAULT_SCENARIOS
-

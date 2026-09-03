@@ -438,6 +438,9 @@ def format_communication_journey(
             "ratings": {
                 "greeting": appropriateness_stars,
                 "clarity": clarity_stars,
+                "answering": relevance_stars,
+                "asking": flow_stars,
+                "confidence": round((appropriateness_stars + flow_stars) / 2),
                 "response": relevance_stars,
                 "initiation": flow_stars,
                 "communication": communication_stars,

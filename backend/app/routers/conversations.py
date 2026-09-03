@@ -63,6 +63,8 @@ def format_scenario(s: Union[CommunicationScenario, Dict[str, Any]], language: O
             "feedback": o_feedback.get(lang, o_feedback.get("en", str(o_feedback))) if isinstance(o_feedback, dict) else str(o_feedback),
         })
 
+    category = s_def.get("category", "general") if s_def else (getattr(s, "category", "general") if hasattr(s, "category") else "general")
+
     return {
         "id": s_id,
         "title": resolved_title,
@@ -74,6 +76,7 @@ def format_scenario(s: Union[CommunicationScenario, Dict[str, Any]], language: O
         "personas": personas,
         "languages": languages,
         "difficulty": difficulty,
+        "category": category,
         "objectives": resolved_objs,
         "rawObjectives": obj_data if isinstance(obj_data, dict) else {"en": resolved_objs},
         "context": context,
@@ -102,6 +105,7 @@ def list_scenarios(
     persona: Optional[str] = Query(None),
     language: Optional[str] = Query(None),
     difficulty: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
     include_general: bool = Query(False),
     db: Session = Depends(get_db),
 ):
@@ -113,6 +117,8 @@ def list_scenarios(
         if language and language not in s["languages"]:
             continue
         if difficulty and difficulty != "all" and s["difficulty"] != difficulty:
+            continue
+        if category and category != "all" and s.get("category") != category:
             continue
         results.append(format_scenario(s, language=language))
 

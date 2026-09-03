@@ -172,7 +172,19 @@ def get_next_recommendation(db: Session, user_id: str, last_scenario_id: str = "
     }
 
 async def update_progress_from_evaluation(db: Session, user_id: str, scenario_title: str, overall_score: int):
-    skill = "conversation"
+    user = db.query(User).filter(User.id == user_id).first()
+    persona = user.persona if user and user.persona else "child"
+    if persona == "teen":
+        skill = "teen_communication"
+    elif persona == "adult":
+        s_lower = str(scenario_title).lower()
+        if any(w in s_lower for w in ["workplace", "interview", "meeting", "disagreement", "manager", "colleague"]):
+            skill = "adult_workplace_comm"
+        else:
+            skill = "adult_everyday_comm"
+    else:
+        skill = "communication"
+
     prog = db.query(Progress).filter(Progress.userId == user_id, Progress.skill == skill).first()
 
     prev_attempts = prog.attempts if prog else 0
@@ -321,6 +333,10 @@ async def evaluate_session(db: Session, session_id: str, user_id: str) -> Dict[s
         feedback=feedback_text,
         createdAt=datetime.utcnow(),
     )
+    session.completed = True
+    if not session.completedAt:
+        session.completedAt = datetime.utcnow()
+
     if user:
         user.lastActiveAt = datetime.utcnow()
     db.add(eval_record)
@@ -328,6 +344,8 @@ async def evaluate_session(db: Session, session_id: str, user_id: str) -> Dict[s
     db.refresh(eval_record)
 
     await update_progress_from_evaluation(db, user_id, scenario.title if scenario else "Conversation", overall_score)
+
+    confidence = round((appropriateness + conversation_flow) / 2)
 
     return {
         "id": eval_record.id,
@@ -337,6 +355,7 @@ async def evaluate_session(db: Session, session_id: str, user_id: str) -> Dict[s
         "appropriateness": eval_record.appropriateness,
         "communication": eval_record.communication,
         "conversationFlow": eval_record.conversationFlow,
+        "confidence": confidence,
         "overallScore": eval_record.overallScore,
         "strengths": strengths,
         "improvements": improvements,
@@ -350,6 +369,8 @@ def get_evaluation(db: Session, session_id: str) -> Optional[Dict[str, Any]]:
     if not ev:
         return None
 
+    confidence = round(((ev.appropriateness or 80) + (ev.conversationFlow or 80)) / 2)
+
     return {
         "id": ev.id,
         "sessionId": ev.sessionId,
@@ -358,6 +379,7 @@ def get_evaluation(db: Session, session_id: str) -> Optional[Dict[str, Any]]:
         "appropriateness": ev.appropriateness,
         "communication": ev.communication,
         "conversationFlow": ev.conversationFlow,
+        "confidence": confidence,
         "overallScore": ev.overallScore,
         "strengths": parse_json(ev.strengths, []),
         "improvements": parse_json(ev.improvements, []),

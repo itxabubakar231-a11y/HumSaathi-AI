@@ -202,9 +202,41 @@ def recommend_activity_rule_based(db: Session, user_id: str) -> Dict[str, Any]:
     if user.persona == 'child' and activity:
         resolved_activity_id = activity.id
 
+    rec_title = None
+    rec_duration = "5-10 min"
+    rec_scenario_id = None
+
+    if user.persona == 'teen':
+        if 'comm' in target_skill or 'social' in target_skill:
+            rec_scenario_id = 'scenario_teen_peer_dispute'
+            rec_title = {'en': '🎯 Handling a Disagreement', 'ur': '🎯 اختلاف رائے کو باوقار حل کرنا', 'ur_rm': '🎯 Handling a Disagreement'}
+            rec_duration = '5 minutes'
+            reason_text = 'Recommended based on your recent communication practice.'
+        elif 'reading' in target_skill or 'vocab' in target_skill:
+            rec_title = {'en': '📖 Context Clues & Passages', 'ur': '📖 سیاق و سباق اور تفہیم عبارت', 'ur_rm': '📖 Context Clues & Passages'}
+            rec_duration = '12 minutes'
+        elif 'problem' in target_skill:
+            rec_title = {'en': '💡 Budget Math & Decision Making', 'ur': '💡 بجٹ اور روزمرہ فیصلے', 'ur_rm': '💡 Budget Math & Decision Making'}
+            rec_duration = '10 minutes'
+    elif user.persona == 'adult':
+        if 'workplace' in target_skill or 'comm' in target_skill:
+            rec_scenario_id = 'scenario_adult_workplace_disagreement'
+            rec_title = {'en': '🎯 Handling a Workplace Disagreement', 'ur': '🎯 دفتر میں اختلاف رائے کا باوقار حل', 'ur_rm': '🎯 Workplace Disagreement'}
+            rec_duration = '5 minutes'
+            reason_text = 'Recommended based on your recent communication practice.'
+        elif 'reading' in target_skill:
+            rec_title = {'en': '📄 Workplace Notices & Invoices', 'ur': '📄 دفتری نوٹس اور بلز کا فہم', 'ur_rm': '📄 Workplace Notices & Invoices'}
+            rec_duration = '10 minutes'
+        elif 'problem' in target_skill:
+            rec_title = {'en': '🚌 Transit Delay & Shift Contingency', 'ur': '🚌 ٹرانزٹ تاخیر اور ہنگامی رابطہ', 'ur_rm': '🚌 Transit Delay Problem Solving'}
+            rec_duration = '8 minutes'
+
     return {
         "activityType": activity_type,
         "topic": target_skill,
+        "title": rec_title,
+        "duration": rec_duration,
+        "scenarioId": rec_scenario_id,
         "difficulty": difficulty,
         "questionCount": 5,
         "shouldRetry": should_retry,
